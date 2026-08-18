@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #C62828;
+  --color-primary-hover: #A61F1F;
+  --color-surface: #F7F7F7;
+  --color-background: #FFFFFF;
+  --color-text-main: #1A1A1A;
+  --color-focus: #0D47A1; /* Deep navy for contrast */
+  
+  --font-display: "Poppins", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-dyslexic: "Lexend", sans-serif;
+}
+
+@layer base {
+  :root {
+    --font-current-body: var(--font-body);
+    --font-current-display: var(--font-display);
+  }
+
+  :root.dyslexia-mode {
+    --font-current-body: var(--font-dyslexic);
+    --font-current-display: var(--font-dyslexic);
+  }
+
+  body {
+    font-family: var(--font-current-body);
+    color: var(--color-text-main);
+    background-color: var(--color-background);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-current-display);
+    font-weight: 700;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
