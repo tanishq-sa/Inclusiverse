@@ -816,14 +816,9 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
 
 // ─── About ────────────────────────────────────────────────────────────────────
 function About() {
-  const team = [
-    { name: "Avichal Sharma", role: "Faculty Coordinator", initial: "A" },
-    { name: "Mayank Sharma", role: "Student President", initial: "M" },
-    { name: "Nishita Gupta", role: "Secretary", initial: "N" },
-  ];
-
   return (
     <div>
+      {/* Hero Section */}
       <section className="bg-surface py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -831,91 +826,184 @@ function About() {
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
         >
-          <p className="text-primary font-semibold text-sm uppercase tracking-[0.16em] mb-4">Our story</p>
           <h1 className="text-5xl sm:text-6xl font-display font-bold text-text-main mb-6">
-            About <span className="text-primary">Inclusiverse</span>
+            Where Everyone <span className="text-primary">Belongs</span>
           </h1>
-          <p className="text-xl text-gray-600 leading-relaxed">
-            Inclusiverse began with a simple belief: every student deserves to experience the joy of campus life, regardless of their physical or cognitive abilities. What started as a small group of passionate students has grown into a campus-wide movement, breaking down barriers and building bridges through shared experiences, sports, and creative arts.
+          <p className="text-lg text-gray-600 leading-relaxed">
+            Inclusiverse is a student-led initiative at Christ University, Pune Lavasa Campus, built on a simple belief: everyone deserves to feel included, heard, respected, and valued.
           </p>
         </motion.div>
       </section>
 
+      {/* Introduction Section */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="grid md:grid-cols-2 gap-12 items-center"
-          >
-            <div>
-              <h2 className="text-3xl font-display font-bold mb-6">Our Mission</h2>
-              <p className="text-gray-700 leading-relaxed text-lg mb-6">
-                Our mission is to create a fully inclusive campus environment where students of all abilities can connect, learn, and grow together. We strive to replace sympathy with genuine friendship, organizing events and programs that celebrate diversity and empower every individual to participate fully in university life.
-              </p>
-              <p className="text-gray-700 leading-relaxed text-lg">
-                Through collaborative initiatives and continuous advocacy, we aim to transform not just our campus, but the broader community's approach to accessibility. We believe that true inclusion happens when we actively dismantle obstacles and create spaces where everyone belongs.
-              </p>
-            </div>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.4 }}
-              className="aspect-[4/3] rounded-3xl overflow-hidden shadow-lg"
-            >
-              <ImageWithFallback 
-                src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=800&q=80" 
-                alt="Students collaborating and smiling together" 
-                className="w-full h-full object-cover" 
-              />
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-surface">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="max-w-2xl mb-12"
+            transition={{ duration: 0.6 }}
+            className="prose prose-lg max-w-none text-gray-700"
           >
-            <p className="text-primary font-semibold text-sm uppercase tracking-[0.16em] mb-3">Our leadership</p>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">The people building belonging</h2>
-            <p className="text-gray-600 text-lg">Guided by a committed faculty coordinator and student leadership team.</p>
+            <p className="text-lg leading-relaxed">
+              We are more than just a club. We are a community of students who believe that inclusion is not merely about creating opportunities for people—it is about <span className="font-semibold text-primary">creating spaces where people feel comfortable enough to participate, express themselves, discover their strengths, and simply be themselves.</span>
+            </p>
+            <p className="text-lg leading-relaxed mt-6">
+              Our journey began with a vision to bridge gaps between people of different abilities, backgrounds, and experiences. Today, Inclusiverse works towards creating meaningful opportunities for <span className="font-semibold text-primary">specially-abled individuals and the wider community</span> through sports, cultural activities, awareness initiatives, creative events, and social engagement.
+            </p>
           </motion.div>
-          
+        </div>
+      </section>
+
+      {/* Our Purpose Section */}
+      <section className="py-20 bg-surface">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-40px" }}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
-            }}
-            className="grid md:grid-cols-3 gap-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            {team.map((member) => (
-              <motion.article
-                key={member.name}
-                variants={{
-                  hidden: { opacity: 0, y: 25 },
-                  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-                }}
-                whileHover={{ y: -6 }}
-                transition={{ duration: 0.3 }}
-                className="rounded-3xl bg-white p-8 shadow-sm transition-shadow duration-300 hover:shadow-lg"
-              >
-                <div className="mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-xl font-display font-bold text-white shadow-md">
-                  {member.initial}
-                </div>
-                <p className="text-sm font-semibold uppercase tracking-[0.13em] text-primary">{member.role}</p>
-                <h3 className="mt-2 text-2xl font-display font-bold text-text-main">{member.name}</h3>
-              </motion.article>
-            ))}
+            <h2 className="text-4xl font-display font-bold mb-8 text-text-main">Our Purpose</h2>
+            <div className="bg-white rounded-3xl p-8 shadow-sm">
+              <p className="text-lg font-semibold text-primary mb-6">We believe that differences should never become barriers.</p>
+              <p className="text-gray-700 leading-relaxed mb-6">
+                Through our initiatives, we aim to challenge stereotypes, encourage empathy, and build a culture where accessibility and inclusion become a part of everyday life. Whether it is bringing specially-abled children to campus, organising inclusive games, conducting awareness activities, collaborating with schools and organisations, or creating platforms for students to express themselves, every initiative is driven by the same purpose—to make inclusion something we <span className="font-semibold">experience</span>, not just something we talk about.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* What We Do Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-4xl font-display font-bold mb-6 text-text-main">What We Do</h2>
+            <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+              At Inclusiverse, we believe that change can happen through both big movements and small moments.
+            </p>
+
+            <div className="space-y-4 mb-8">
+              {[
+                "Inclusive sports and recreational activities that encourage participation, teamwork, and confidence.",
+                "Cultural and creative initiatives that provide everyone with a platform to express themselves.",
+                "Awareness and sensitisation programmes that encourage conversations around disability, accessibility, empathy, and equality.",
+                "Community outreach initiatives in collaboration with schools, organisations, and individuals working towards inclusion.",
+                "Student-led events and campaigns that turn ideas into meaningful action.",
+                "Collaborative projects and competitions that use creativity, technology, and innovation to address real-world challenges.",
+              ].map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  className="flex gap-4 items-start"
+                >
+                  <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+                  <p className="text-gray-700 leading-relaxed">{item}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            <p className="text-gray-700 leading-relaxed text-lg italic bg-surface p-6 rounded-2xl border-l-4 border-primary">
+              From the <span className="font-semibold">State Unified Championship</span> and inclusive campus activities to our outreach initiatives and collaborations with organisations such as <span className="font-semibold">Special Olympics Bharat Maharashtra</span> and schools supporting specially-abled children, our work is rooted in participation, connection, and impact.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* More Than Inclusion Section */}
+      <section className="py-20 bg-surface">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-4xl font-display font-bold mb-8 text-text-main">More Than Inclusion</h2>
+            <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-3xl p-8 border border-primary/20">
+              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                For us, inclusion is not about asking people to fit into an existing space.
+              </p>
+              <p className="text-xl font-semibold text-primary mb-6">
+                It is about changing the space so that everyone has a place in it.
+              </p>
+              <p className="text-lg text-gray-700 leading-relaxed">
+                We want to create an environment where a person's ability does not define their opportunities, where differences are met with curiosity rather than judgement, and where every individual has the confidence to participate without feeling like an outsider.
+              </p>
+            </div>
+            <p className="text-gray-700 leading-relaxed mt-8 text-lg">
+              We know that meaningful change does not happen overnight. It begins with awareness, grows through understanding, and becomes real through consistent action.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Our Community Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-4xl font-display font-bold mb-8 text-text-main">Our Community</h2>
+            <div className="space-y-6">
+              <p className="text-lg text-gray-700 leading-relaxed">
+                Inclusiverse is powered by students who bring different ideas, talents, perspectives, and experiences to the table. It is a space where students learn not only how to organise events, but also how to listen, collaborate, understand different perspectives, and contribute to something larger than themselves.
+              </p>
+              <p className="text-lg text-gray-700 leading-relaxed">
+                Every volunteer, participant, collaborator, faculty member, and community partner becomes a part of our journey.
+              </p>
+              <p className="text-lg font-semibold text-primary bg-surface p-6 rounded-2xl">
+                Because ultimately, <span className="text-gray-900">Inclusiverse is not defined by the events we conduct. It is defined by the people we bring together.</span>
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Our Vision Section */}
+      <section className="py-24 bg-gradient-to-b from-surface to-primary/5">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <h2 className="text-4xl md:text-5xl font-display font-bold mb-8 text-text-main">Our Vision</h2>
+            <p className="text-xl text-gray-700 leading-relaxed mb-12">
+              We envision a community where <span className="font-semibold text-primary">inclusion is the norm, accessibility is a shared responsibility, and every individual has the opportunity to participate, grow, and thrive.</span>
+            </p>
+            <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+              We are working towards a future where no one has to ask, <span className="italic font-medium">"Do I belong here?"</span>
+            </p>
+            <p className="text-lg text-gray-700 mb-12">
+              Because the answer should always be:
+            </p>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-primary text-white text-3xl md:text-4xl font-display font-bold py-8 px-6 rounded-3xl shadow-lg mb-12"
+            >
+              Yes. You do.
+            </motion.div>
+            <p className="text-gray-600 text-lg italic">
+              <span className="font-semibold text-primary">Inclusiverse</span> — Different abilities. Different stories. One community.
+            </p>
           </motion.div>
         </div>
       </section>
@@ -924,41 +1012,110 @@ function About() {
 }
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
-const TIMELINE_ITEMS = [
-  { year: "2024", title: "Unified Skating Championship", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vehicula diam vitae purus dictum, nec facilisis urna tincidunt. Pellentesque habitant morbi tristique senectus.", photos: ["https://images.unsplash.com/photo-1607453998774-d533f65dac99?w=600&q=80", "https://images.unsplash.com/photo-1533222535026-754c501569dd?w=600&q=80"] },
-  { year: "2024", title: "Creative Arts Fun Day", desc: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.", photos: ["https://images.unsplash.com/photo-1524503033411-c9566986fc8f?w=600&q=80", "https://images.unsplash.com/photo-1469406396016-013bfae5d83e?w=600&q=80"] },
-  { year: "2023", title: "Inclusive Sports Meet", desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa.", photos: ["https://images.unsplash.com/photo-1607453998774-d533f65dac99?w=600&q=80"] },
-  { year: "2023", title: "Community Mural Project", desc: "Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis molestie pretium placerat, arcu purus pulvinar libero, vel fringilla ante.", photos: ["https://images.unsplash.com/photo-1524503033411-c9566986fc8f?w=600&q=80", "https://images.unsplash.com/photo-1533222535026-754c501569dd?w=600&q=80"] },
-  { year: "2022", title: "First Inclusive Games Day", desc: "Fusce fermentum. Nullam varius nulla at tellus tincidunt lobortis. Phasellus blandit leo ut odio. Sed libero. Praesent feugiat sapien aliquet odio.", photos: ["https://images.unsplash.com/photo-1469406396016-013bfae5d83e?w=600&q=80"] },
+const MILESTONES = [
+  {
+    year: "2023",
+    title: "Beyond Barriers",
+    tagline: "Where it all began.",
+    description: "Beyond Barriers marked the beginning of the Inclusiverse journey. It was built around the belief that differences should never become limitations and that inclusion begins when we choose to understand one another.\n\nThe initiative laid the foundation for what Inclusiverse would become—a student-led community committed to creating opportunities for participation, connection, and equal opportunity.",
+    closing: "Our first step beyond the barriers that divide us.",
+    reportUrl: "https://docs.google.com/document/d/1gtp75s_DaImsIL1ZtUwk366AknWk0Icp3nX8G3GE9Uc/edit?usp=drive_link",
+    momentsUrl: "https://drive.google.com/drive/folders/1Pv_d6dgGquGrKtn2ZBWHK7-8TRfjYKz4?usp=drive_link"
+  },
+  {
+    year: "2024",
+    title: "State Unified Championship",
+    tagline: "Bringing people together through sport.",
+    description: "The State Unified Championship brought athletes with and without disabilities together on the same field, united by the spirit of sport.\n\nMore than a championship, it became a celebration of teamwork, friendship, determination, and participation. It showed us how sport can break down barriers and create connections that go far beyond the game.",
+    closing: "Different abilities. One team. One spirit."
+  },
+  {
+    year: "2025",
+    title: "Emerging InClusiWarriors",
+    tagline: "Celebrating participation.",
+    description: "Emerging InClusiWarriors created an opportunity for specially-abled students to come to campus, participate in fun activities, and experience a space where they could simply be themselves.\n\nThe focus was never just on competition. It was about building confidence, encouraging interaction, creating friendships, and celebrating every individual's ability to participate.",
+    closing: "Because every participant is a warrior in their own way."
+  },
+  {
+    year: "2025",
+    title: "InclusiAI",
+    tagline: "Innovation with inclusion at its core.",
+    description: "With InclusiAI, we explored how technology and innovation can contribute to a more inclusive and accessible world.\n\nThe initiative brought together creativity, problem-solving, and technology, encouraging students to look at real-world challenges through an inclusive lens and imagine solutions that can make a difference.",
+    closing: "Ideas that innovate. Solutions that include."
+  },
+  {
+    year: "2026",
+    title: "Compassion in Action — Asha Bhavan",
+    tagline: "Taking inclusion beyond the campus.",
+    description: "Our visit to Asha Bhavan Special School, Satara marked another meaningful step in our journey.\n\nThrough interactions, activities, and shared experiences, students had the opportunity to connect with the children and understand inclusion through real human connections. The experience reminded us that sometimes the most meaningful impact comes from the simplest things—being present, listening, sharing, and caring.",
+    closing: "Inclusion begins with empathy and comes alive through action."
+  },
+  {
+    year: "2026",
+    title: "Take a Stand",
+    tagline: "Giving every voice a platform.",
+    description: "Take a Stand created a space for students to express their perspectives, engage with important issues, and confidently make their voices heard.\n\nFor us, inclusion also means ensuring that people have the freedom and opportunity to speak, question, share, and be heard.",
+    closing: "Because every voice deserves a space."
+  },
 ];
 
-function TimelineCard({ item }: { item: typeof TIMELINE_ITEMS[0] }) {
+function MilestoneCard({ milestone, index }: { milestone: typeof MILESTONES[0]; index: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
       className="relative flex gap-6 md:gap-10"
     >
       <div className="flex flex-col items-center">
         <motion.div
           whileHover={{ scale: 1.1 }}
-          className="bg-primary text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-md whitespace-nowrap z-10"
+          className="bg-primary text-white text-sm font-bold px-4 py-2 rounded-full shadow-md whitespace-nowrap z-10 font-display"
         >
-          {item.year}
+          {milestone.year}
         </motion.div>
-        <div className="flex-1 w-px bg-gray-200 mt-3" />
+        {index < MILESTONES.length - 1 && <div className="flex-1 w-px bg-gray-300 mt-4 mb-4" style={{ minHeight: "200px" }} />}
       </div>
-      <div className="flex-1 bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-8 hover:shadow-md transition-shadow">
-        <h3 className="text-xl font-display font-bold mb-3">{item.title}</h3>
-        <p className="text-gray-600 leading-relaxed mb-5">{item.desc}</p>
-        <div className="flex flex-wrap gap-3">
-          <a href="#" className="flex items-center gap-2 bg-surface hover:bg-gray-200 text-text-main font-medium text-sm px-4 py-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2">
-            <FileText className="w-4 h-4" />
-            Report
-          </a>
+      <div className="flex-1 bg-white rounded-3xl shadow-sm border border-gray-200 p-8 mb-8 hover:shadow-lg transition-shadow">
+        <div className="mb-4">
+          <h3 className="text-2xl md:text-3xl font-display font-bold text-text-main mb-2">{milestone.title}</h3>
+          <p className="text-primary font-semibold italic text-lg">{milestone.tagline}</p>
         </div>
+        <div className="space-y-4">
+          {milestone.description.split('\n\n').map((para, i) => (
+            <p key={i} className="text-gray-700 leading-relaxed">{para}</p>
+          ))}
+        </div>
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <p className="text-primary font-semibold text-lg italic">{milestone.closing}</p>
+        </div>
+        {(milestone.reportUrl || milestone.momentsUrl) && (
+          <div className="mt-6 flex flex-wrap gap-3">
+            {milestone.reportUrl && (
+              <a
+                href={milestone.reportUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold text-sm px-4 py-2 rounded-full transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
+              >
+                <FileText className="w-4 h-4" />
+                Report
+              </a>
+            )}
+            {milestone.momentsUrl && (
+              <a
+                href={milestone.momentsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-surface hover:bg-gray-200 text-text-main font-semibold text-sm px-4 py-2 rounded-full transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
+              >
+                <Camera className="w-4 h-4" />
+                Moments Captured
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -967,31 +1124,81 @@ function TimelineCard({ item }: { item: typeof TIMELINE_ITEMS[0] }) {
 function Timeline() {
   return (
     <div>
+      {/* Hero Section */}
       <section className="bg-surface py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+          className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
         >
-          <h1 className="text-5xl font-display font-bold mb-5">
-            Our <span className="text-primary">Timeline</span>
+          <h1 className="text-5xl md:text-6xl font-display font-bold mb-6 text-text-main">
+            Our <span className="text-primary">Journey</span>
           </h1>
-          <p className="text-xl text-gray-600">
-            A journey of shared moments, inclusive milestones, and community stories.
+          <h2 className="text-2xl md:text-3xl font-semibold mb-6 text-primary">Six Milestones. One Growing Movement.</h2>
+          <p className="text-lg text-gray-700 leading-relaxed">
+            Inclusiverse began with a simple idea: <span className="font-semibold">to look beyond barriers and create spaces where everyone can participate, connect, and belong.</span>
+          </p>
+          <p className="text-gray-600 mt-6 leading-relaxed">
+            From our first initiative in 2023 to the work we continue today, each milestone has shaped who we are. Every event has taught us something, introduced us to new communities, and brought us one step closer to the inclusive world we envision.
           </p>
         </motion.div>
       </section>
+
+      {/* Timeline Section */}
       <section className="py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          {TIMELINE_ITEMS.map((item, i) => <TimelineCard key={i} item={item} />)}
-          <div className="flex justify-start pl-5">
+          {MILESTONES.map((milestone, i) => (
+            <MilestoneCard key={i} milestone={milestone} index={i} />
+          ))}
+          <div className="flex justify-start pl-5 mt-8">
             <motion.div
               animate={{ scale: [1, 1.4, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
               className="w-3 h-3 rounded-full bg-primary"
             />
           </div>
+        </div>
+      </section>
+
+      {/* Conclusion Section */}
+      <section className="py-24 bg-gradient-to-b from-white to-surface">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <h2 className="text-4xl md:text-5xl font-display font-bold mb-8 text-text-main">Our Story Continues</h2>
+            <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+              Six milestones. Countless people. One shared purpose.
+            </p>
+            <div className="bg-white rounded-3xl p-8 md:p-12 border border-gray-200 shadow-sm mb-8">
+              <p className="text-lg text-gray-700 leading-relaxed mb-6">
+                From <span className="font-semibold text-primary">Beyond Barriers</span> to <span className="font-semibold text-primary">Take a Stand</span>, our journey has evolved—but our core belief has remained the same:
+              </p>
+              <h3 className="text-3xl md:text-4xl font-display font-bold text-primary mb-8">
+                Everyone deserves to belong.
+              </h3>
+              <p className="text-gray-700 leading-relaxed mb-6">
+                These milestones are not just events on a timeline. They represent the people we have met, the communities we have connected with, the conversations we have started, and the barriers we continue to challenge.
+              </p>
+              <p className="text-lg text-gray-700 font-semibold">
+                And this is only the beginning.
+              </p>
+            </div>
+            <motion.p
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-xl md:text-2xl font-display font-bold text-primary"
+            >
+              The next chapter of Inclusiverse is waiting to be written—<span className="text-text-main">with you.</span>
+            </motion.p>
+          </motion.div>
         </div>
       </section>
     </div>
