@@ -685,20 +685,8 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
   return (
     <>
       <section className="relative overflow-hidden bg-surface py-20 lg:py-32">
-        <motion.div
-          animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.5, 0.8, 0.5],
-            x: [0, 20, 0],
-            y: [0, -20, 0],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none"
-        />
+        {/* Background decorative glow (pure CSS animation, no continuous DOM JS mutations) */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             <motion.div
@@ -920,13 +908,9 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
         >
-          <motion.div
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            className="inline-block mb-8"
-          >
+          <div className="inline-block mb-8 animate-pulse">
             <Heart className="w-16 h-16 text-primary mx-auto opacity-30" />
-          </motion.div>
+          </div>
           <h2 className="text-4xl md:text-5xl font-display font-bold mb-6">Ready to make a difference?</h2>
           <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
             Join our community of students dedicated to building lasting friendships and creating inclusive spaces.
@@ -1255,11 +1239,7 @@ function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }
             <MilestoneCard key={i} milestone={milestone} index={i} onViewGallery={onViewGallery} />
           ))}
           <div className="flex justify-start pl-4 sm:pl-5 mt-4 sm:mt-8">
-            <motion.div
-              animate={{ scale: [1, 1.4, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-3 h-3 rounded-full bg-primary"
-            />
+            <div className="w-3 h-3 rounded-full bg-primary animate-ping" />
           </div>
         </div>
       </section>
