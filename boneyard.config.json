@@ -1,0 +1,21 @@
+{
+  "breakpoints": [375, 768, 1280],
+  "out": "./src/bones",
+  "wait": 1200,
+  "animate": "shimmer",
+  "shimmerColor": "rgba(107, 70, 193, 0.15)",
+  "color": "rgba(0, 0, 0, 0.06)",
+  "darkColor": "rgba(255, 255, 255, 0.08)",
+  "darkShimmerColor": "rgba(107, 70, 193, 0.3)",
+  "speed": "1.6s",
+  "stagger": true,
+  "transition": 250,
+  "routes": [
+    "/",
+    "/?page=about",
+    "/?page=timeline",
+    "/?page=gallery",
+    "/?page=join",
+    "/?page=404"
+  ]
+}

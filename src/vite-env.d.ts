@@ -11,6 +11,7 @@ interface ImportMeta {
 }
 
 declare module 'react-dom/client';
+declare module 'canvas-confetti';
 
 interface Window {
   Razorpay: any;

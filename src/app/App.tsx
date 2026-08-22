@@ -1,11 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Heart, Menu, X, Accessibility, ArrowRight, ChevronRight, PlayCircle, Camera, FileText, ChevronDown, ChevronUp, GraduationCap, Users, MapPin, Mail, Instagram, Linkedin } from "lucide-react";
+import { Heart, Menu, X, Accessibility, ArrowRight, ChevronRight, PlayCircle, Camera, FileText, ChevronDown, ChevronUp, GraduationCap, Users, MapPin, Mail, Instagram, Linkedin, Home as HomeIcon, Compass, Sparkles, AlertCircle, ArrowLeft, Search, CheckCircle2, Send, Phone, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence, Variants } from "motion/react";
+import { Skeleton } from "boneyard-js/react";
+import confetti from "canvas-confetti";
+import GALLERY_PHOTOS_RAW from "../data/photos.json";
+import GALLERY_EVENTS_RAW from "../data/events.json";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
-import GALLERY_PHOTOS from "../data/photos.json";
+
+type GalleryPhoto = { src: string; alt: string; caption: string; cat: string; event?: string };
+type GalleryEvent = { name: string; slug: string; year?: string };
+const GALLERY_PHOTOS = GALLERY_PHOTOS_RAW as GalleryPhoto[];
+const GALLERY_EVENTS = GALLERY_EVENTS_RAW as GalleryEvent[];
+
 
 // ─── Simple router ────────────────────────────────────────────────────────────
-type Page = "home" | "about" | "timeline" | "gallery" | "join";
+type Page = "home" | "about" | "timeline" | "gallery" | "join" | "404";
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
 function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
@@ -36,14 +45,14 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <button onClick={() => setPage("home")} className="flex items-center gap-2 group focus:outline-none">
-            <motion.div
-              whileHover={{ rotate: 10, scale: 1.1 }}
+          <button onClick={() => setPage("home")} className="flex items-center gap-3 group focus:outline-none">
+            <motion.img
+              src="/inclusiverse-logo.png"
+              alt="Inclusiverse Logo"
+              whileHover={{ rotate: 8, scale: 1.08 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-primary text-white p-2 rounded-xl shadow-sm"
-            >
-              <Heart className="w-6 h-6" />
-            </motion.div>
+              className="w-12 h-12 object-contain drop-shadow-sm"
+            />
             <span className="font-display font-bold text-2xl tracking-tight text-primary">Inclusiverse</span>
           </button>
 
@@ -104,10 +113,12 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-gray-800/80">
           {/* Brand & Mission */}
           <div className="md:col-span-6 space-y-4">
-            <button onClick={() => setPage("home")} className="flex items-center gap-2 group text-left focus:outline-none">
-              <div className="bg-primary text-white p-2 rounded-xl shadow-sm">
-                <Heart className="w-5 h-5" />
-              </div>
+            <button onClick={() => setPage("home")} className="flex items-center gap-3 group text-left focus:outline-none">
+              <img
+                src="/inclusiverse-logo.png"
+                alt="Inclusiverse Logo"
+                className="w-10 h-10 object-contain drop-shadow-md"
+              />
               <span className="font-display font-bold text-2xl tracking-tight text-white">Inclusiverse</span>
             </button>
             <p className="text-gray-400 max-w-md text-sm leading-relaxed">
@@ -155,7 +166,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
             </p>
             <div className="flex items-center gap-3">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/inclusiverse.christuniversity"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-all"
@@ -164,7 +175,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
                 <Instagram className="w-4 h-4" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/company/inclusiverse-club"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-all"
@@ -254,8 +265,8 @@ function DonateModal({ onClose }: { onClose: () => void }) {
       amount: finalAmount * 100, // Razorpay expects amount in paise
       currency: "INR",
       name: "Inclusiverse",
-      description: "Donation to Inclusiverse",
-      image: "", // Add your logo URL here
+      description: "Donation to Inclusiverse (Collected by Ashish)",
+      image: "/inclusiverse-logo.png",
       handler: function (_response: any) {
         setIsProcessing(false);
         setPaymentStatus("success");
@@ -266,10 +277,11 @@ function DonateModal({ onClose }: { onClose: () => void }) {
         contact: "",
       },
       notes: {
-        purpose: "Donation",
+        purpose: "Donation to Inclusiverse",
+        collector: "Ashish (on behalf of Inclusiverse)",
       },
       theme: {
-        color: "#6366f1",
+        color: "#6b46c1",
       },
       modal: {
         ondismiss: function () {
@@ -376,7 +388,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl"
+        className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl border border-gray-100"
       >
         {/* Close button */}
         <button
@@ -387,48 +399,62 @@ function DonateModal({ onClose }: { onClose: () => void }) {
         </button>
 
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-5">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-            className="w-16 h-16 bg-gradient-to-br from-primary/20 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            className="w-14 h-14 bg-white border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3 p-2 shadow-sm ring-4 ring-gray-50"
           >
-            <Heart className="w-8 h-8 text-primary" />
+            <img src="/inclusiverse-logo.png" alt="Inclusiverse" className="w-10 h-10 object-contain" />
           </motion.div>
           <h3 className="text-2xl font-display font-bold text-text-main mb-1">Support Our Cause</h3>
           <p className="text-gray-500 text-sm">Every contribution makes a difference</p>
         </div>
 
+        {/* Ashish Collector Disclosure - Placed informatively at top */}
+        <div className="bg-surface/90 border border-gray-200/80 rounded-2xl p-3.5 mb-5 text-center shadow-xs">
+          <p className="text-xs font-semibold text-gray-800 flex items-center justify-center gap-1.5">
+            <Heart className="w-3.5 h-3.5 fill-primary text-primary flex-shrink-0" />
+            <span>Ashish is collecting money on behalf of Inclusiverse</span>
+          </p>
+          <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
+            All contributions directly support inclusive student initiatives & events.
+          </p>
+        </div>
+
         {/* Preset amount grid + Custom Button */}
-        <div className="grid grid-cols-3 gap-2.5 mb-5">
-          {PRESET_AMOUNTS.map((preset) => (
-            <motion.button
-              key={preset}
-              type="button"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => handlePresetClick(preset)}
-              className={`py-3 rounded-xl font-semibold text-sm transition-all border-2 ${
-                selectedPreset === preset
-                  ? "bg-primary text-white border-primary shadow-md shadow-primary/25"
-                  : "bg-gray-50 text-text-main border-transparent hover:border-primary/30 hover:bg-primary/5"
-              }`}
-            >
-              ₹{preset.toLocaleString("en-IN")}
-            </motion.button>
-          ))}
+        <div className="grid grid-cols-3 gap-2.5 mb-4">
+          {PRESET_AMOUNTS.map((preset) => {
+            const isSelected = selectedPreset === preset;
+            return (
+              <motion.button
+                key={preset}
+                type="button"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handlePresetClick(preset)}
+                className={`py-3 rounded-xl font-semibold text-sm transition-all border cursor-pointer ${
+                  isSelected
+                    ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
+                    : "bg-surface hover:bg-gray-100 text-text-main border-gray-200/80 hover:border-gray-300"
+                }`}
+              >
+                ₹{preset.toLocaleString("en-IN")}
+              </motion.button>
+            );
+          })}
 
           {/* Custom option button */}
           <motion.button
             type="button"
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             onClick={handleCustomClick}
-            className={`py-3 rounded-xl font-semibold text-sm transition-all border-2 ${
+            className={`py-3 rounded-xl font-semibold text-sm transition-all border cursor-pointer ${
               selectedPreset === "custom"
-                ? "bg-primary text-white border-primary shadow-md shadow-primary/25"
-                : "bg-gray-50 text-text-main border-transparent hover:border-primary/30 hover:bg-primary/5"
+                ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
+                : "bg-surface hover:bg-gray-100 text-text-main border-gray-200/80 hover:border-gray-300"
             }`}
           >
             Custom
@@ -440,13 +466,13 @@ function DonateModal({ onClose }: { onClose: () => void }) {
           {selectedPreset === "custom" && (
             <motion.div
               initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-              animate={{ opacity: 1, height: "auto", marginBottom: 20 }}
+              animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
               exit={{ opacity: 0, height: 0, marginBottom: 0 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden"
             >
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-lg">₹</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg select-none pointer-events-none">₹</span>
                 <input
                   ref={inputRef}
                   type="text"
@@ -454,10 +480,10 @@ function DonateModal({ onClose }: { onClose: () => void }) {
                   placeholder="Enter custom amount (min ₹100)"
                   value={customAmount}
                   onChange={handleCustomAmountChange}
-                  className={`w-full pl-10 pr-10 py-3.5 bg-gray-50 border-2 rounded-xl text-lg font-medium text-text-main placeholder:text-gray-400 focus:outline-none transition-all ${
+                  className={`w-full pl-10 pr-10 py-3.5 bg-gray-50/80 border-2 rounded-2xl text-base font-semibold text-text-main placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-all ${
                     customAmount && parseInt(customAmount, 10) < 100
-                      ? "border-amber-500 ring-2 ring-amber-500/20"
-                      : "border-primary ring-2 ring-primary/20 bg-white"
+                      ? "border-amber-400 ring-2 ring-amber-400/20 bg-white"
+                      : "border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/10 bg-white"
                   }`}
                 />
                 {customAmount && (
@@ -484,22 +510,22 @@ function DonateModal({ onClose }: { onClose: () => void }) {
         </AnimatePresence>
 
         {/* Payment methods info */}
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            UPI
+        <div className="flex items-center justify-center gap-3.5 py-2 px-3 bg-gray-50/80 rounded-xl border border-gray-100 mb-5">
+          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            <span>UPI</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            Cards
+          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Cards</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            Wallets
+          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Wallets</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            Netbanking
+          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Netbanking</span>
           </div>
         </div>
 
@@ -509,19 +535,19 @@ function DonateModal({ onClose }: { onClose: () => void }) {
           whileTap={finalAmount >= 100 ? { scale: 0.98 } : {}}
           onClick={handlePayment}
           disabled={finalAmount < 100 || isProcessing}
-          className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${
+          className={`w-full py-4 rounded-2xl font-semibold text-base transition-all ${
             finalAmount >= 100
-              ? "bg-gradient-to-r from-primary to-indigo-500 hover:from-primary-hover hover:to-indigo-600 text-white shadow-lg shadow-primary/25 cursor-pointer"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              ? "bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/25 cursor-pointer"
+              : "bg-gray-100 text-gray-400 border border-gray-200/60 cursor-not-allowed"
           }`}
         >
           {isProcessing ? (
             <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin w-5 h-5 text-white" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
-              Processing...
+              <span>Processing Payment...</span>
             </span>
           ) : finalAmount >= 100 ? (
             `Donate ₹${finalAmount.toLocaleString("en-IN")}`
@@ -533,16 +559,69 @@ function DonateModal({ onClose }: { onClose: () => void }) {
         </motion.button>
 
         {/* Secure payment note */}
-        <div className="flex items-center justify-center gap-1.5 mt-4">
-          <svg className="w-3.5 h-3.5 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/>
+        <div className="flex items-center justify-center gap-1.5 mt-3.5 text-gray-400">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z" />
           </svg>
-          <span className="text-xs text-gray-400">Secured by Razorpay</span>
+          <span className="text-xs font-medium">Secured by Razorpay</span>
         </div>
       </motion.div>
     </div>
   );
 }
+
+// ─── Timeline Milestones Data ──────────────────────────────────────────────────
+const MILESTONES = [
+  {
+    year: "2023",
+    title: "Beyond Barriers",
+    tagline: "Where it all began.",
+    description: "Beyond Barriers marked the beginning of the Inclusiverse journey. It was built around the belief that differences should never become limitations and that inclusion begins when we choose to understand one another.\n\nThe initiative laid the foundation for what Inclusiverse would become—a student-led community committed to creating opportunities for participation, connection, and equal opportunity.",
+    closing: "Our first step beyond the barriers that divide us.",
+    reportUrl: "https://docs.google.com/document/d/1gtp75s_DaImsIL1ZtUwk366AknWk0Icp3nX8G3GE9Uc/edit?usp=drive_link",
+    galleryFilter: "beyond-barriers"
+  },
+  {
+    year: "2024",
+    title: "State Unified Championship",
+    tagline: "Bringing people together through sport.",
+    description: "The State Unified Championship brought athletes with and without disabilities together on the same field, united by the spirit of sport.\n\nMore than a championship, it became a celebration of teamwork, friendship, determination, and participation. It showed us how sport can break down barriers and create connections that go far beyond the game.",
+    closing: "Different abilities. One team. One spirit.",
+    galleryFilter: "state-unified-championship"
+  },
+  {
+    year: "2025",
+    title: "Emerging InClusiWarriors",
+    tagline: "Celebrating participation.",
+    description: "Emerging InClusiWarriors created an opportunity for specially-abled students to come to campus, participate in fun activities, and experience a space where they could simply be themselves.\n\nThe focus was never just on competition. It was about building confidence, encouraging interaction, creating friendships, and celebrating every individual's ability to participate.",
+    closing: "Because every participant is a warrior in their own way.",
+    galleryFilter: "emerging-inclusiwarriors"
+  },
+  {
+    year: "2025",
+    title: "InclusiAI",
+    tagline: "Innovation with inclusion at its core.",
+    description: "With InclusiAI, we explored how technology and innovation can contribute to a more inclusive and accessible world.\n\nThe initiative brought together creativity, problem-solving, and technology, encouraging students to look at real-world challenges through an inclusive lens and imagine solutions that can make a difference.",
+    closing: "Ideas that innovate. Solutions that include.",
+    galleryFilter: "inclusiai"
+  },
+  {
+    year: "2026",
+    title: "Compassion in Action — Asha Bhavan",
+    tagline: "Taking inclusion beyond the campus.",
+    description: "Our visit to Asha Bhavan Special School, Satara marked another meaningful step in our journey.\n\nThrough interactions, activities, and shared experiences, students had the opportunity to connect with the children and understand inclusion through real human connections. The experience reminded us that sometimes the most meaningful impact comes from the simplest things—being present, listening, sharing, and caring.",
+    closing: "Inclusion begins with empathy and comes alive through action.",
+    galleryFilter: "compassion-in-action-asha-bhavan"
+  },
+  {
+    year: "2026",
+    title: "Take a Stand",
+    tagline: "Giving every voice a platform.",
+    description: "Take a Stand created a space for students to express their perspectives, engage with important issues, and confidently make their voices heard.\n\nFor us, inclusion also means ensuring that people have the freedom and opportunity to speak, question, share, and be heard.",
+    closing: "Because every voice deserves a space.",
+    galleryFilter: "take-a-stand"
+  },
+];
 
 // ─── Home ─────────────────────────────────────────────────────────────────────
 const staggerContainer: Variants = {
@@ -561,6 +640,39 @@ const fadeUpItem: Variants = {
 function Home({ setPage }: { setPage: (p: Page) => void }) {
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Dynamic events count derived directly from Timeline MILESTONES & registered events
+  const dynamicEventsCount = React.useMemo(() => {
+    const uniqueEvents = new Set<string>();
+    MILESTONES.forEach(m => uniqueEvents.add(m.title.toLowerCase().trim()));
+    GALLERY_EVENTS.forEach(e => uniqueEvents.add(e.name.toLowerCase().trim()));
+    return Math.max(uniqueEvents.size, MILESTONES.length, 1);
+  }, []);
+
+  // Dynamic shared experiences sourced directly from Timeline MILESTONES
+  const sharedExperiences = React.useMemo(() => {
+    return MILESTONES.map((m) => {
+      // Find a matching photo for this milestone from GALLERY_PHOTOS
+      const matched = GALLERY_PHOTOS.find(
+        p => (m.galleryFilter && p.event === m.galleryFilter) ||
+             (p.cat && p.cat.toLowerCase() === m.title.toLowerCase()) ||
+             (p.caption && p.caption.toLowerCase().includes(m.title.toLowerCase()))
+      );
+
+      // Default backup photo based on milestone title hash
+      const fallbackPhoto = GALLERY_PHOTOS.length > 0
+        ? GALLERY_PHOTOS[Math.abs(m.title.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)) % GALLERY_PHOTOS.length]
+        : null;
+
+      const photo = matched || fallbackPhoto;
+
+      return {
+        ...m,
+        photoSrc: photo ? photo.src : "/gallery/compassion-in-action-asha-bhavan/IMG_1730.webp",
+        photoAlt: photo ? photo.alt : m.title,
+      };
+    });
+  }, []);
 
   useEffect(() => {
     if (!GALLERY_PHOTOS.length) return;
@@ -670,7 +782,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
         </div>
       </section>
 
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -680,13 +792,12 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               hidden: { opacity: 0 },
               visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
             }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto"
           >
             {[
-              { label: "Volunteers", value: "250+" },
-              { label: "Events", value: "15+" },
+              { label: "Volunteers", value: "50+" },
+              { label: "Events", value: `${dynamicEventsCount}+` },
               { label: "Smiles", value: "500+" },
-              { label: "Partner Schools", value: "8+" },
             ].map((stat, i) => (
               <motion.div
                 key={i}
@@ -694,10 +805,10 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
                 }}
-                className="text-center"
+                className="text-center p-4 rounded-2xl bg-surface/50 sm:bg-transparent"
               >
                 <div className="text-4xl md:text-5xl font-display font-bold text-primary mb-2">{stat.value}</div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
+                <div className="text-gray-600 font-medium text-base">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -714,15 +825,19 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               transition={{ duration: 0.5 }}
               className="max-w-2xl"
             >
-              <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Shared Experiences</h2>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-3 uppercase tracking-wider">
+                Our Journey & Milestones
+              </div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold mb-3 text-text-main">Shared Experiences</h2>
               <p className="text-gray-600 text-lg">Meaningful moments created through sports, art, and community inclusion.</p>
             </motion.div>
             <motion.button
               whileHover={{ x: 4 }}
               onClick={() => setPage("timeline")}
-              className="hidden md:flex items-center gap-2 text-primary font-medium hover:text-primary-hover transition-colors"
+              className="hidden md:flex items-center gap-2 text-primary font-semibold hover:text-primary-hover transition-colors cursor-pointer"
             >
-              View timeline <ChevronRight className="w-4 h-4" />
+              <span>View full timeline ({MILESTONES.length} chapters)</span>
+              <ChevronRight className="w-4 h-4" />
             </motion.button>
           </div>
 
@@ -732,37 +847,68 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
             viewport={{ once: true, margin: "-40px" }}
             variants={{
               hidden: { opacity: 0 },
-              visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
+              visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
             }}
-            className="grid md:grid-cols-3 gap-8"
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {[
-              { title: "Unified Skating Championship", src: "https://images.unsplash.com/photo-1607453998774-d533f65dac99?w=800&q=80", alt: "Two children sitting together and smiling" },
-              { title: "Creative Arts Fun Day", src: "https://images.unsplash.com/photo-1524503033411-c9566986fc8f?w=800&q=80", alt: "Two boys making wacky faces and having fun" },
-              { title: "Inclusive Sports Meet", src: "https://images.unsplash.com/photo-1469406396016-013bfae5d83e?w=800&q=80", alt: "Children playing and cheering outdoors" },
-            ].map((p, i) => (
+            {sharedExperiences.slice(0, 3).map((m, i) => (
               <motion.div
-                key={i}
+                key={m.title}
                 variants={{
                   hidden: { opacity: 0, y: 30 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
                 }}
                 whileHover={{ y: -8 }}
+                onClick={() => setPage("timeline")}
                 transition={{ duration: 0.3 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 group cursor-pointer flex flex-col h-full"
+                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer flex flex-col h-full border border-gray-100/80"
               >
-                <div className="p-8 flex flex-col flex-grow">
-                  <h3 className="text-xl font-display font-bold mb-4 group-hover:text-primary transition-colors">{p.title}</h3>
-                  <div className="flex items-center gap-2 text-primary font-medium text-sm mt-auto">
-                    Read story <ArrowRight className="w-4 h-4" />
+                {/* Image header with Year Badge */}
+                <div className="relative h-52 sm:h-56 overflow-hidden bg-gray-100">
+                  <ImageWithFallback
+                    src={m.photoSrc}
+                    alt={m.photoAlt}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 rounded-full bg-white/95 backdrop-blur-xs text-text-main text-xs font-bold shadow-md">
+                      {m.year}
+                    </span>
+                  </div>
+                  <div className="absolute bottom-3 left-4 right-4">
+                    <p className="text-white/95 text-xs font-medium line-clamp-1 italic">
+                      "{m.tagline}"
+                    </p>
+                  </div>
+                </div>
+
+                {/* Content body */}
+                <div className="p-6 sm:p-7 flex flex-col flex-grow">
+                  <h3 className="text-xl font-display font-bold mb-2 text-text-main group-hover:text-primary transition-colors line-clamp-1">
+                    {m.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-2 mb-6 flex-grow">
+                    {m.description.split('\n')[0]}
+                  </p>
+                  <div className="flex items-center justify-between text-primary font-semibold text-sm pt-4 border-t border-gray-100 mt-auto">
+                    <span>Read story</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                   </div>
                 </div>
               </motion.div>
             ))}
           </motion.div>
-          <button onClick={() => setPage("timeline")} className="md:hidden mt-8 w-full flex justify-center items-center gap-2 text-primary font-medium">
-            View timeline <ChevronRight className="w-4 h-4" />
-          </button>
+
+          <div className="mt-10 text-center md:hidden">
+            <button
+              onClick={() => setPage("timeline")}
+              className="w-full py-3.5 px-6 rounded-2xl bg-white border border-gray-200 text-primary font-semibold text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>View full timeline ({MILESTONES.length} chapters)</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </section>
 
@@ -789,7 +935,8 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
-              className="bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-full font-medium text-lg transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
+              onClick={() => setPage("join")}
+              className="bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-full font-medium text-lg transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 cursor-pointer"
             >
               Become a Volunteer
             </motion.button>
@@ -797,7 +944,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => setShowDonateModal(true)}
-              className="relative bg-surface hover:bg-gray-200 text-text-main px-8 py-4 rounded-full font-medium text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
+              className="relative bg-surface hover:bg-gray-200 text-text-main px-8 py-4 rounded-full font-medium text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 cursor-pointer"
             >
               Donate Now
             </motion.button>
@@ -1012,85 +1159,44 @@ function About() {
 }
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
-const MILESTONES = [
-  {
-    year: "2023",
-    title: "Beyond Barriers",
-    tagline: "Where it all began.",
-    description: "Beyond Barriers marked the beginning of the Inclusiverse journey. It was built around the belief that differences should never become limitations and that inclusion begins when we choose to understand one another.\n\nThe initiative laid the foundation for what Inclusiverse would become—a student-led community committed to creating opportunities for participation, connection, and equal opportunity.",
-    closing: "Our first step beyond the barriers that divide us.",
-    reportUrl: "https://docs.google.com/document/d/1gtp75s_DaImsIL1ZtUwk366AknWk0Icp3nX8G3GE9Uc/edit?usp=drive_link",
-    momentsUrl: "https://drive.google.com/drive/folders/1Pv_d6dgGquGrKtn2ZBWHK7-8TRfjYKz4?usp=drive_link"
-  },
-  {
-    year: "2024",
-    title: "State Unified Championship",
-    tagline: "Bringing people together through sport.",
-    description: "The State Unified Championship brought athletes with and without disabilities together on the same field, united by the spirit of sport.\n\nMore than a championship, it became a celebration of teamwork, friendship, determination, and participation. It showed us how sport can break down barriers and create connections that go far beyond the game.",
-    closing: "Different abilities. One team. One spirit."
-  },
-  {
-    year: "2025",
-    title: "Emerging InClusiWarriors",
-    tagline: "Celebrating participation.",
-    description: "Emerging InClusiWarriors created an opportunity for specially-abled students to come to campus, participate in fun activities, and experience a space where they could simply be themselves.\n\nThe focus was never just on competition. It was about building confidence, encouraging interaction, creating friendships, and celebrating every individual's ability to participate.",
-    closing: "Because every participant is a warrior in their own way."
-  },
-  {
-    year: "2025",
-    title: "InclusiAI",
-    tagline: "Innovation with inclusion at its core.",
-    description: "With InclusiAI, we explored how technology and innovation can contribute to a more inclusive and accessible world.\n\nThe initiative brought together creativity, problem-solving, and technology, encouraging students to look at real-world challenges through an inclusive lens and imagine solutions that can make a difference.",
-    closing: "Ideas that innovate. Solutions that include."
-  },
-  {
-    year: "2026",
-    title: "Compassion in Action — Asha Bhavan",
-    tagline: "Taking inclusion beyond the campus.",
-    description: "Our visit to Asha Bhavan Special School, Satara marked another meaningful step in our journey.\n\nThrough interactions, activities, and shared experiences, students had the opportunity to connect with the children and understand inclusion through real human connections. The experience reminded us that sometimes the most meaningful impact comes from the simplest things—being present, listening, sharing, and caring.",
-    closing: "Inclusion begins with empathy and comes alive through action."
-  },
-  {
-    year: "2026",
-    title: "Take a Stand",
-    tagline: "Giving every voice a platform.",
-    description: "Take a Stand created a space for students to express their perspectives, engage with important issues, and confidently make their voices heard.\n\nFor us, inclusion also means ensuring that people have the freedom and opportunity to speak, question, share, and be heard.",
-    closing: "Because every voice deserves a space."
-  },
-];
+function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof MILESTONES[0]; index: number; onViewGallery: (filter: string) => void }) {
+  const hasGalleryPhotos = milestone.galleryFilter && GALLERY_PHOTOS.some(p => p.event === milestone.galleryFilter);
 
-function MilestoneCard({ milestone, index }: { milestone: typeof MILESTONES[0]; index: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="relative flex gap-6 md:gap-10"
+      className="relative flex gap-4 sm:gap-6 md:gap-10"
     >
-      <div className="flex flex-col items-center">
+      {/* Timeline spine */}
+      <div className="relative flex flex-col items-center flex-shrink-0">
         <motion.div
           whileHover={{ scale: 1.1 }}
-          className="bg-primary text-white text-sm font-bold px-4 py-2 rounded-full shadow-md whitespace-nowrap z-10 font-display"
+          className="bg-primary text-white text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-md whitespace-nowrap z-10 font-display"
         >
           {milestone.year}
         </motion.div>
-        {index < MILESTONES.length - 1 && <div className="flex-1 w-px bg-gray-300 mt-4 mb-4" style={{ minHeight: "200px" }} />}
+        {index < MILESTONES.length - 1 && (
+          <div className="flex-1 w-px bg-gradient-to-b from-primary/30 to-gray-200 mt-4" />
+        )}
       </div>
-      <div className="flex-1 bg-white rounded-3xl shadow-sm border border-gray-200 p-8 mb-8 hover:shadow-lg transition-shadow">
+      {/* Card */}
+      <div className="flex-1 bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-200 p-5 sm:p-8 mb-6 sm:mb-8 hover:shadow-lg transition-shadow">
         <div className="mb-4">
-          <h3 className="text-2xl md:text-3xl font-display font-bold text-text-main mb-2">{milestone.title}</h3>
-          <p className="text-primary font-semibold italic text-lg">{milestone.tagline}</p>
+          <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-bold text-text-main mb-2">{milestone.title}</h3>
+          <p className="text-primary font-semibold italic text-base sm:text-lg">{milestone.tagline}</p>
         </div>
         <div className="space-y-4">
           {milestone.description.split('\n\n').map((para, i) => (
-            <p key={i} className="text-gray-700 leading-relaxed">{para}</p>
+            <p key={i} className="text-gray-700 leading-relaxed text-sm sm:text-base">{para}</p>
           ))}
         </div>
         <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-primary font-semibold text-lg italic">{milestone.closing}</p>
+          <p className="text-primary font-semibold text-base sm:text-lg italic">{milestone.closing}</p>
         </div>
-        {(milestone.reportUrl || milestone.momentsUrl) && (
+        {(milestone.reportUrl || milestone.galleryFilter) && (
           <div className="mt-6 flex flex-wrap gap-3">
             {milestone.reportUrl && (
               <a
@@ -1103,16 +1209,14 @@ function MilestoneCard({ milestone, index }: { milestone: typeof MILESTONES[0]; 
                 Report
               </a>
             )}
-            {milestone.momentsUrl && (
-              <a
-                href={milestone.momentsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+            {milestone.galleryFilter && hasGalleryPhotos && (
+              <button
+                onClick={() => onViewGallery(milestone.galleryFilter!)}
                 className="inline-flex items-center gap-2 bg-surface hover:bg-gray-200 text-text-main font-semibold text-sm px-4 py-2 rounded-full transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
               >
                 <Camera className="w-4 h-4" />
                 Moments Captured
-              </a>
+              </button>
             )}
           </div>
         )}
@@ -1121,7 +1225,7 @@ function MilestoneCard({ milestone, index }: { milestone: typeof MILESTONES[0]; 
   );
 }
 
-function Timeline() {
+function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }) {
   return (
     <div>
       {/* Hero Section */}
@@ -1145,13 +1249,12 @@ function Timeline() {
         </motion.div>
       </section>
 
-      {/* Timeline Section */}
-      <section className="py-20 bg-white">
+      <section className="py-16 sm:py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {MILESTONES.map((milestone, i) => (
-            <MilestoneCard key={i} milestone={milestone} index={i} />
+            <MilestoneCard key={i} milestone={milestone} index={i} onViewGallery={onViewGallery} />
           ))}
-          <div className="flex justify-start pl-5 mt-8">
+          <div className="flex justify-start pl-4 sm:pl-5 mt-4 sm:mt-8">
             <motion.div
               animate={{ scale: [1, 1.4, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -1208,8 +1311,23 @@ function Timeline() {
 // ─── Gallery ──────────────────────────────────────────────────────────────────
 
 
-function Gallery() {
+function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setActiveFilter: (f: string) => void }) {
   const [lightbox, setLightbox] = useState<typeof GALLERY_PHOTOS[0] | null>(null);
+
+  // Build filter categories from events.json + derive from photos
+  const eventFilters = GALLERY_EVENTS.map((e: { name: string; slug: string }) => ({ name: e.name, slug: e.slug }));
+  // Also derive from photos in case events.json is out of sync
+  const photoCats = [...new Set(GALLERY_PHOTOS.map(p => p.cat).filter(c => c !== "All"))];
+  const allFilters = [
+    ...eventFilters,
+    ...photoCats
+      .filter(cat => !eventFilters.some((ef: { name: string }) => ef.name === cat))
+      .map(cat => ({ name: cat, slug: cat.toLowerCase().replace(/\s+/g, '-') }))
+  ];
+
+  const filteredPhotos = activeFilter === "All"
+    ? GALLERY_PHOTOS
+    : GALLERY_PHOTOS.filter(p => p.cat === activeFilter || p.event === activeFilter);
 
   return (
     <div>
@@ -1229,20 +1347,67 @@ function Gallery() {
         </motion.div>
       </section>
 
+      {/* Filter Pills */}
+      {allFilters.length > 0 && (
+        <section className="bg-white pt-10 pb-2">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="flex flex-wrap justify-center gap-3"
+            >
+              <button
+                onClick={() => setActiveFilter("All")}
+                className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === "All"
+                    ? "bg-primary text-white shadow-md shadow-primary/25"
+                    : "bg-surface text-gray-600 hover:bg-gray-200 hover:text-text-main"
+                  }`}
+              >
+                All Events
+              </button>
+              {allFilters.map((filter) => (
+                <button
+                  key={filter.slug}
+                  onClick={() => setActiveFilter(filter.slug)}
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === filter.slug
+                      ? "bg-primary text-white shadow-md shadow-primary/25"
+                      : "bg-surface text-gray-600 hover:bg-gray-200 hover:text-text-main"
+                    }`}
+                >
+                  {filter.name}
+                </button>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            layout
-            className="columns-1 sm:columns-2 lg:columns-3 gap-5 space-y-5"
-          >
-            <AnimatePresence mode="popLayout">
-              {GALLERY_PHOTOS.map((photo, i) => (
+          {filteredPhotos.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-20"
+            >
+              <Camera className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-xl text-gray-400 font-display font-semibold">No photos yet for this event</p>
+              <p className="text-gray-400 mt-2">Photos will appear here once they are uploaded.</p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={activeFilter}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="columns-1 sm:columns-2 lg:columns-3 gap-5 space-y-5"
+            >
+              {filteredPhotos.map((photo, i) => (
                 <motion.button
-                  layout
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                  transition={{ duration: 0.4, delay: i * 0.03 }}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.4) }}
                   key={photo.src}
                   onClick={() => setLightbox(photo)}
                   className="w-full break-inside-avoid rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group relative block text-left"
@@ -1255,8 +1420,8 @@ function Gallery() {
                   </div>
                 </motion.button>
               ))}
-            </AnimatePresence>
-          </motion.div>
+            </motion.div>
+          )}
         </div>
       </section>
 
@@ -1295,54 +1460,306 @@ function Gallery() {
 }
 
 // ─── Join Us Page ─────────────────────────────────────────────────────────────
+const CHRIST_UNIVERSITY_VOLUNTEER_FORM_URL = "https://forms.google.com";
+const OUTSIDE_VOLUNTEER_FORM_URL = "https://forms.google.com";
+
 function JoinUs() {
   return (
-    <div className="py-20 lg:py-32">
+    <div className="py-20 lg:py-32 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto px-4 text-center"
+        transition={{ duration: 0.5 }}
+        className="text-center max-w-3xl mx-auto mb-16"
       >
-        <h1 className="text-4xl md:text-5xl font-display font-bold mb-6">Join Inclusiverse</h1>
-        <p className="text-xl text-gray-600 mb-12">
-          Choose how you want to make an impact. Are you a student at Christ University Lavasa, or are you joining us from outside?
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs sm:text-sm font-semibold mb-4 border border-primary/20">
+          <Heart className="w-4 h-4 fill-primary" />
+          <span>Become a Part of Inclusiverse</span>
+        </div>
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-text-main mb-5 tracking-tight">
+          Join the <span className="text-primary">Movement</span>
+        </h1>
+        <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
+          Choose how you want to make an impact. Are you a student at Christ University Lavasa, or joining our wider global network?
         </p>
-        <div className="flex flex-col md:flex-row gap-6 justify-center">
-          <motion.a
-            whileHover={{ scale: 1.02, y: -4 }}
-            whileTap={{ scale: 0.98 }}
-            href="#"
-            className="flex-1 bg-surface hover:bg-gray-100 border-2 border-gray-200 p-8 rounded-3xl flex flex-col items-center gap-4 transition-all"
-          >
-            <div className="bg-white p-5 rounded-full shadow-sm mb-2 text-primary">
-              <GraduationCap className="w-10 h-10" />
+      </motion.div>
+
+      {/* Two Action Cards / Buttons */}
+      <div className="grid md:grid-cols-2 gap-8 mb-16">
+        {/* Card 1: Christ University Lavasa */}
+        <motion.a
+          href={CHRIST_UNIVERSITY_VOLUNTEER_FORM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ y: -6 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white border-2 border-gray-200/80 hover:border-primary rounded-3xl p-8 sm:p-10 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-300 relative group cursor-pointer block text-left"
+        >
+          <div>
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm">
+              <GraduationCap className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold">Christ University Lavasa</h3>
-            <p className="text-gray-600">Join our on-campus chapter and participate in local events.</p>
-          </motion.a>
-          
-          <motion.a
-            whileHover={{ scale: 1.02, y: -4 }}
-            whileTap={{ scale: 0.98 }}
-            href="#"
-            className="flex-1 bg-primary text-white p-8 rounded-3xl flex flex-col items-center gap-4 shadow-lg hover:shadow-xl transition-all"
-          >
-            <div className="bg-white/20 p-5 rounded-full mb-2">
-              <Users className="w-10 h-10 text-white" />
+            <div className="inline-block px-3 py-1 rounded-full bg-surface text-gray-600 text-xs font-bold uppercase tracking-wider mb-3">
+              On-Campus Chapter
             </div>
-            <h3 className="text-2xl font-bold">Outside Volunteer</h3>
-            <p className="text-white/90">Join our global network of volunteers and supporters.</p>
-          </motion.a>
+            <h3 className="text-2xl sm:text-3xl font-display font-bold text-text-main mb-3 group-hover:text-primary transition-colors">
+              Christ University Lavasa
+            </h3>
+            <p className="text-gray-600 text-base leading-relaxed mb-8">
+              Join our on-campus student chapter. Help organize interactive workshops, inclusive sports meets, arts events, and peer support activities.
+            </p>
+          </div>
+
+          <div className="w-full py-4 px-6 rounded-2xl bg-primary group-hover:bg-primary-hover text-white font-semibold text-base transition-all shadow-md shadow-primary/25 group-hover:shadow-lg flex items-center justify-center gap-2 group-hover:gap-3">
+            <span>Apply via Google Form</span>
+            <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </div>
+        </motion.a>
+
+        {/* Card 2: Outside Volunteer */}
+        <motion.a
+          href={OUTSIDE_VOLUNTEER_FORM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ y: -6 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white border-2 border-gray-200/80 hover:border-primary rounded-3xl p-8 sm:p-10 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-300 relative group cursor-pointer block text-left"
+        >
+          <div>
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm">
+              <Users className="w-8 h-8" />
+            </div>
+            <div className="inline-block px-3 py-1 rounded-full bg-surface text-gray-600 text-xs font-bold uppercase tracking-wider mb-3">
+              Community & Global
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-display font-bold text-text-main mb-3 group-hover:text-primary transition-colors">
+              Outside Volunteer
+            </h3>
+            <p className="text-gray-600 text-base leading-relaxed mb-8">
+              Join our broader community from anywhere. Contribute through creative design, social outreach, partner school collaborations, or mentorship.
+            </p>
+          </div>
+
+          <div className="w-full py-4 px-6 rounded-2xl bg-text-main group-hover:bg-black text-white font-semibold text-base transition-all shadow-md group-hover:shadow-lg flex items-center justify-center gap-2 group-hover:gap-3">
+            <span>Apply via Google Form</span>
+            <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </div>
+        </motion.a>
+      </div>
+
+      {/* Direct Contact & Social Links */}
+      <div className="pt-10 border-t border-gray-200/80 text-center">
+        <p className="text-xs uppercase font-bold tracking-wider text-gray-400 mb-4">Have questions? Reach out to us</p>
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <a
+            href="https://www.instagram.com/inclusiverse.christuniversity"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-text-main hover:text-primary hover:border-primary/40 shadow-sm transition-all"
+          >
+            <Instagram className="w-4 h-4 text-pink-500" />
+            <span>@inclusiverse.christuniversity</span>
+          </a>
+          <a
+            href="https://www.linkedin.com/company/inclusiverse-club"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-text-main hover:text-primary hover:border-primary/40 shadow-sm transition-all"
+          >
+            <Linkedin className="w-4 h-4 text-blue-600" />
+            <span>Inclusiverse Club</span>
+          </a>
+          <div className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-gray-700 shadow-sm">
+            <MapPin className="w-4 h-4 text-primary" />
+            <span>Christ University, Pune Lavasa Campus</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── 404 Page ─────────────────────────────────────────────────────────────────
+function NotFound({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <div className="min-h-[75vh] flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background Decorative Glows */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-gradient-to-tr from-primary/15 via-pink-200/20 to-indigo-100/30 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute top-12 right-12 w-64 h-64 bg-primary/10 rounded-full blur-2xl pointer-events-none -z-10" />
+
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-2xl w-full text-center"
+      >
+        {/* Floating 404 badge with logo and sparkles */}
+        <div className="relative inline-flex items-center justify-center mb-8">
+          <motion.div
+            animate={{
+              y: [0, -10, 0],
+              rotate: [0, 2, -2, 0],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="relative"
+          >
+            <div className="flex items-center justify-center gap-2 sm:gap-4 font-display font-black text-7xl sm:text-9xl text-primary/90 tracking-tighter select-none">
+              <span>4</span>
+              <motion.div
+                whileHover={{ rotate: 360, scale: 1.15 }}
+                transition={{ duration: 0.8 }}
+                className="w-20 h-20 sm:w-28 sm:h-28 rounded-3xl bg-white shadow-xl shadow-primary/20 border-2 border-primary/20 flex items-center justify-center p-3 relative"
+              >
+                <img
+                  src="/inclusiverse-logo.png"
+                  alt="Inclusiverse Logo"
+                  className="w-full h-full object-contain"
+                />
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-pink-500 text-white p-1.5 rounded-full shadow-md"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                </motion.div>
+              </motion.div>
+              <span>4</span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Heading & Subtitle */}
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-text-main mb-4 tracking-tight">
+          Lost in the <span className="text-primary">Inclusiverse?</span>
+        </h1>
+        <p className="text-gray-600 text-base sm:text-lg max-w-lg mx-auto mb-10 leading-relaxed">
+          The page you’re looking for might have moved, been renamed, or simply took a different path. Don't worry—every journey leads back to community and joy.
+        </p>
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+          <motion.button
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setPage("home")}
+            className="bg-primary hover:bg-primary-hover text-white px-7 py-3.5 rounded-full font-semibold transition-all shadow-md shadow-primary/25 hover:shadow-lg flex items-center gap-2"
+          >
+            <HomeIcon className="w-4 h-4" />
+            <span>Back to Home</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setPage("gallery")}
+            className="bg-white hover:bg-gray-50 text-text-main border border-gray-200 px-6 py-3.5 rounded-full font-semibold transition-all shadow-sm hover:border-primary/40 flex items-center gap-2"
+          >
+            <Camera className="w-4 h-4 text-primary" />
+            <span>Explore Gallery</span>
+          </motion.button>
+        </div>
+
+        {/* Quick Links Card */}
+        <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-3xl p-6 shadow-sm max-w-md mx-auto">
+          <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Or discover other sections</p>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: "About Us", target: "about" as Page, icon: Heart },
+              { label: "Timeline", target: "timeline" as Page, icon: Compass },
+              { label: "Join Us", target: "join" as Page, icon: Users },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.target}
+                  onClick={() => setPage(item.target)}
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-surface/70 hover:bg-primary/10 text-gray-700 hover:text-primary transition-all duration-200 group text-center"
+                >
+                  <Icon className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-semibold">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </motion.div>
     </div>
   );
 }
 
+function getInitialPage(): Page {
+  if (typeof window !== "undefined") {
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get("page") as Page;
+    if (p) {
+      if (["home", "about", "timeline", "gallery", "join", "404"].includes(p)) {
+        return p;
+      }
+      return "404";
+    }
+    const hash = window.location.hash.replace("#", "") as Page;
+    if (hash) {
+      if (["home", "about", "timeline", "gallery", "join", "404"].includes(hash)) {
+        return hash;
+      }
+      return "404";
+    }
+    const pathname = window.location.pathname.replace(/^\/|\/$/g, "");
+    if (pathname && !["index.html", ""].includes(pathname)) {
+      if (["home", "about", "timeline", "gallery", "join", "404"].includes(pathname)) {
+        return pathname as Page;
+      }
+      return "404";
+    }
+  }
+  return "home";
+}
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [page, setPage] = useState<Page>("home");
+  const [page, setPage] = useState<Page>(getInitialPage);
   const [isDyslexic, setIsDyslexic] = useState(false);
+  const [galleryFilter, setGalleryFilter] = useState("All");
+  const [pageLoading, setPageLoading] = useState(false);
+
+  // Sync with browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const p = getInitialPage();
+      setPage(p);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  // Wrap setPage to reset gallery filter when navigating to gallery from nav
+  const handleSetPage = (p: Page) => {
+    if (p === "gallery") {
+      setGalleryFilter("All");
+    }
+    if (p !== page) {
+      const url = new URL(window.location.href);
+      if (p === "home") {
+        url.searchParams.delete("page");
+      } else {
+        url.searchParams.set("page", p);
+      }
+      window.history.pushState(null, "", url.toString());
+
+      setPageLoading(true);
+      setPage(p);
+      setTimeout(() => {
+        setPageLoading(false);
+      }, 300);
+    }
+  };
 
   useEffect(() => {
     document.documentElement.classList.toggle("dyslexia-mode", isDyslexic);
@@ -1354,17 +1771,52 @@ export default function App() {
 
   const toggleDyslexic = () => setIsDyslexic(d => !d);
 
+  // Navigate to gallery with a specific event filter pre-selected
+  const viewGalleryWithFilter = (filter: string) => {
+    setGalleryFilter(filter);
+    handleSetPage("gallery");
+  };
+
   const content = {
-    home: <Home setPage={setPage} />,
-    about: <About />,
-    timeline: <Timeline />,
-    gallery: <Gallery />,
-    join: <JoinUs />,
-  }[page];
+    home: (
+      <Skeleton name="page-home" loading={pageLoading}>
+        <Home setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    about: (
+      <Skeleton name="page-about" loading={pageLoading}>
+        <About />
+      </Skeleton>
+    ),
+    timeline: (
+      <Skeleton name="page-timeline" loading={pageLoading}>
+        <Timeline onViewGallery={viewGalleryWithFilter} />
+      </Skeleton>
+    ),
+    gallery: (
+      <Skeleton name="page-gallery" loading={pageLoading}>
+        <Gallery activeFilter={galleryFilter} setActiveFilter={setGalleryFilter} />
+      </Skeleton>
+    ),
+    join: (
+      <Skeleton name="page-join" loading={pageLoading}>
+        <JoinUs />
+      </Skeleton>
+    ),
+    "404": (
+      <Skeleton name="page-404" loading={pageLoading}>
+        <NotFound setPage={handleSetPage} />
+      </Skeleton>
+    ),
+  }[page] || (
+    <Skeleton name="page-404" loading={pageLoading}>
+      <NotFound setPage={handleSetPage} />
+    </Skeleton>
+  );
 
   return (
     <div className="min-h-screen bg-background text-text-main flex flex-col font-body">
-      <Nav page={page} setPage={setPage} isDyslexic={isDyslexic} toggleDyslexic={toggleDyslexic} />
+      <Nav page={page} setPage={handleSetPage} isDyslexic={isDyslexic} toggleDyslexic={toggleDyslexic} />
       <main className="flex-grow">
         <AnimatePresence mode="wait">
           <motion.div
@@ -1378,7 +1830,7 @@ export default function App() {
           </motion.div>
         </AnimatePresence>
       </main>
-      <Footer setPage={setPage} />
+      <Footer setPage={handleSetPage} />
     </div>
   );
 }
