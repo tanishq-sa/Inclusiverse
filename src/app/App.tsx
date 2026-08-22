@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Heart, Menu, X, Accessibility, ArrowRight, ChevronRight, PlayCircle, Camera, FileText, ChevronDown, ChevronUp, GraduationCap, Users, MapPin, Mail, Instagram, Linkedin, Home as HomeIcon, Compass, Sparkles, AlertCircle, ArrowLeft, Search, CheckCircle2, Send, Phone, ExternalLink } from "lucide-react";
-import { motion, AnimatePresence, Variants } from "motion/react";
+import { LazyMotion, domAnimation, m, AnimatePresence, Variants } from "motion/react";
 import { Skeleton } from "boneyard-js/react";
 import confetti from "canvas-confetti";
 import GALLERY_PHOTOS_RAW from "../data/photos.json";
@@ -32,7 +32,7 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
     >
       {label}
       {page === target && (
-        <motion.div
+        <m.div
           layoutId="activeNavIndicator"
           className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
           transition={{ type: "spring", stiffness: 380, damping: 30 }}
@@ -46,7 +46,7 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <button onClick={() => setPage("home")} className="flex items-center gap-3 group focus:outline-none">
-            <motion.img
+            <m.img
               src="/inclusiverse-logo.png"
               alt="Inclusiverse Logo"
               whileHover={{ rotate: 8, scale: 1.08 }}
@@ -61,14 +61,14 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
             {link("About", "about")}
             {link("Timeline", "timeline")}
             {link("Gallery", "gallery")}
-            <motion.button
+            <m.button
               onClick={() => setPage("join")}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
             >
               Join Us
-            </motion.button>
+            </m.button>
           </div>
 
           <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-text-main focus:outline-none">
@@ -79,12 +79,12 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
 
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="overflow-hidden md:hidden bg-white border-b border-gray-100 px-4 py-4 space-y-4"
+          <m.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="md:hidden bg-white border-b border-gray-100 px-4 py-4 space-y-4 shadow-md"
           >
             {(["home", "about", "timeline", "gallery"] as Page[]).map((p) => (
               <button
@@ -98,7 +98,7 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
             <button onClick={() => { setPage("join"); setMenuOpen(false); }} className="w-full bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-sm">
               Join Us
             </button>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </nav>
@@ -124,10 +124,17 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
             <p className="text-gray-400 max-w-md text-sm leading-relaxed">
               A student-led initiative dedicated to creating joyful, barrier-free, and empowering experiences for children with disabilities. Dignity over sympathy, community over charity.
             </p>
-            <div className="flex items-center gap-2 text-xs text-gray-400 bg-white/5 py-1.5 px-3 rounded-full w-fit border border-white/10">
-              <MapPin className="w-3.5 h-3.5 text-primary" />
+            <a
+              href="https://maps.app.goo.gl/kV1XKQ1xFksGbzqU6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-xs text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 py-1.5 px-3 rounded-full w-fit border border-white/10 hover:border-primary/40 transition-colors group"
+              title="Open Christ University, Lavasa Campus on Google Maps"
+            >
+              <MapPin className="w-3.5 h-3.5 text-primary group-hover:scale-110 transition-transform" />
               <span>Christ University, Lavasa Campus</span>
-            </div>
+              <ExternalLink className="w-3 h-3 text-gray-500 group-hover:text-primary transition-colors" />
+            </a>
           </div>
 
           {/* Quick Links */}
@@ -146,7 +153,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
                 <li key={p}>
                   <button
                     onClick={() => setPage(p)}
-                    className="hover:text-primary hover:translate-x-1 transition-all duration-200 inline-flex items-center gap-1.5 text-left"
+                    className="hover:text-primary hover:translate-x-1 transition-[color,transform] duration-200 inline-flex items-center gap-1.5 text-left"
                   >
                     <ChevronRight className="w-3.5 h-3.5 text-primary/70" />
                     {label}
@@ -169,7 +176,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
                 href="https://www.instagram.com/inclusiverse.christuniversity"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-all"
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-colors"
                 aria-label="Instagram"
               >
                 <Instagram className="w-4 h-4" />
@@ -178,14 +185,14 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
                 href="https://www.linkedin.com/company/inclusiverse-club"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-all"
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-colors"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="w-4 h-4" />
               </a>
               <button
                 onClick={() => setPage("join")}
-                className="px-4 py-2 text-xs font-semibold bg-primary hover:bg-primary-hover text-white rounded-xl transition-all shadow-sm"
+                className="px-4 py-2 text-xs font-semibold bg-primary hover:bg-primary-hover text-white rounded-xl transition-colors shadow-sm"
               >
                 Volunteer Now
               </button>
@@ -307,35 +314,35 @@ function DonateModal({ onClose }: { onClose: () => void }) {
   if (paymentStatus === "success") {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl text-center"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
+          <m.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
             className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
           >
             <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
-          </motion.div>
+          </m.div>
           <h3 className="text-2xl font-display font-bold text-text-main mb-2">Thank You! 🎉</h3>
           <p className="text-gray-600 mb-6">
             Your donation of <span className="font-bold text-primary">₹{finalAmount.toLocaleString("en-IN")}</span> has been received. You're making a real difference!
           </p>
-          <motion.button
+          <m.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={onClose}
             className="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-full font-medium transition-colors"
           >
             Close
-          </motion.button>
-        </motion.div>
+          </m.button>
+        </m.div>
       </div>
     );
   }
@@ -344,7 +351,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
   if (paymentStatus === "error") {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -358,24 +365,24 @@ function DonateModal({ onClose }: { onClose: () => void }) {
             Something went wrong with your payment. Please try again.
           </p>
           <div className="flex gap-3 justify-center">
-            <motion.button
+            <m.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setPaymentStatus("idle")}
               className="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-full font-medium transition-colors"
             >
               Try Again
-            </motion.button>
-            <motion.button
+            </m.button>
+            <m.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={onClose}
               className="bg-gray-100 hover:bg-gray-200 text-text-main px-8 py-3 rounded-full font-medium transition-colors"
             >
               Cancel
-            </motion.button>
+            </m.button>
           </div>
-        </motion.div>
+        </m.div>
       </div>
     );
   }
@@ -383,7 +390,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
   // Main donate form
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <motion.div
+      <m.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -400,14 +407,14 @@ function DonateModal({ onClose }: { onClose: () => void }) {
 
         {/* Header */}
         <div className="text-center mb-5">
-          <motion.div
+          <m.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
             className="w-14 h-14 bg-white border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3 p-2 shadow-sm ring-4 ring-gray-50"
           >
             <img src="/inclusiverse-logo.png" alt="Inclusiverse" className="w-10 h-10 object-contain" />
-          </motion.div>
+          </m.div>
           <h3 className="text-2xl font-display font-bold text-text-main mb-1">Support Our Cause</h3>
           <p className="text-gray-500 text-sm">Every contribution makes a difference</p>
         </div>
@@ -428,48 +435,48 @@ function DonateModal({ onClose }: { onClose: () => void }) {
           {PRESET_AMOUNTS.map((preset) => {
             const isSelected = selectedPreset === preset;
             return (
-              <motion.button
+              <m.button
                 key={preset}
                 type="button"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => handlePresetClick(preset)}
-                className={`py-3 rounded-xl font-semibold text-sm transition-all border cursor-pointer ${
+                className={`py-3 rounded-xl font-semibold text-sm transition-colors border cursor-pointer ${
                   isSelected
                     ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
                     : "bg-surface hover:bg-gray-100 text-text-main border-gray-200/80 hover:border-gray-300"
                 }`}
               >
                 ₹{preset.toLocaleString("en-IN")}
-              </motion.button>
+              </m.button>
             );
           })}
 
           {/* Custom option button */}
-          <motion.button
+          <m.button
             type="button"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleCustomClick}
-            className={`py-3 rounded-xl font-semibold text-sm transition-all border cursor-pointer ${
+            className={`py-3 rounded-xl font-semibold text-sm transition-colors border cursor-pointer ${
               selectedPreset === "custom"
                 ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
                 : "bg-surface hover:bg-gray-100 text-text-main border-gray-200/80 hover:border-gray-300"
             }`}
           >
             Custom
-          </motion.button>
+          </m.button>
         </div>
 
         {/* Custom amount input field - only shown when Custom is selected */}
         <AnimatePresence>
           {selectedPreset === "custom" && (
-            <motion.div
-              initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-              animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
-              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden"
+            <m.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="mb-4"
             >
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg select-none pointer-events-none">₹</span>
@@ -480,7 +487,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
                   placeholder="Enter custom amount (min ₹100)"
                   value={customAmount}
                   onChange={handleCustomAmountChange}
-                  className={`w-full pl-10 pr-10 py-3.5 bg-gray-50/80 border-2 rounded-2xl text-base font-semibold text-text-main placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-all ${
+                  className={`w-full pl-10 pr-10 py-3.5 bg-gray-50/80 border-2 rounded-2xl text-base font-semibold text-text-main placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-colors ${
                     customAmount && parseInt(customAmount, 10) < 100
                       ? "border-amber-400 ring-2 ring-amber-400/20 bg-white"
                       : "border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/10 bg-white"
@@ -505,7 +512,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
                   Minimum donation amount is ₹100
                 </p>
               )}
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
 
@@ -530,12 +537,12 @@ function DonateModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Pay button */}
-        <motion.button
+        <m.button
           whileHover={finalAmount >= 100 ? { scale: 1.02 } : {}}
           whileTap={finalAmount >= 100 ? { scale: 0.98 } : {}}
           onClick={handlePayment}
           disabled={finalAmount < 100 || isProcessing}
-          className={`w-full py-4 rounded-2xl font-semibold text-base transition-all ${
+          className={`w-full py-4 rounded-2xl font-semibold text-base transition-colors ${
             finalAmount >= 100
               ? "bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/25 cursor-pointer"
               : "bg-gray-100 text-gray-400 border border-gray-200/60 cursor-not-allowed"
@@ -556,7 +563,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
           ) : (
             "Select or enter an amount"
           )}
-        </motion.button>
+        </m.button>
 
         {/* Secure payment note */}
         <div className="flex items-center justify-center gap-1.5 mt-3.5 text-gray-400">
@@ -565,7 +572,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
           </svg>
           <span className="text-xs font-medium">Secured by Razorpay</span>
         </div>
-      </motion.div>
+      </m.div>
     </div>
   );
 }
@@ -689,22 +696,22 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-            <motion.div
+            <m.div
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
               className="max-w-2xl"
             >
-              <motion.h1 variants={fadeUpItem} className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold text-text-main leading-tight mb-6">
+              <m.h1 variants={fadeUpItem} className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold text-text-main leading-tight mb-6">
                 Every Child Deserves <span className="text-primary">Joy</span>,{" "}
                 <span className="text-primary">Friendship</span>, and Opportunity.
-              </motion.h1>
-              <motion.p variants={fadeUpItem} className="text-lg sm:text-xl text-gray-700 mb-10 leading-relaxed max-w-xl">
+              </m.h1>
+              <m.p variants={fadeUpItem} className="text-lg sm:text-xl text-gray-700 mb-10 leading-relaxed max-w-xl">
                 Inclusiverse is a student-led initiative creating meaningful experiences for children with
                 disabilities through sports, inclusion, creativity, and compassion.
-              </motion.p>
-              <motion.div variants={fadeUpItem} className="flex flex-wrap gap-4">
-                <motion.button
+              </m.p>
+              <m.div variants={fadeUpItem} className="flex flex-wrap gap-4">
+                <m.button
                   onClick={() => setPage("join")}
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
@@ -712,8 +719,8 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
                 >
                   Join Us Today
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </motion.button>
-                <motion.button
+                </m.button>
+                <m.button
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setPage("timeline")}
@@ -721,11 +728,11 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
                 >
                   <PlayCircle className="w-5 h-5 text-gray-500" />
                   Our Journey
-                </motion.button>
-              </motion.div>
-            </motion.div>
+                </m.button>
+              </m.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
@@ -734,7 +741,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               <div className="aspect-square rounded-3xl overflow-hidden shadow-2xl relative group">
                 <AnimatePresence mode="sync">
                   {GALLERY_PHOTOS.length > 0 && (
-                    <motion.div
+                    <m.div
                       key={currentImageIndex}
                       initial={{ opacity: 0, scale: 1.1 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -742,7 +749,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
                       transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
                       className="absolute inset-0"
                     >
-                      <motion.div
+                      <m.div
                         animate={{ scale: [1, 1.08] }}
                         transition={{ duration: 5, ease: "easeOut" }}
                         className="w-full h-full"
@@ -752,27 +759,27 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
                           alt={GALLERY_PHOTOS[currentImageIndex].alt}
                           className="w-full h-full object-cover"
                         />
-                      </motion.div>
-                    </motion.div>
+                      </m.div>
+                    </m.div>
                   )}
                 </AnimatePresence>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent z-10 pointer-events-none" />
-                <motion.div
+                <m.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.6 }}
                   className="absolute bottom-6 left-6 right-6 z-20"
                 >
-                </motion.div>
+                </m.div>
               </div>
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </section>
 
       <section className="py-16 bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+          <m.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
@@ -787,7 +794,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               { label: "Events", value: `${dynamicEventsCount}+` },
               { label: "Smiles", value: "500+" },
             ].map((stat, i) => (
-              <motion.div
+              <m.div
                 key={i}
                 variants={{
                   hidden: { opacity: 0, y: 20 },
@@ -797,16 +804,16 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               >
                 <div className="text-4xl md:text-5xl font-display font-bold text-primary mb-2">{stat.value}</div>
                 <div className="text-gray-600 font-medium text-base">{stat.label}</div>
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
       <section className="py-24 bg-surface">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-12">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -818,18 +825,18 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               </div>
               <h2 className="text-3xl md:text-4xl font-display font-bold mb-3 text-text-main">Shared Experiences</h2>
               <p className="text-gray-600 text-lg">Meaningful moments created through sports, art, and community inclusion.</p>
-            </motion.div>
-            <motion.button
+            </m.div>
+            <m.button
               whileHover={{ x: 4 }}
               onClick={() => setPage("timeline")}
               className="hidden md:flex items-center gap-2 text-primary font-semibold hover:text-primary-hover transition-colors cursor-pointer"
             >
               <span>View full timeline ({MILESTONES.length} chapters)</span>
               <ChevronRight className="w-4 h-4" />
-            </motion.button>
+            </m.button>
           </div>
 
-          <motion.div
+          <m.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-40px" }}
@@ -839,9 +846,9 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
             }}
             className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {sharedExperiences.slice(0, 3).map((m, i) => (
-              <motion.div
-                key={m.title}
+            {sharedExperiences.slice(0, 3).map((exp, i) => (
+              <m.div
+                key={exp.title}
                 variants={{
                   hidden: { opacity: 0, y: 30 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
@@ -849,24 +856,24 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
                 whileHover={{ y: -8 }}
                 onClick={() => setPage("timeline")}
                 transition={{ duration: 0.3 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer flex flex-col h-full border border-gray-100/80"
+                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 group cursor-pointer flex flex-col h-full border border-gray-100/80"
               >
                 {/* Image header with Year Badge */}
                 <div className="relative h-52 sm:h-56 overflow-hidden bg-gray-100">
                   <ImageWithFallback
-                    src={m.photoSrc}
-                    alt={m.photoAlt}
+                    src={exp.photoSrc}
+                    alt={exp.photoAlt}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
                   <div className="absolute top-4 left-4">
                     <span className="px-3 py-1 rounded-full bg-white/95 backdrop-blur-xs text-text-main text-xs font-bold shadow-md">
-                      {m.year}
+                      {exp.year}
                     </span>
                   </div>
                   <div className="absolute bottom-3 left-4 right-4">
                     <p className="text-white/95 text-xs font-medium line-clamp-1 italic">
-                      "{m.tagline}"
+                      "{exp.tagline}"
                     </p>
                   </div>
                 </div>
@@ -874,19 +881,19 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
                 {/* Content body */}
                 <div className="p-6 sm:p-7 flex flex-col flex-grow">
                   <h3 className="text-xl font-display font-bold mb-2 text-text-main group-hover:text-primary transition-colors line-clamp-1">
-                    {m.title}
+                    {exp.title}
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed line-clamp-2 mb-6 flex-grow">
-                    {m.description.split('\n')[0]}
+                    {exp.description.split('\n')[0]}
                   </p>
                   <div className="flex items-center justify-between text-primary font-semibold text-sm pt-4 border-t border-gray-100 mt-auto">
                     <span>Read story</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
+          </m.div>
 
           <div className="mt-10 text-center md:hidden">
             <button
@@ -901,7 +908,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
       </section>
 
       <section className="py-24 bg-white">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -916,24 +923,24 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
             Join our community of students dedicated to building lasting friendships and creating inclusive spaces.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <motion.button
+            <m.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => setPage("join")}
               className="bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-full font-medium text-lg transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 cursor-pointer"
             >
               Become a Volunteer
-            </motion.button>
-            <motion.button
+            </m.button>
+            <m.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => setShowDonateModal(true)}
               className="relative bg-surface hover:bg-gray-200 text-text-main px-8 py-4 rounded-full font-medium text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 cursor-pointer"
             >
               Donate Now
-            </motion.button>
+            </m.button>
           </div>
-        </motion.div>
+        </m.div>
       </section>
 
       <AnimatePresence>
@@ -951,7 +958,7 @@ function About() {
     <div>
       {/* Hero Section */}
       <section className="bg-surface py-24">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -963,13 +970,13 @@ function About() {
           <p className="text-lg text-gray-600 leading-relaxed">
             Inclusiverse is a student-led initiative at Christ University, Pune Lavasa Campus, built on a simple belief: everyone deserves to feel included, heard, respected, and valued.
           </p>
-        </motion.div>
+        </m.div>
       </section>
 
       {/* Introduction Section */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -982,14 +989,14 @@ function About() {
             <p className="text-lg leading-relaxed mt-6">
               Our journey began with a vision to bridge gaps between people of different abilities, backgrounds, and experiences. Today, Inclusiverse works towards creating meaningful opportunities for <span className="font-semibold text-primary">specially-abled individuals and the wider community</span> through sports, cultural activities, awareness initiatives, creative events, and social engagement.
             </p>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
       {/* Our Purpose Section */}
       <section className="py-20 bg-surface">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -1002,14 +1009,14 @@ function About() {
                 Through our initiatives, we aim to challenge stereotypes, encourage empathy, and build a culture where accessibility and inclusion become a part of everyday life. Whether it is bringing specially-abled children to campus, organising inclusive games, conducting awareness activities, collaborating with schools and organisations, or creating platforms for students to express themselves, every initiative is driven by the same purpose—to make inclusion something we <span className="font-semibold">experience</span>, not just something we talk about.
               </p>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
       {/* What We Do Section */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -1029,7 +1036,7 @@ function About() {
                 "Student-led events and campaigns that turn ideas into meaningful action.",
                 "Collaborative projects and competitions that use creativity, technology, and innovation to address real-world challenges.",
               ].map((item, index) => (
-                <motion.div
+                <m.div
                   key={index}
                   initial={{ opacity: 0, x: -10 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -1039,21 +1046,21 @@ function About() {
                 >
                   <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
                   <p className="text-gray-700 leading-relaxed">{item}</p>
-                </motion.div>
+                </m.div>
               ))}
             </div>
 
             <p className="text-gray-700 leading-relaxed text-lg italic bg-surface p-6 rounded-2xl border-l-4 border-primary">
               From the <span className="font-semibold">State Unified Championship</span> and inclusive campus activities to our outreach initiatives and collaborations with organisations such as <span className="font-semibold">Special Olympics Bharat Maharashtra</span> and schools supporting specially-abled children, our work is rooted in participation, connection, and impact.
             </p>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
       {/* More Than Inclusion Section */}
       <section className="py-20 bg-surface">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -1074,14 +1081,14 @@ function About() {
             <p className="text-gray-700 leading-relaxed mt-8 text-lg">
               We know that meaningful change does not happen overnight. It begins with awareness, grows through understanding, and becomes real through consistent action.
             </p>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
       {/* Our Community Section */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -1099,14 +1106,14 @@ function About() {
                 Because ultimately, <span className="text-gray-900">Inclusiverse is not defined by the events we conduct. It is defined by the people we bring together.</span>
               </p>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
       {/* Our Vision Section */}
       <section className="py-24 bg-gradient-to-b from-surface to-primary/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -1123,7 +1130,7 @@ function About() {
             <p className="text-lg text-gray-700 mb-12">
               Because the answer should always be:
             </p>
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -1131,11 +1138,11 @@ function About() {
               className="bg-primary text-white text-3xl md:text-4xl font-display font-bold py-8 px-6 rounded-3xl shadow-lg mb-12"
             >
               Yes. You do.
-            </motion.div>
+            </m.div>
             <p className="text-gray-600 text-lg italic">
               <span className="font-semibold text-primary">Inclusiverse</span> — Different abilities. Different stories. One community.
             </p>
-          </motion.div>
+          </m.div>
         </div>
       </section>
     </div>
@@ -1147,7 +1154,7 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
   const hasGalleryPhotos = milestone.galleryFilter && GALLERY_PHOTOS.some(p => p.event === milestone.galleryFilter);
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }}
@@ -1156,12 +1163,12 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
     >
       {/* Timeline spine */}
       <div className="relative flex flex-col items-center flex-shrink-0">
-        <motion.div
+        <m.div
           whileHover={{ scale: 1.1 }}
           className="bg-primary text-white text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-md whitespace-nowrap z-10 font-display"
         >
           {milestone.year}
-        </motion.div>
+        </m.div>
         {index < MILESTONES.length - 1 && (
           <div className="flex-1 w-px bg-gradient-to-b from-primary/30 to-gray-200 mt-4" />
         )}
@@ -1187,7 +1194,7 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
                 href={milestone.reportUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold text-sm px-4 py-2 rounded-full transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold text-sm px-4 py-2 rounded-full transition-colors hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
               >
                 <FileText className="w-4 h-4" />
                 Report
@@ -1196,7 +1203,7 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
             {milestone.galleryFilter && hasGalleryPhotos && (
               <button
                 onClick={() => onViewGallery(milestone.galleryFilter!)}
-                className="inline-flex items-center gap-2 bg-surface hover:bg-gray-200 text-text-main font-semibold text-sm px-4 py-2 rounded-full transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
+                className="inline-flex items-center gap-2 bg-surface hover:bg-gray-200 text-text-main font-semibold text-sm px-4 py-2 rounded-full transition-colors hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
               >
                 <Camera className="w-4 h-4" />
                 Moments Captured
@@ -1205,7 +1212,7 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
           </div>
         )}
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -1214,7 +1221,7 @@ function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }
     <div>
       {/* Hero Section */}
       <section className="bg-surface py-20">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -1230,7 +1237,7 @@ function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }
           <p className="text-gray-600 mt-6 leading-relaxed">
             From our first initiative in 2023 to the work we continue today, each milestone has shaped who we are. Every event has taught us something, introduced us to new communities, and brought us one step closer to the inclusive world we envision.
           </p>
-        </motion.div>
+        </m.div>
       </section>
 
       <section className="py-16 sm:py-20 bg-white">
@@ -1247,7 +1254,7 @@ function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }
       {/* Conclusion Section */}
       <section className="py-24 bg-gradient-to-b from-white to-surface">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -1272,7 +1279,7 @@ function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }
                 And this is only the beginning.
               </p>
             </div>
-            <motion.p
+            <m.p
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -1280,8 +1287,8 @@ function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }
               className="text-xl md:text-2xl font-display font-bold text-primary"
             >
               The next chapter of Inclusiverse is waiting to be written—<span className="text-text-main">with you.</span>
-            </motion.p>
-          </motion.div>
+            </m.p>
+          </m.div>
         </div>
       </section>
     </div>
@@ -1291,6 +1298,22 @@ function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }
 // ─── Gallery ──────────────────────────────────────────────────────────────────
 const INITIAL_GALLERY_COUNT = 12;
 const GALLERY_BATCH_SIZE = 12;
+
+const ALL_GALLERY_FILTERS: { name: string; slug: string }[] = (() => {
+  const eventFilters = GALLERY_EVENTS.map((e: { name: string; slug: string }) => ({ name: e.name, slug: e.slug }));
+  const seenNames = new Set(eventFilters.map((e: { name: string; slug: string }) => e.name));
+  const additional: { name: string; slug: string }[] = [];
+  for (const photo of GALLERY_PHOTOS) {
+    if (photo.cat && photo.cat !== "All" && !seenNames.has(photo.cat)) {
+      seenNames.add(photo.cat);
+      additional.push({
+        name: photo.cat,
+        slug: photo.cat.toLowerCase().replace(/\s+/g, '-'),
+      });
+    }
+  }
+  return [...eventFilters, ...additional];
+})();
 
 function GalleryCard({
   photo,
@@ -1304,12 +1327,12 @@ function GalleryCard({
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <motion.button
+    <m.button
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: Math.min((index % GALLERY_BATCH_SIZE) * 0.03, 0.3) }}
       onClick={onClick}
-      className="w-full break-inside-avoid rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group relative block text-left bg-gray-100 mb-5"
+      className="w-full break-inside-avoid rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 group relative block text-left bg-gray-100 mb-5"
     >
       <div className="relative w-full overflow-hidden bg-gray-100">
         <img
@@ -1317,7 +1340,7 @@ function GalleryCard({
           alt={photo.alt}
           loading={index < 6 ? "eager" : "lazy"}
           onLoad={() => setIsLoaded(true)}
-          className={`w-full object-cover group-hover:scale-105 transition-all duration-500 ${
+          className={`w-full object-cover group-hover:scale-105 transition-transform duration-500 ${
             isLoaded ? "opacity-100" : "opacity-0 min-h-[220px]"
           }`}
         />
@@ -1327,11 +1350,11 @@ function GalleryCard({
       </div>
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
+      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-[opacity,transform] duration-300 pointer-events-none">
         <span className="text-white text-sm font-medium drop-shadow-sm">{photo.caption}</span>
         <span className="ml-2 bg-primary text-white text-xs px-2.5 py-0.5 rounded-full shadow-sm">{photo.cat}</span>
       </div>
-    </motion.button>
+    </m.button>
   );
 }
 
@@ -1340,15 +1363,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
   const [visibleCount, setVisibleCount] = useState(INITIAL_GALLERY_COUNT);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  // Build filter categories from events.json + derive from photos
-  const eventFilters = GALLERY_EVENTS.map((e: { name: string; slug: string }) => ({ name: e.name, slug: e.slug }));
-  const photoCats = [...new Set(GALLERY_PHOTOS.map(p => p.cat).filter(c => c !== "All"))];
-  const allFilters = [
-    ...eventFilters,
-    ...photoCats
-      .filter(cat => !eventFilters.some((ef: { name: string }) => ef.name === cat))
-      .map(cat => ({ name: cat, slug: cat.toLowerCase().replace(/\s+/g, '-') }))
-  ];
+  const allFilters = ALL_GALLERY_FILTERS;
 
   const filteredPhotos = activeFilter === "All"
     ? GALLERY_PHOTOS
@@ -1359,6 +1374,10 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
     setActiveFilter(slug);
     setVisibleCount(INITIAL_GALLERY_COUNT);
   };
+
+  useEffect(() => {
+    setVisibleCount(INITIAL_GALLERY_COUNT);
+  }, [activeFilter]);
 
   const visiblePhotos = filteredPhotos.slice(0, visibleCount);
   const hasMore = visibleCount < filteredPhotos.length;
@@ -1387,7 +1406,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
   return (
     <div>
       <section className="bg-surface py-20">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -1399,14 +1418,14 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
           <p className="text-xl text-gray-600">
             Joyful moments captured across our events, projects, and community gatherings.
           </p>
-        </motion.div>
+        </m.div>
       </section>
 
       {/* Filter Pills */}
       {allFilters.length > 0 && (
         <section className="bg-white pt-10 pb-2">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
@@ -1414,7 +1433,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
             >
               <button
                 onClick={() => handleFilterChange("All")}
-                className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === "All"
+                className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === "All"
                     ? "bg-primary text-white shadow-md shadow-primary/25"
                     : "bg-surface text-gray-600 hover:bg-gray-200 hover:text-text-main"
                   }`}
@@ -1425,7 +1444,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
                 <button
                   key={filter.slug}
                   onClick={() => handleFilterChange(filter.slug)}
-                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === filter.slug
+                  className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === filter.slug
                       ? "bg-primary text-white shadow-md shadow-primary/25"
                       : "bg-surface text-gray-600 hover:bg-gray-200 hover:text-text-main"
                     }`}
@@ -1433,7 +1452,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
                   {filter.name}
                 </button>
               ))}
-            </motion.div>
+            </m.div>
           </div>
         </section>
       )}
@@ -1441,7 +1460,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {filteredPhotos.length === 0 ? (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-center py-20"
@@ -1449,10 +1468,10 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
               <Camera className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-xl text-gray-400 font-display font-semibold">No photos yet for this event</p>
               <p className="text-gray-400 mt-2">Photos will appear here once they are uploaded.</p>
-            </motion.div>
+            </m.div>
           ) : (
             <>
-              <motion.div
+              <m.div
                 key={activeFilter}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -1467,20 +1486,20 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
                     onClick={() => setLightbox(photo)}
                   />
                 ))}
-              </motion.div>
+              </m.div>
 
               {/* Bottom Infinite Scroll Sentinel & Load More trigger */}
               {hasMore && (
                 <div ref={loadMoreRef} className="pt-10 pb-6 text-center">
-                  <motion.button
+                  <m.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => setVisibleCount((prev) => Math.min(prev + GALLERY_BATCH_SIZE, filteredPhotos.length))}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface hover:bg-gray-200 text-sm font-semibold text-text-main transition-all border border-gray-200 shadow-xs"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface hover:bg-gray-200 text-sm font-semibold text-text-main transition-colors border border-gray-200 shadow-xs"
                   >
                     <span>Load More Photos</span>
                     <span className="text-xs text-primary font-bold">({filteredPhotos.length - visibleCount} remaining)</span>
-                  </motion.button>
+                  </m.button>
                 </div>
               )}
             </>
@@ -1490,7 +1509,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
 
       <AnimatePresence>
         {lightbox && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -1498,7 +1517,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
             className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
             onClick={() => setLightbox(null)}
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -1514,8 +1533,8 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
                 <p className="font-display font-semibold">{lightbox.caption}</p>
                 <span className="inline-block mt-2 bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full">{lightbox.cat}</span>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
@@ -1529,7 +1548,7 @@ function JoinUs() {
   return (
     <div className="py-20 lg:py-32 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -1545,22 +1564,22 @@ function JoinUs() {
         <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
           Choose how you want to make an impact. Are you a student at Christ University Lavasa, or joining our wider global network?
         </p>
-      </motion.div>
+      </m.div>
 
       {/* Two Action Cards / Buttons */}
       <div className="grid md:grid-cols-2 gap-8 mb-16">
         {/* Card 1: Christ University Lavasa */}
-        <motion.a
+        <m.a
           href={CHRIST_UNIVERSITY_VOLUNTEER_FORM_URL}
           target="_blank"
           rel="noopener noreferrer"
           whileHover={{ y: -6 }}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.3 }}
-          className="bg-white border-2 border-gray-200/80 hover:border-primary rounded-3xl p-8 sm:p-10 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-300 relative group cursor-pointer block text-left"
+          className="bg-white border-2 border-gray-200/80 hover:border-primary rounded-3xl p-8 sm:p-10 flex flex-col justify-between shadow-sm hover:shadow-xl transition-shadow duration-300 relative group cursor-pointer block text-left"
         >
           <div>
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-colors duration-300 shadow-sm">
               <GraduationCap className="w-8 h-8" />
             </div>
             <div className="inline-block px-3 py-1 rounded-full bg-surface text-gray-600 text-xs font-bold uppercase tracking-wider mb-3">
@@ -1574,14 +1593,14 @@ function JoinUs() {
             </p>
           </div>
 
-          <div className="w-full py-4 px-6 rounded-2xl bg-primary group-hover:bg-primary-hover text-white font-semibold text-base transition-all shadow-md shadow-primary/25 group-hover:shadow-lg flex items-center justify-center gap-2 group-hover:gap-3">
+          <div className="w-full py-4 px-6 rounded-2xl bg-primary group-hover:bg-primary-hover text-white font-semibold text-base transition-colors shadow-md shadow-primary/25 group-hover:shadow-lg flex items-center justify-center gap-2 group-hover:gap-3">
             <span>Apply via Google Form</span>
             <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </div>
-        </motion.a>
+        </m.a>
 
         {/* Card 2: Outside Volunteer - Coming Soon */}
-        <motion.div
+        <m.div
           whileHover={{ y: -4 }}
           transition={{ duration: 0.3 }}
           className="bg-white border-2 border-gray-200/80 rounded-3xl p-8 sm:p-10 flex flex-col justify-between shadow-sm relative text-left"
@@ -1610,7 +1629,7 @@ function JoinUs() {
             <span>Applications Opening Soon</span>
             <Sparkles className="w-4 h-4 text-amber-500" />
           </div>
-        </motion.div>
+        </m.div>
       </div>
 
       {/* Direct Contact & Social Links */}
@@ -1621,7 +1640,7 @@ function JoinUs() {
             href="https://www.instagram.com/inclusiverse.christuniversity"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-text-main hover:text-primary hover:border-primary/40 shadow-sm transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-text-main hover:text-primary hover:border-primary/40 shadow-sm transition-colors"
           >
             <Instagram className="w-4 h-4 text-pink-500" />
             <span>@inclusiverse.christuniversity</span>
@@ -1630,15 +1649,21 @@ function JoinUs() {
             href="https://www.linkedin.com/company/inclusiverse-club"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-text-main hover:text-primary hover:border-primary/40 shadow-sm transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-text-main hover:text-primary hover:border-primary/40 shadow-sm transition-colors"
           >
             <Linkedin className="w-4 h-4 text-blue-600" />
             <span>Inclusiverse Club</span>
           </a>
-          <div className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-gray-700 shadow-sm">
-            <MapPin className="w-4 h-4 text-primary" />
+          <a
+            href="https://maps.app.goo.gl/kV1XKQ1xFksGbzqU6"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-text-main hover:text-primary hover:border-primary/40 shadow-sm transition-colors group"
+            title="Open Christ University, Pune Lavasa Campus on Google Maps"
+          >
+            <MapPin className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
             <span>Christ University, Pune Lavasa Campus</span>
-          </div>
+          </a>
         </div>
       </div>
     </div>
@@ -1653,7 +1678,7 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-gradient-to-tr from-primary/15 via-pink-200/20 to-indigo-100/30 rounded-full blur-3xl pointer-events-none -z-10" />
       <div className="absolute top-12 right-12 w-64 h-64 bg-primary/10 rounded-full blur-2xl pointer-events-none -z-10" />
 
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -1661,7 +1686,7 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
       >
         {/* Floating 404 badge with logo and sparkles */}
         <div className="relative inline-flex items-center justify-center mb-8">
-          <motion.div
+          <m.div
             animate={{
               y: [0, -10, 0],
               rotate: [0, 2, -2, 0],
@@ -1675,7 +1700,7 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
           >
             <div className="flex items-center justify-center gap-2 sm:gap-4 font-display font-black text-7xl sm:text-9xl text-primary/90 tracking-tighter select-none">
               <span>4</span>
-              <motion.div
+              <m.div
                 whileHover={{ rotate: 360, scale: 1.15 }}
                 transition={{ duration: 0.8 }}
                 className="w-20 h-20 sm:w-28 sm:h-28 rounded-3xl bg-white shadow-xl shadow-primary/20 border-2 border-primary/20 flex items-center justify-center p-3 relative"
@@ -1685,17 +1710,17 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
                   alt="Inclusiverse Logo"
                   className="w-full h-full object-contain"
                 />
-                <motion.div
+                <m.div
                   animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
                   transition={{ duration: 2, repeat: Infinity }}
                   className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-pink-500 text-white p-1.5 rounded-full shadow-md"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                </motion.div>
-              </motion.div>
+                </m.div>
+              </m.div>
               <span>4</span>
             </div>
-          </motion.div>
+          </m.div>
         </div>
 
         {/* Heading & Subtitle */}
@@ -1708,25 +1733,25 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
-          <motion.button
+          <m.button
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.96 }}
             onClick={() => setPage("home")}
-            className="bg-primary hover:bg-primary-hover text-white px-7 py-3.5 rounded-full font-semibold transition-all shadow-md shadow-primary/25 hover:shadow-lg flex items-center gap-2"
+            className="bg-primary hover:bg-primary-hover text-white px-7 py-3.5 rounded-full font-semibold transition-colors shadow-md shadow-primary/25 hover:shadow-lg flex items-center gap-2"
           >
             <HomeIcon className="w-4 h-4" />
             <span>Back to Home</span>
-          </motion.button>
+          </m.button>
 
-          <motion.button
+          <m.button
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.96 }}
             onClick={() => setPage("gallery")}
-            className="bg-white hover:bg-gray-50 text-text-main border border-gray-200 px-6 py-3.5 rounded-full font-semibold transition-all shadow-sm hover:border-primary/40 flex items-center gap-2"
+            className="bg-white hover:bg-gray-50 text-text-main border border-gray-200 px-6 py-3.5 rounded-full font-semibold transition-colors shadow-sm hover:border-primary/40 flex items-center gap-2"
           >
             <Camera className="w-4 h-4 text-primary" />
             <span>Explore Gallery</span>
-          </motion.button>
+          </m.button>
         </div>
 
         {/* Quick Links Card */}
@@ -1743,7 +1768,7 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
                 <button
                   key={item.target}
                   onClick={() => setPage(item.target)}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-surface/70 hover:bg-primary/10 text-gray-700 hover:text-primary transition-all duration-200 group text-center"
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-surface/70 hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors duration-200 group text-center"
                 >
                   <Icon className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-semibold">{item.label}</span>
@@ -1752,7 +1777,7 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
             })}
           </div>
         </div>
-      </motion.div>
+      </m.div>
     </div>
   );
 }
@@ -1785,43 +1810,70 @@ function getInitialPage(): Page {
   return "home";
 }
 
+function getInitialGalleryFilter(): string {
+  if (typeof window !== "undefined") {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("filter") || "All";
+  }
+  return "All";
+}
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const [page, setPage] = useState<Page>(getInitialPage);
   const [isDyslexic, setIsDyslexic] = useState(false);
-  const [galleryFilter, setGalleryFilter] = useState("All");
+  const [galleryFilter, setGalleryFilter] = useState(getInitialGalleryFilter);
   const [pageLoading, setPageLoading] = useState(false);
 
   // Sync with browser back/forward buttons
   useEffect(() => {
     const handlePopState = () => {
       const p = getInitialPage();
+      const f = getInitialGalleryFilter();
       setPage(p);
+      setGalleryFilter(f);
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  // Wrap setPage to reset gallery filter when navigating to gallery from nav
-  const handleSetPage = (p: Page) => {
+  // Wrap setPage to reset gallery filter when navigating to gallery from nav unless a filter is provided
+  const handleSetPage = (p: Page, explicitGalleryFilter?: string) => {
     if (p === "gallery") {
-      setGalleryFilter("All");
+      setGalleryFilter(explicitGalleryFilter ?? "All");
     }
-    if (p !== page) {
-      const url = new URL(window.location.href);
-      if (p === "home") {
-        url.searchParams.delete("page");
-      } else {
-        url.searchParams.set("page", p);
+    const url = new URL(window.location.href);
+    if (p === "home") {
+      url.searchParams.delete("page");
+      url.searchParams.delete("filter");
+    } else {
+      url.searchParams.set("page", p);
+      if (p === "gallery" && explicitGalleryFilter && explicitGalleryFilter !== "All") {
+        url.searchParams.set("filter", explicitGalleryFilter);
+      } else if (p !== "gallery") {
+        url.searchParams.delete("filter");
       }
-      window.history.pushState(null, "", url.toString());
+    }
+    window.history.pushState(null, "", url.toString());
 
+    if (p !== page) {
       setPageLoading(true);
       setPage(p);
       setTimeout(() => {
         setPageLoading(false);
       }, 300);
     }
+  };
+
+  const handleGalleryFilterChange = (filter: string) => {
+    setGalleryFilter(filter);
+    const url = new URL(window.location.href);
+    if (filter && filter !== "All") {
+      url.searchParams.set("filter", filter);
+    } else {
+      url.searchParams.delete("filter");
+    }
+    window.history.pushState(null, "", url.toString());
   };
 
   useEffect(() => {
@@ -1836,8 +1888,7 @@ export default function App() {
 
   // Navigate to gallery with a specific event filter pre-selected
   const viewGalleryWithFilter = (filter: string) => {
-    setGalleryFilter(filter);
-    handleSetPage("gallery");
+    handleSetPage("gallery", filter);
   };
 
   const content = {
@@ -1858,7 +1909,7 @@ export default function App() {
     ),
     gallery: (
       <Skeleton name="page-gallery" loading={pageLoading}>
-        <Gallery activeFilter={galleryFilter} setActiveFilter={setGalleryFilter} />
+        <Gallery activeFilter={galleryFilter} setActiveFilter={handleGalleryFilterChange} />
       </Skeleton>
     ),
     join: (
@@ -1878,11 +1929,12 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-text-main flex flex-col font-body">
+    <LazyMotion features={domAnimation}>
+      <div className="min-h-screen bg-background text-text-main flex flex-col font-body">
       <Nav page={page} setPage={handleSetPage} isDyslexic={isDyslexic} toggleDyslexic={toggleDyslexic} />
       <main className="flex-grow">
         <AnimatePresence mode="wait">
-          <motion.div
+          <m.div
             key={page}
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1890,11 +1942,12 @@ export default function App() {
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
             {content}
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       </main>
       <Footer setPage={handleSetPage} />
-    </div>
+      </div>
+    </LazyMotion>
   );
 }
 

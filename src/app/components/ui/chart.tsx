@@ -1,9 +1,19 @@
 "use client";
 
 import * as React from "react";
-import * as RechartsPrimitive from "recharts";
+import type * as RechartsPrimitive from "recharts";
 
 import { cn } from "./utils";
+
+const RechartsResponsiveContainer = React.lazy(() =>
+  import("recharts").then((mod) => ({ default: mod.ResponsiveContainer })),
+);
+const ChartTooltip = React.lazy(() =>
+  import("recharts").then((mod) => ({ default: mod.Tooltip })),
+);
+const ChartLegend = React.lazy(() =>
+  import("recharts").then((mod) => ({ default: mod.Legend })),
+);
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
@@ -48,9 +58,10 @@ function ChartContainer({
 }) {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
+  const contextValue = React.useMemo(() => ({ config }), [config]);
 
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={contextValue}>
       <div
         data-slot="chart"
         data-chart={chartId}
@@ -61,9 +72,9 @@ function ChartContainer({
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer>
+        <RechartsResponsiveContainer>
           {children}
-        </RechartsPrimitive.ResponsiveContainer>
+        </RechartsResponsiveContainer>
       </div>
     </ChartContext.Provider>
   );
@@ -102,10 +113,7 @@ ${colorConfig
   );
 };
 
-const ChartTooltip = RechartsPrimitive.Tooltip;
-
-function ChartTooltipContent({
-  active,
+function ChartTooltipInner({
   payload,
   className,
   indicator = "dot",
@@ -125,6 +133,7 @@ function ChartTooltipContent({
     indicator?: "line" | "dot" | "dashed";
     nameKey?: string;
     labelKey?: string;
+    payload: NonNullable<React.ComponentProps<typeof RechartsPrimitive.Tooltip>["payload"]>;
   }) {
   const { config } = useChart();
 
@@ -163,10 +172,6 @@ function ChartTooltipContent({
     config,
     labelKey,
   ]);
-
-  if (!active || !payload?.length) {
-    return null;
-  }
 
   const nestLabel = payload.length === 1 && indicator !== "dot";
 
@@ -248,7 +253,24 @@ function ChartTooltipContent({
   );
 }
 
-const ChartLegend = RechartsPrimitive.Legend;
+function ChartTooltipContent({
+  active,
+  payload,
+  ...props
+}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+  React.ComponentProps<"div"> & {
+    hideLabel?: boolean;
+    hideIndicator?: boolean;
+    indicator?: "line" | "dot" | "dashed";
+    nameKey?: string;
+    labelKey?: string;
+  }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  return <ChartTooltipInner payload={payload} {...props} />;
+}
 
 function ChartLegendContent({
   className,

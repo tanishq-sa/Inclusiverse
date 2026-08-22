@@ -1,5 +1,6 @@
 packages:
   - '.'
+trustPolicy: no-downgrade
 supportedArchitectures:
   os:
     - linux
