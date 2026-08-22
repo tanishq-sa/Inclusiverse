@@ -1309,14 +1309,59 @@ function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }
 }
 
 // ─── Gallery ──────────────────────────────────────────────────────────────────
+const INITIAL_GALLERY_COUNT = 12;
+const GALLERY_BATCH_SIZE = 12;
 
+function GalleryCard({
+  photo,
+  index,
+  onClick,
+}: {
+  photo: GalleryPhoto;
+  index: number;
+  onClick: () => void;
+}) {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: Math.min((index % GALLERY_BATCH_SIZE) * 0.03, 0.3) }}
+      onClick={onClick}
+      className="w-full break-inside-avoid rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group relative block text-left bg-gray-100 mb-5"
+    >
+      <div className="relative w-full overflow-hidden bg-gray-100">
+        <img
+          src={photo.src}
+          alt={photo.alt}
+          loading={index < 6 ? "eager" : "lazy"}
+          onLoad={() => setIsLoaded(true)}
+          className={`w-full object-cover group-hover:scale-105 transition-all duration-500 ${
+            isLoaded ? "opacity-100" : "opacity-0 min-h-[220px]"
+          }`}
+        />
+        {!isLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse min-h-[220px]" />
+        )}
+      </div>
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
+        <span className="text-white text-sm font-medium drop-shadow-sm">{photo.caption}</span>
+        <span className="ml-2 bg-primary text-white text-xs px-2.5 py-0.5 rounded-full shadow-sm">{photo.cat}</span>
+      </div>
+    </motion.button>
+  );
+}
 
 function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setActiveFilter: (f: string) => void }) {
   const [lightbox, setLightbox] = useState<typeof GALLERY_PHOTOS[0] | null>(null);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_GALLERY_COUNT);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Build filter categories from events.json + derive from photos
   const eventFilters = GALLERY_EVENTS.map((e: { name: string; slug: string }) => ({ name: e.name, slug: e.slug }));
-  // Also derive from photos in case events.json is out of sync
   const photoCats = [...new Set(GALLERY_PHOTOS.map(p => p.cat).filter(c => c !== "All"))];
   const allFilters = [
     ...eventFilters,
@@ -1328,6 +1373,36 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
   const filteredPhotos = activeFilter === "All"
     ? GALLERY_PHOTOS
     : GALLERY_PHOTOS.filter(p => p.cat === activeFilter || p.event === activeFilter);
+
+  // Reset visible count when switching tabs so top images load first
+  const handleFilterChange = (slug: string) => {
+    setActiveFilter(slug);
+    setVisibleCount(INITIAL_GALLERY_COUNT);
+  };
+
+  const visiblePhotos = filteredPhotos.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredPhotos.length;
+
+  // Progressive intersection observer for smooth bottom appending
+  useEffect(() => {
+    if (!hasMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + GALLERY_BATCH_SIZE, filteredPhotos.length));
+        }
+      },
+      { rootMargin: "350px" }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+    return () => {
+      if (currentRef) observer.unobserve(currentRef);
+    };
+  }, [hasMore, filteredPhotos.length]);
 
   return (
     <div>
@@ -1358,7 +1433,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
               className="flex flex-wrap justify-center gap-3"
             >
               <button
-                onClick={() => setActiveFilter("All")}
+                onClick={() => handleFilterChange("All")}
                 className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === "All"
                     ? "bg-primary text-white shadow-md shadow-primary/25"
                     : "bg-surface text-gray-600 hover:bg-gray-200 hover:text-text-main"
@@ -1369,7 +1444,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
               {allFilters.map((filter) => (
                 <button
                   key={filter.slug}
-                  onClick={() => setActiveFilter(filter.slug)}
+                  onClick={() => handleFilterChange(filter.slug)}
                   className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === filter.slug
                       ? "bg-primary text-white shadow-md shadow-primary/25"
                       : "bg-surface text-gray-600 hover:bg-gray-200 hover:text-text-main"
@@ -1396,31 +1471,39 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
               <p className="text-gray-400 mt-2">Photos will appear here once they are uploaded.</p>
             </motion.div>
           ) : (
-            <motion.div
-              key={activeFilter}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="columns-1 sm:columns-2 lg:columns-3 gap-5 space-y-5"
-            >
-              {filteredPhotos.map((photo, i) => (
-                <motion.button
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: Math.min(i * 0.02, 0.4) }}
-                  key={photo.src}
-                  onClick={() => setLightbox(photo)}
-                  className="w-full break-inside-avoid rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group relative block text-left"
-                >
-                  <img src={photo.src} alt={photo.alt} loading="lazy" className="w-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <span className="text-white text-sm font-medium">{photo.caption}</span>
-                    <span className="ml-2 bg-primary text-white text-xs px-2 py-0.5 rounded-full">{photo.cat}</span>
-                  </div>
-                </motion.button>
-              ))}
-            </motion.div>
+            <>
+              <motion.div
+                key={activeFilter}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className="columns-1 sm:columns-2 lg:columns-3 gap-5"
+              >
+                {visiblePhotos.map((photo, i) => (
+                  <GalleryCard
+                    key={photo.src}
+                    photo={photo}
+                    index={i}
+                    onClick={() => setLightbox(photo)}
+                  />
+                ))}
+              </motion.div>
+
+              {/* Bottom Infinite Scroll Sentinel & Load More trigger */}
+              {hasMore && (
+                <div ref={loadMoreRef} className="pt-10 pb-6 text-center">
+                  <motion.button
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setVisibleCount((prev) => Math.min(prev + GALLERY_BATCH_SIZE, filteredPhotos.length))}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface hover:bg-gray-200 text-sm font-semibold text-text-main transition-all border border-gray-200 shadow-xs"
+                  >
+                    <span>Load More Photos</span>
+                    <span className="text-xs text-primary font-bold">({filteredPhotos.length - visibleCount} remaining)</span>
+                  </motion.button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
