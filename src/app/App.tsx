@@ -594,6 +594,7 @@ const MILESTONES = [
     tagline: "Bringing people together through sport.",
     description: "The State Unified Championship brought athletes with and without disabilities together on the same field, united by the spirit of sport.\n\nMore than a championship, it became a celebration of teamwork, friendship, determination, and participation. It showed us how sport can break down barriers and create connections that go far beyond the game.",
     closing: "Different abilities. One team. One spirit.",
+    reportUrl: "https://docs.google.com/document/d/1gtp75s_DaImsIL1ZtUwk366AknWk0Icp3nX8G3GE9Uc/edit?usp=drive_link",
     galleryFilter: "state-unified-championship"
   },
   {
