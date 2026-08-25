@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { Heart, Menu, X, Accessibility, ArrowRight, ChevronRight, PlayCircle, Camera, FileText, ChevronDown, ChevronUp, GraduationCap, Users, MapPin, Mail, Instagram, Linkedin, Home as HomeIcon, Compass, Sparkles, AlertCircle, ArrowLeft, Search, CheckCircle2, Send, Phone, ExternalLink } from "lucide-react";
 import { LazyMotion, domAnimation, m, AnimatePresence, Variants } from "motion/react";
 import { Skeleton } from "boneyard-js/react";
-import confetti from "canvas-confetti";
 import GALLERY_PHOTOS_RAW from "../data/photos.json";
 import GALLERY_EVENTS_RAW from "../data/events.json";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
+import { TeamPage } from "./components/TeamPage";
 
 type GalleryPhoto = { src: string; alt: string; caption: string; cat: string; event?: string };
 type GalleryEvent = { name: string; slug: string; year?: string };
@@ -14,7 +14,7 @@ const GALLERY_EVENTS = GALLERY_EVENTS_RAW as GalleryEvent[];
 
 
 // ─── Simple router ────────────────────────────────────────────────────────────
-type Page = "home" | "about" | "timeline" | "gallery" | "join" | "404";
+export type Page = "home" | "about" | "team" | "timeline" | "gallery" | "join" | "404";
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
 function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
@@ -59,6 +59,7 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
           <div className="hidden md:flex items-center space-x-8">
             {link("Home", "home")}
             {link("About", "about")}
+            {link("Team", "team")}
             {link("Timeline", "timeline")}
             {link("Gallery", "gallery")}
             <m.button
@@ -86,13 +87,13 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="md:hidden bg-white border-b border-gray-100 px-4 py-4 space-y-4 shadow-md"
           >
-            {(["home", "about", "timeline", "gallery"] as Page[]).map((p) => (
+            {(["home", "about", "team", "timeline", "gallery"] as Page[]).map((p) => (
               <button
                 key={p}
                 onClick={() => { setPage(p); setMenuOpen(false); }}
                 className={`block w-full text-left font-medium capitalize py-1 transition-colors ${page === p ? "text-primary font-bold" : "text-text-main hover:text-primary"}`}
               >
-                {p === "timeline" ? "Timeline" : p === "gallery" ? "Gallery" : p.charAt(0).toUpperCase() + p.slice(1)}
+                {p === "timeline" ? "Timeline" : p === "gallery" ? "Gallery" : p === "team" ? "Our Team" : p.charAt(0).toUpperCase() + p.slice(1)}
               </button>
             ))}
             <button onClick={() => { setPage("join"); setMenuOpen(false); }} className="w-full bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-sm">
@@ -146,6 +147,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
               {([
                 ["Home", "home"],
                 ["About Us", "about"],
+                ["Our Team", "team"],
                 ["Timeline & Milestones", "timeline"],
                 ["Photo Gallery", "gallery"],
                 ["Join the Movement", "join"],
@@ -172,6 +174,14 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
               Have questions or want to collaborate? Reach out to our student volunteer team.
             </p>
             <div className="flex items-center gap-3">
+              <a
+                href="mailto:inclusiverse.lavasa@christuniversity.in"
+                className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-colors"
+                aria-label="Email Inclusiverse"
+                title="inclusiverse.lavasa@christuniversity.in"
+              >
+                <Mail className="w-4 h-4" />
+              </a>
               <a
                 href="https://www.instagram.com/inclusiverse.christuniversity"
                 target="_blank"
@@ -943,6 +953,113 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
         </m.div>
       </section>
 
+      {/* Contact Us & Connect Section */}
+      <section className="py-20 bg-surface border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <m.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-3xl mx-auto mb-14"
+          >
+            <h2 className="text-4xl sm:text-5xl font-display font-bold text-text-main mb-4">
+              Contact & <span className="text-primary">Connect with Us</span>
+            </h2>
+            <p className="text-lg text-gray-600 leading-relaxed">
+              Have questions, collaboration ideas, or want to invite Inclusiverse for an inclusive initiative? Reach out directly to our team.
+            </p>
+          </m.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+            {/* Email Card */}
+            <m.a
+              href="mailto:inclusiverse.lavasa@christuniversity.in"
+              whileHover={{ y: -5 }}
+              className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center group cursor-pointer"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                <Mail className="w-6 h-6" />
+              </div>
+              <span className="text-xs uppercase font-bold tracking-wider text-gray-400 mb-1">
+                Email
+              </span>
+              <h3 className="text-lg font-bold text-text-main group-hover:text-primary transition-colors mb-2">
+                Send an Email
+              </h3>
+              <p className="text-sm font-medium text-primary break-all">
+                inclusiverse.lavasa@christuniversity.in
+              </p>
+            </m.a>
+
+            {/* Instagram Card */}
+            <m.a
+              href="https://www.instagram.com/inclusiverse.christuniversity"
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ y: -5 }}
+              className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center group cursor-pointer"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center mb-4 group-hover:bg-pink-600 group-hover:text-white transition-colors duration-300">
+                <Instagram className="w-6 h-6" />
+              </div>
+              <span className="text-xs uppercase font-bold tracking-wider text-gray-400 mb-1">
+                Social Media
+              </span>
+              <h3 className="text-lg font-bold text-text-main group-hover:text-pink-600 transition-colors mb-2">
+                Instagram
+              </h3>
+              <p className="text-sm font-medium text-gray-600">
+                @inclusiverse.christuniversity
+              </p>
+            </m.a>
+
+            {/* LinkedIn Card */}
+            <m.a
+              href="https://www.linkedin.com/company/inclusiverse-club"
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ y: -5 }}
+              className="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center group cursor-pointer sm:col-span-2 lg:col-span-1"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                <Linkedin className="w-6 h-6" />
+              </div>
+              <span className="text-xs uppercase font-bold tracking-wider text-gray-400 mb-1">
+                Social Media
+              </span>
+              <h3 className="text-lg font-bold text-text-main group-hover:text-blue-600 transition-colors mb-2">
+                LinkedIn
+              </h3>
+              <p className="text-sm font-medium text-gray-600">
+                Inclusiverse Club
+              </p>
+            </m.a>
+          </div>
+
+          {/* Quick Action CTA inside Contact Box */}
+          <div className="bg-white rounded-3xl p-8 sm:p-10 border border-gray-100 shadow-sm max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            <div>
+              <h3 className="text-xl sm:text-2xl font-display font-bold text-text-main mb-2">
+                Want to become an active student volunteer?
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Join our on-campus team at Christ University, Pune Lavasa Campus.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <button
+                onClick={() => setPage("join")}
+                className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-primary hover:bg-primary-hover text-white font-medium text-sm transition-colors shadow-sm cursor-pointer"
+              >
+                <span>Join the Movement</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <AnimatePresence>
         {showDonateModal && (
           <DonateModal onClose={() => setShowDonateModal(false)} />
@@ -1554,10 +1671,6 @@ function JoinUs() {
         transition={{ duration: 0.5 }}
         className="text-center max-w-3xl mx-auto mb-16"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs sm:text-sm font-semibold mb-4 border border-primary/20">
-          <Heart className="w-4 h-4 fill-primary" />
-          <span>Become a Part of Inclusiverse</span>
-        </div>
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-text-main mb-5 tracking-tight">
           Join the <span className="text-primary">Movement</span>
         </h1>
@@ -1636,6 +1749,13 @@ function JoinUs() {
       <div className="pt-10 border-t border-gray-200/80 text-center">
         <p className="text-xs uppercase font-bold tracking-wider text-gray-400 mb-4">Have questions? Reach out to us</p>
         <div className="flex flex-wrap items-center justify-center gap-4">
+          <a
+            href="mailto:inclusiverse.lavasa@christuniversity.in"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-200 text-sm font-semibold text-text-main hover:text-primary hover:border-primary/40 shadow-sm transition-colors"
+          >
+            <Mail className="w-4 h-4 text-primary" />
+            <span>inclusiverse.lavasa@christuniversity.in</span>
+          </a>
           <a
             href="https://www.instagram.com/inclusiverse.christuniversity"
             target="_blank"
@@ -1787,21 +1907,21 @@ function getInitialPage(): Page {
     const params = new URLSearchParams(window.location.search);
     const p = params.get("page") as Page;
     if (p) {
-      if (["home", "about", "timeline", "gallery", "join", "404"].includes(p)) {
+      if (["home", "about", "team", "timeline", "gallery", "join", "404"].includes(p)) {
         return p;
       }
       return "404";
     }
     const hash = window.location.hash.replace("#", "") as Page;
     if (hash) {
-      if (["home", "about", "timeline", "gallery", "join", "404"].includes(hash)) {
+      if (["home", "about", "team", "timeline", "gallery", "join", "404"].includes(hash)) {
         return hash;
       }
       return "404";
     }
     const pathname = window.location.pathname.replace(/^\/|\/$/g, "");
     if (pathname && !["index.html", ""].includes(pathname)) {
-      if (["home", "about", "timeline", "gallery", "join", "404"].includes(pathname)) {
+      if (["home", "about", "team", "timeline", "gallery", "join", "404"].includes(pathname)) {
         return pathname as Page;
       }
       return "404";
@@ -1900,6 +2020,11 @@ export default function App() {
     about: (
       <Skeleton name="page-about" loading={pageLoading}>
         <About />
+      </Skeleton>
+    ),
+    team: (
+      <Skeleton name="page-team" loading={pageLoading}>
+        <TeamPage onNavigate={handleSetPage} />
       </Skeleton>
     ),
     timeline: (
