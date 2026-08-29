@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Heart, Menu, X, Accessibility, ArrowRight, ChevronRight, PlayCircle, Camera, FileText, ChevronDown, ChevronUp, GraduationCap, Users, MapPin, Mail, Instagram, Linkedin, Home as HomeIcon, Compass, Sparkles, AlertCircle, ArrowLeft, Search, CheckCircle2, Send, Phone, ExternalLink } from "lucide-react";
+import { Heart, Menu, X, ArrowRight, ChevronRight, PlayCircle, Camera, FileText, GraduationCap, Users, MapPin, InstagramIcon, LinkedinIcon, Home as HomeIcon, Compass, Sparkles, CheckCircle2, ExternalLink } from "lucide-react";
 import { LazyMotion, domAnimation, m, AnimatePresence, Variants } from "motion/react";
 import { Skeleton } from "boneyard-js/react";
-import confetti from "canvas-confetti";
 import GALLERY_PHOTOS_RAW from "../data/photos.json";
 import GALLERY_EVENTS_RAW from "../data/events.json";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
@@ -17,16 +16,17 @@ const GALLERY_EVENTS = GALLERY_EVENTS_RAW as GalleryEvent[];
 type Page = "home" | "about" | "timeline" | "gallery" | "join" | "404";
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
-function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
+function Nav({ page, setPage, isDyslexic, toggleDyslexic }: Readonly<{
   page: Page;
   setPage: (p: Page) => void;
   isDyslexic: boolean;
   toggleDyslexic: () => void;
-}) {
+}>) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const link = (label: string, target: Page) => (
     <button
+      type="button"
       onClick={() => { setPage(target); setMenuOpen(false); }}
       className={`relative text-text-main hover:text-primary transition-colors font-medium py-1 ${page === target ? "text-primary font-semibold" : ""}`}
     >
@@ -45,7 +45,7 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <button onClick={() => setPage("home")} className="flex items-center gap-3 group focus:outline-none">
+          <button type="button" onClick={() => setPage("home")} className="flex items-center gap-3 group focus:outline-none">
             <m.img
               src="/inclusiverse-logo.png"
               alt="Inclusiverse Logo"
@@ -71,7 +71,7 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
             </m.button>
           </div>
 
-          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-text-main focus:outline-none">
+          <button type="button" onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-text-main focus:outline-none">
             {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
@@ -86,16 +86,20 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="md:hidden bg-white border-b border-gray-100 px-4 py-4 space-y-4 shadow-md"
           >
-            {(["home", "about", "timeline", "gallery"] as Page[]).map((p) => (
-              <button
-                key={p}
-                onClick={() => { setPage(p); setMenuOpen(false); }}
-                className={`block w-full text-left font-medium capitalize py-1 transition-colors ${page === p ? "text-primary font-bold" : "text-text-main hover:text-primary"}`}
-              >
-                {p === "timeline" ? "Timeline" : p === "gallery" ? "Gallery" : p.charAt(0).toUpperCase() + p.slice(1)}
-              </button>
-            ))}
-            <button onClick={() => { setPage("join"); setMenuOpen(false); }} className="w-full bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-sm">
+            {(["home", "about", "timeline", "gallery"] as Page[]).map((p) => {
+              const label = p === "timeline" ? "Timeline" : p === "gallery" ? "Gallery" : p.charAt(0).toUpperCase() + p.slice(1);
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => { setPage(p); setMenuOpen(false); }}
+                  className={`block w-full text-left font-medium capitalize py-1 transition-colors ${page === p ? "text-primary font-bold" : "text-text-main hover:text-primary"}`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+            <button type="button" onClick={() => { setPage("join"); setMenuOpen(false); }} className="w-full bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-sm">
               Join Us
             </button>
           </m.div>
@@ -106,14 +110,14 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
 }
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer({ setPage }: { setPage: (p: Page) => void }) {
+function Footer({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
   return (
     <footer className="bg-text-main text-white pt-16 pb-12 mt-auto border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-gray-800/80">
           {/* Brand & Mission */}
           <div className="md:col-span-6 space-y-4">
-            <button onClick={() => setPage("home")} className="flex items-center gap-3 group text-left focus:outline-none">
+            <button type="button" onClick={() => setPage("home")} className="flex items-center gap-3 group text-left focus:outline-none">
               <img
                 src="/inclusiverse-logo.png"
                 alt="Inclusiverse Logo"
@@ -152,6 +156,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
               ] as [string, Page][]).map(([label, p]) => (
                 <li key={p}>
                   <button
+                    type="button"
                     onClick={() => setPage(p)}
                     className="hover:text-primary hover:translate-x-1 transition-[color,transform] duration-200 inline-flex items-center gap-1.5 text-left"
                   >
@@ -179,7 +184,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
                 className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-colors"
                 aria-label="Instagram"
               >
-                <Instagram className="w-4 h-4" />
+                <InstagramIcon className="w-4 h-4" />
               </a>
               <a
                 href="https://www.linkedin.com/company/inclusiverse-club"
@@ -188,9 +193,10 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
                 className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-colors"
                 aria-label="LinkedIn"
               >
-                <Linkedin className="w-4 h-4" />
+                <LinkedinIcon className="w-4 h-4" />
               </a>
               <button
+                type="button"
                 onClick={() => setPage("join")}
                 className="px-4 py-2 text-xs font-semibold bg-primary hover:bg-primary-hover text-white rounded-xl transition-colors shadow-sm"
               >
@@ -227,7 +233,7 @@ const PRESET_AMOUNTS = [100, 250, 500, 1000, 2500];
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
-function DonateModal({ onClose }: { onClose: () => void }) {
+function DonateModal({ onClose }: Readonly<{ onClose: () => void }>) {
   const [selectedPreset, setSelectedPreset] = useState<number | "custom">(2500);
   const [customAmount, setCustomAmount] = useState("2500");
   const [amount, setAmount] = useState<number | "">(2500);
@@ -250,9 +256,9 @@ function DonateModal({ onClose }: { onClose: () => void }) {
   };
 
   const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/[^0-9]/g, "");
+    const val = e.target.value.replace(/\D/g, "");
     setCustomAmount(val);
-    const parsed = val ? parseInt(val, 10) : "";
+    const parsed = val ? Number.parseInt(val, 10) : "";
     setAmount(parsed);
     if (typeof parsed === "number" && PRESET_AMOUNTS.includes(parsed)) {
       setSelectedPreset(parsed);
@@ -262,6 +268,11 @@ function DonateModal({ onClose }: { onClose: () => void }) {
   };
 
   const finalAmount = typeof amount === "number" ? amount : 0;
+  const paymentButtonLabel = finalAmount >= 100
+    ? `Donate ₹${finalAmount.toLocaleString("en-IN")}`
+    : finalAmount > 0
+      ? "Minimum donation is ₹100"
+      : "Select or enter an amount";
 
   const handlePayment = () => {
     if (finalAmount < 100) return;
@@ -399,6 +410,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
       >
         {/* Close button */}
         <button
+          type="button"
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-gray-400 hover:text-text-main hover:bg-gray-100 rounded-full transition-colors"
         >
@@ -488,7 +500,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
                   value={customAmount}
                   onChange={handleCustomAmountChange}
                   className={`w-full pl-10 pr-10 py-3.5 bg-gray-50/80 border-2 rounded-2xl text-base font-semibold text-text-main placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-colors ${
-                    customAmount && parseInt(customAmount, 10) < 100
+                    customAmount && Number.parseInt(customAmount, 10) < 100
                       ? "border-amber-400 ring-2 ring-amber-400/20 bg-white"
                       : "border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/10 bg-white"
                   }`}
@@ -507,7 +519,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
                   </button>
                 )}
               </div>
-              {customAmount && parseInt(customAmount, 10) < 100 && (
+              {customAmount && Number.parseInt(customAmount, 10) < 100 && (
                 <p className="text-xs text-amber-600 mt-1.5 ml-1 font-medium flex items-center gap-1">
                   Minimum donation amount is ₹100
                 </p>
@@ -538,6 +550,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
 
         {/* Pay button */}
         <m.button
+          type="button"
           whileHover={finalAmount >= 100 ? { scale: 1.02 } : {}}
           whileTap={finalAmount >= 100 ? { scale: 0.98 } : {}}
           onClick={handlePayment}
@@ -556,12 +569,8 @@ function DonateModal({ onClose }: { onClose: () => void }) {
               </svg>
               <span>Processing Payment...</span>
             </span>
-          ) : finalAmount >= 100 ? (
-            `Donate ₹${finalAmount.toLocaleString("en-IN")}`
-          ) : finalAmount > 0 ? (
-            "Minimum donation is ₹100"
           ) : (
-            "Select or enter an amount"
+            paymentButtonLabel
           )}
         </m.button>
 
@@ -649,7 +658,7 @@ const fadeUpItem: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
 };
 
-function Home({ setPage }: { setPage: (p: Page) => void }) {
+function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -667,13 +676,13 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
       // Find a matching photo for this milestone from GALLERY_PHOTOS
       const matched = GALLERY_PHOTOS.find(
         p => (m.galleryFilter && p.event === m.galleryFilter) ||
-             (p.cat && p.cat.toLowerCase() === m.title.toLowerCase()) ||
-             (p.caption && p.caption.toLowerCase().includes(m.title.toLowerCase()))
+             (p.cat?.toLowerCase() === m.title.toLowerCase()) ||
+             (p.caption?.toLowerCase().includes(m.title.toLowerCase()))
       );
 
       // Default backup photo based on milestone title hash
       const fallbackPhoto = GALLERY_PHOTOS.length > 0
-        ? GALLERY_PHOTOS[Math.abs(m.title.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)) % GALLERY_PHOTOS.length]
+        ? GALLERY_PHOTOS[Math.abs(m.title.split('').reduce((acc, c) => acc + c.codePointAt(0) ?? 0, 0)) % GALLERY_PHOTOS.length]
         : null;
 
       const photo = matched || fallbackPhoto;
@@ -832,6 +841,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               <p className="text-gray-600 text-lg">Meaningful moments created through sports, art, and community inclusion.</p>
             </m.div>
             <m.button
+              type="button"
               whileHover={{ x: 4 }}
               onClick={() => setPage("timeline")}
               className="hidden md:flex items-center gap-2 text-primary font-semibold hover:text-primary-hover transition-colors cursor-pointer"
@@ -902,6 +912,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
 
           <div className="mt-10 text-center md:hidden">
             <button
+              type="button"
               onClick={() => setPage("timeline")}
               className="w-full py-3.5 px-6 rounded-2xl bg-white border border-gray-200 text-primary font-semibold text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
@@ -929,6 +940,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <m.button
+              type="button"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => setPage("join")}
@@ -937,6 +949,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               Become a Volunteer
             </m.button>
             <m.button
+              type="button"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => setShowDonateModal(true)}
