@@ -14,7 +14,7 @@ const GALLERY_EVENTS = GALLERY_EVENTS_RAW as GalleryEvent[];
 
 
 // ─── Simple router ────────────────────────────────────────────────────────────
-type Page = "home" | "about" | "timeline" | "gallery" | "join" | "404";
+type Page = "home" | "about" | "timeline" | "gallery" | "join" | "404" | "tos" | "privacy" | "cancellation" | "no-refund" | "contact";
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
 function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
@@ -201,13 +201,32 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
         </div>
 
         {/* Bottom Bar with Credits */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>© {new Date().getFullYear()} Inclusiverse. All rights reserved.</p>
-          <div className="flex items-center gap-1.5 text-gray-400 font-medium bg-white/5 px-3.5 py-1.5 rounded-full border border-white/5">
-            <span>Designed & Developed by</span>
-            <span className="text-white font-semibold flex items-center gap-1">
-              Inclusiverse Team <Heart className="w-3 h-3 text-primary inline fill-primary" />
-            </span>
+        <div className="pt-8 border-t border-gray-800/60">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mb-4">
+            {([
+              ["Terms of Service", "tos"],
+              ["Privacy Policy", "privacy"],
+              ["Cancellation Policy", "cancellation"],
+              ["No Refund Policy", "no-refund"],
+              ["Contact Us", "contact"],
+            ] as [string, Page][]).map(([label, p]) => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className="text-xs text-gray-500 hover:text-gray-300 transition-colors underline-offset-2 hover:underline"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+            <p>© {new Date().getFullYear()} Inclusiverse. All rights reserved. Donations are non-refundable.</p>
+            <div className="flex items-center gap-1.5 text-gray-400 font-medium bg-white/5 px-3.5 py-1.5 rounded-full border border-white/5">
+              <span>Designed & Developed by</span>
+              <span className="text-white font-semibold flex items-center gap-1">
+                Inclusiverse Team <Heart className="w-3 h-3 text-primary inline fill-primary" />
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -572,6 +591,25 @@ function DonateModal({ onClose }: { onClose: () => void }) {
           </svg>
           <span className="text-xs font-medium">Secured by Razorpay</span>
         </div>
+
+        {/* Non-refundable notice */}
+        <p className="text-[10px] text-center text-gray-400 mt-2 leading-relaxed">
+          All donations are <span className="font-semibold text-gray-500">non-refundable</span>. By donating, you agree to our{" "}
+          <a
+            href="?page=no-refund"
+            onClick={(e) => { e.preventDefault(); onClose(); setTimeout(() => { const u = new URL(window.location.href); u.searchParams.set("page","no-refund"); window.history.pushState(null,"",u.toString()); window.dispatchEvent(new PopStateEvent("popstate")); }, 10); }}
+            className="underline hover:text-gray-600 transition-colors"
+          >
+            No Refund Policy
+          </a>{" "}and{" "}
+          <a
+            href="?page=tos"
+            onClick={(e) => { e.preventDefault(); onClose(); setTimeout(() => { const u = new URL(window.location.href); u.searchParams.set("page","tos"); window.history.pushState(null,"",u.toString()); window.dispatchEvent(new PopStateEvent("popstate")); }, 10); }}
+            className="underline hover:text-gray-600 transition-colors"
+          >
+            Terms of Service
+          </a>.
+        </p>
       </m.div>
     </div>
   );
@@ -1782,26 +1820,420 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
   );
 }
 
+// ─── Legal Page Wrapper ────────────────────────────────────────────────────────
+function LegalPageWrapper({ title, subtitle, icon, children, setPage }: {
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  setPage: (p: Page) => void;
+}) {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-primary/10 via-white to-purple-50 border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <button
+            onClick={() => setPage("home")}
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors mb-8 group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </button>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              {icon}
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-display font-bold text-text-main">{title}</h1>
+              <p className="text-gray-500 text-sm mt-1">Last updated: August 2025</p>
+            </div>
+          </div>
+          <p className="text-gray-600 text-base leading-relaxed max-w-2xl">{subtitle}</p>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function LegalSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+      <h2 className="text-lg font-display font-bold text-text-main mb-4 pb-3 border-b border-gray-100">{title}</h2>
+      <div className="text-gray-600 text-sm leading-relaxed space-y-3">{children}</div>
+    </section>
+  );
+}
+
+// ─── Terms of Service ────────────────────────────────────────────────────────
+function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <LegalPageWrapper
+      title="Terms of Service"
+      subtitle="Please read these terms carefully before making a donation to Inclusiverse through our Razorpay-powered crowdfunding platform."
+      icon={<FileText className="w-6 h-6" />}
+      setPage={setPage}
+    >
+      <LegalSection title="1. Acceptance of Terms">
+        <p>By accessing our website and making a donation, you confirm that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree with any part of these terms, please do not proceed with your donation.</p>
+      </LegalSection>
+
+      <LegalSection title="2. About Inclusiverse">
+        <p>Inclusiverse is a student-led initiative operating under Christ University, Lavasa Campus. We organize inclusive events and activities for children with disabilities. Donations collected through this platform are managed by designated student volunteers on behalf of Inclusiverse.</p>
+        <p>All funds raised go directly toward organizing events, procuring materials, and supporting participants in our inclusive programs.</p>
+      </LegalSection>
+
+      <LegalSection title="3. Nature of Donations">
+        <p>All contributions made through this platform are <strong>voluntary donations</strong> to support Inclusiverse's crowdfunding initiatives. Donations are not purchases of goods or services. By donating, you acknowledge:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Your contribution is a voluntary gift to support Inclusiverse's mission.</li>
+          <li>Donations are <strong>strictly non-refundable</strong> once processed (see our No Refund Policy).</li>
+          <li>You will receive no goods, services, equity, or reward in exchange for your donation.</li>
+          <li>Inclusiverse is not a registered NGO or charitable trust; donations may not be tax-deductible.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="4. Payment Processing">
+        <p>All payments are processed securely through <strong>Razorpay</strong>, a third-party payment gateway. By making a payment, you also agree to Razorpay's Terms of Service and Privacy Policy available at <a href="https://razorpay.com/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">razorpay.com/terms</a>.</p>
+        <p>We accept UPI, Credit/Debit Cards, Net Banking, and Wallets. All transactions are encrypted and secured by Razorpay's infrastructure.</p>
+      </LegalSection>
+
+      <LegalSection title="5. Use of Funds">
+        <p>Donated funds are used exclusively for Inclusiverse activities including but not limited to:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Event organization and logistics</li>
+          <li>Participant transportation and meals</li>
+          <li>Event materials, equipment, and supplies</li>
+          <li>Volunteer coordination</li>
+        </ul>
+        <p className="mt-2">We are committed to transparent and responsible use of all contributions.</p>
+      </LegalSection>
+
+      <LegalSection title="6. Donor Obligations">
+        <p>By donating, you confirm that:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>You are at least 18 years of age or have parental consent.</li>
+          <li>The funds used for donation are from legitimate sources.</li>
+          <li>You are not violating any applicable laws by making this donation.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="7. Changes to Terms">
+        <p>Inclusiverse reserves the right to modify these Terms of Service at any time. Continued use of the platform after changes constitutes acceptance of the revised terms. We encourage you to review this page periodically.</p>
+      </LegalSection>
+
+      <LegalSection title="8. Contact">
+        <p>For any questions regarding these terms, please <button onClick={() => setPage("contact")} className="text-primary underline hover:text-primary/80">contact us</button>.</p>
+      </LegalSection>
+    </LegalPageWrapper>
+  );
+}
+
+// ─── Privacy Policy ──────────────────────────────────────────────────────────
+function PrivacyPolicy({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <LegalPageWrapper
+      title="Privacy Policy"
+      subtitle="Your privacy matters to us. This policy explains how Inclusiverse collects, uses, and protects your information when you donate through our platform."
+      icon={<CheckCircle2 className="w-6 h-6" />}
+      setPage={setPage}
+    >
+      <LegalSection title="1. Information We Collect">
+        <p>When you make a donation through Razorpay, the following information may be collected:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li><strong>Personal details:</strong> Name, email address, phone number (optional, entered in Razorpay checkout)</li>
+          <li><strong>Transaction data:</strong> Payment amount, transaction ID, payment method used</li>
+          <li><strong>Technical data:</strong> Browser type, device information, IP address (collected automatically)</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="2. How We Use Your Information">
+        <p>The information collected is used solely for:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Processing and confirming your donation</li>
+          <li>Sending transaction receipts (via Razorpay)</li>
+          <li>Communicating updates about Inclusiverse (only if you opt in)</li>
+          <li>Internal reporting and fund reconciliation</li>
+        </ul>
+        <p className="mt-2">We do <strong>not</strong> sell, rent, or share your personal information with third parties for marketing purposes.</p>
+      </LegalSection>
+
+      <LegalSection title="3. Razorpay's Role">
+        <p>Payment information (card numbers, UPI IDs, bank details) is processed directly by Razorpay and is never stored on our servers. Razorpay is PCI-DSS compliant. Please review <a href="https://razorpay.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary underline">Razorpay's Privacy Policy</a> for details on how they handle your payment data.</p>
+      </LegalSection>
+
+      <LegalSection title="4. Data Security">
+        <p>We implement reasonable administrative and technical safeguards to protect your data. However, no internet transmission is 100% secure. We encourage donors to use secure networks when making payments.</p>
+      </LegalSection>
+
+      <LegalSection title="5. Data Retention">
+        <p>Transaction records are retained for accounting and compliance purposes for a minimum of 3 years. Personal information is retained only as long as necessary for the purposes described above.</p>
+      </LegalSection>
+
+      <LegalSection title="6. Your Rights">
+        <p>You have the right to:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Request access to the personal data we hold about you</li>
+          <li>Request correction of inaccurate information</li>
+          <li>Request deletion of your data (subject to legal obligations)</li>
+        </ul>
+        <p className="mt-2">To exercise these rights, please <button onClick={() => setPage("contact")} className="text-primary underline hover:text-primary/80">contact us</button>.</p>
+      </LegalSection>
+
+      <LegalSection title="7. Cookies">
+        <p>Our website may use minimal cookies for basic functionality (e.g., remembering accessibility preferences). We do not use tracking or advertising cookies. Razorpay's checkout may use cookies governed by their own policy.</p>
+      </LegalSection>
+
+      <LegalSection title="8. Changes to This Policy">
+        <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated revision date.</p>
+      </LegalSection>
+    </LegalPageWrapper>
+  );
+}
+
+// ─── Cancellation Policy ─────────────────────────────────────────────────────
+function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <LegalPageWrapper
+      title="Cancellation Policy"
+      subtitle="Important information about donation cancellations for Inclusiverse's crowdfunding initiative processed via Razorpay."
+      icon={<AlertCircle className="w-6 h-6" />}
+      setPage={setPage}
+    >
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-3">
+        <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="font-semibold text-amber-800 text-sm">Important Notice</p>
+          <p className="text-amber-700 text-sm mt-1">Donations to Inclusiverse are final and cannot be cancelled once the payment is initiated and confirmed. Please review your donation amount carefully before proceeding.</p>
+        </div>
+      </div>
+
+      <LegalSection title="1. Pre-Payment Cancellation">
+        <p>You may cancel or exit the Razorpay payment window at any time <strong>before</strong> confirming your payment. Simply close the Razorpay checkout or click "Cancel." No amount will be charged if the payment is not completed.</p>
+      </LegalSection>
+
+      <LegalSection title="2. Post-Payment Cancellation">
+        <p>Once a donation payment is <strong>successfully processed</strong> through Razorpay, it is considered final and <strong>cannot be cancelled</strong>. This is because:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Donations are immediately allocated toward Inclusiverse's event planning and operations.</li>
+          <li>Crowdfunding contributions are voluntary gifts with no obligation of return.</li>
+          <li>Processing and gateway fees incurred are non-recoverable.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="3. Failed Transactions">
+        <p>If your payment fails or is declined but an amount has been debited from your account, please note:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Failed transaction reversals are handled automatically by Razorpay and your bank, typically within 5–7 business days.</li>
+          <li>You will not be charged for failed transactions that do not result in a successful payment confirmation.</li>
+          <li>If you face any issues, please <button onClick={() => setPage("contact")} className="text-primary underline hover:text-primary/80">contact us</button> immediately with your transaction details.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="4. Duplicate Payments">
+        <p>If you accidentally make a duplicate donation, please contact us within 48 hours with both transaction IDs. We will review the case on a goodwill basis and may issue a refund for the duplicate amount at our sole discretion, subject to Razorpay's refund capabilities.</p>
+      </LegalSection>
+
+      <LegalSection title="5. Technical Errors">
+        <p>In case of technical errors where payment is deducted but not confirmed on our end, please reach out to us with your payment reference number. We will investigate with Razorpay and resolve the issue promptly.</p>
+      </LegalSection>
+    </LegalPageWrapper>
+  );
+}
+
+// ─── No Refund Policy ────────────────────────────────────────────────────────
+function NoRefundPolicy({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <LegalPageWrapper
+      title="No Refund Policy"
+      subtitle="All donations made to Inclusiverse through our Razorpay payment gateway are non-refundable. Please read this policy before contributing."
+      icon={<AlertCircle className="w-6 h-6" />}
+      setPage={setPage}
+    >
+      <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex gap-3">
+        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="font-semibold text-red-800 text-sm">No Refunds on Donations</p>
+          <p className="text-red-700 text-sm mt-1">All donations to Inclusiverse are strictly non-refundable. By completing your donation, you acknowledge and accept this policy in full.</p>
+        </div>
+      </div>
+
+      <LegalSection title="1. Non-Refundable Nature of Donations">
+        <p>Inclusiverse operates as a <strong>crowdfunding-based charitable initiative</strong>. All donations collected through our Razorpay-powered platform are:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Voluntary contributions made freely by the donor</li>
+          <li>Immediately directed toward planned events and operations</li>
+          <li>Not exchangeable for goods, services, or any monetary return</li>
+          <li><strong>Non-refundable</strong> under all circumstances once payment is successfully processed</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="2. Why We Cannot Issue Refunds">
+        <p>Our no-refund policy exists because:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li><strong>Crowdfunding nature:</strong> Like all crowdfunding platforms, contributions are pooled and used collectively toward a common cause.</li>
+          <li><strong>Operational commitments:</strong> Funds are planned and committed to event vendors, transportation, and participant support well in advance.</li>
+          <li><strong>Gateway fees:</strong> Razorpay charges payment processing fees which are deducted at the time of transaction and cannot be recovered.</li>
+          <li><strong>Voluntary contribution:</strong> Donations are gifts, not purchases, and do not carry a right to refund.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="3. Exceptions">
+        <p>The only exceptions where we may consider a refund at our <strong>sole discretion</strong> are:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Verified duplicate payments (same donor, same amount, processed twice within minutes)</li>
+          <li>Payment debited but order/confirmation not received due to a verified technical failure</li>
+        </ul>
+        <p className="mt-2">Even in these exceptional cases, any refund is subject to Razorpay's refund timeline (typically 5–10 business days) and our internal review process. We do not guarantee a refund in any case.</p>
+      </LegalSection>
+
+      <LegalSection title="4. Chargebacks">
+        <p>Initiating an unauthorized chargeback or dispute for a valid donation transaction is a violation of these terms. We reserve the right to contest any chargeback with Razorpay and your card issuer by providing transaction evidence. Donors who initiate fraudulent chargebacks may be banned from future participation in Inclusiverse events.</p>
+      </LegalSection>
+
+      <LegalSection title="5. Donor Acknowledgment">
+        <p>By proceeding with a donation, you explicitly acknowledge that:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>You have read and understood this No Refund Policy.</li>
+          <li>Your donation is final and non-refundable once processed.</li>
+          <li>You are donating voluntarily to support Inclusiverse's inclusive initiatives.</li>
+          <li>You will not dispute the charge unless a verified technical error has occurred.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="6. Contact for Concerns">
+        <p>If you have concerns before donating, please <button onClick={() => setPage("contact")} className="text-primary underline hover:text-primary/80">contact us</button> before making a payment. We're happy to answer any questions about how your funds will be used.</p>
+      </LegalSection>
+    </LegalPageWrapper>
+  );
+}
+
+
+// ─── Contact Us ───────────────────────────────────────────────────────────────
+function ContactUs({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-primary/10 via-white to-purple-50 border-b border-gray-100">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <button
+            onClick={() => setPage("home")}
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors mb-8 group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </button>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              <Mail className="w-6 h-6" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-display font-bold text-text-main">Contact Us</h1>
+          </div>
+          <p className="text-gray-600 text-base leading-relaxed max-w-2xl">Have a question about your donation, our events, or our policies? Reach out directly — our student team typically responds within 1–2 business days.</p>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">
+        {/* Get in Touch */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+          <h3 className="font-display font-bold text-text-main mb-6 text-base">Get in Touch</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Mail className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Email</p>
+                <a href="mailto:inclusiverse.christuniversity@gmail.com" className="text-sm text-primary hover:underline break-all">inclusiverse.christuniversity@gmail.com</a>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Instagram className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Instagram</p>
+                <a href="https://www.instagram.com/inclusiverse.christuniversity" target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">@inclusiverse.christuniversity</a>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Linkedin className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">LinkedIn</p>
+                <a href="https://www.linkedin.com/company/inclusiverse-club" target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Inclusiverse Club</a>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Location</p>
+                <a href="https://maps.app.goo.gl/kV1XKQ1xFksGbzqU6" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-primary transition-colors">Christ University, Lavasa Campus</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Donation Queries */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+          <h3 className="font-display font-bold text-text-main mb-3 text-base">Donation Queries?</h3>
+          <p className="text-sm text-gray-500 leading-relaxed mb-5">For issues related to payments, duplicate transactions, or technical errors with Razorpay, please email us directly with your <strong>Razorpay Payment ID</strong> and we will get back to you within 2 business days.</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {(["Terms of Service", "Privacy Policy", "Cancellation Policy", "No Refund Policy"] as const).map((label) => {
+              const map: Record<string, Page> = {
+                "Terms of Service": "tos",
+                "Privacy Policy": "privacy",
+                "Cancellation Policy": "cancellation",
+                "No Refund Policy": "no-refund",
+              };
+              return (
+                <button
+                  key={label}
+                  onClick={() => setPage(map[label])}
+                  className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors group text-left"
+                >
+                  <ChevronRight className="w-3 h-3 text-primary/60 group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const ALL_PAGES: Page[] = ["home", "about", "timeline", "gallery", "join", "404", "tos", "privacy", "cancellation", "no-refund", "contact"];
+
 function getInitialPage(): Page {
   if (typeof window !== "undefined") {
     const params = new URLSearchParams(window.location.search);
     const p = params.get("page") as Page;
     if (p) {
-      if (["home", "about", "timeline", "gallery", "join", "404"].includes(p)) {
+      if (ALL_PAGES.includes(p)) {
         return p;
       }
       return "404";
     }
     const hash = window.location.hash.replace("#", "") as Page;
     if (hash) {
-      if (["home", "about", "timeline", "gallery", "join", "404"].includes(hash)) {
+      if (ALL_PAGES.includes(hash)) {
         return hash;
       }
       return "404";
     }
     const pathname = window.location.pathname.replace(/^\/|\/$/g, "");
     if (pathname && !["index.html", ""].includes(pathname)) {
-      if (["home", "about", "timeline", "gallery", "join", "404"].includes(pathname)) {
+      if (ALL_PAGES.includes(pathname as Page)) {
         return pathname as Page;
       }
       return "404";
@@ -1920,6 +2352,31 @@ export default function App() {
     "404": (
       <Skeleton name="page-404" loading={pageLoading}>
         <NotFound setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    tos: (
+      <Skeleton name="page-tos" loading={pageLoading}>
+        <TermsOfService setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    privacy: (
+      <Skeleton name="page-privacy" loading={pageLoading}>
+        <PrivacyPolicy setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    cancellation: (
+      <Skeleton name="page-cancellation" loading={pageLoading}>
+        <CancellationPolicy setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    "no-refund": (
+      <Skeleton name="page-no-refund" loading={pageLoading}>
+        <NoRefundPolicy setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    contact: (
+      <Skeleton name="page-contact" loading={pageLoading}>
+        <ContactUs setPage={handleSetPage} />
       </Skeleton>
     ),
   }[page] || (
