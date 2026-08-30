@@ -682,7 +682,7 @@ function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
 
       // Default backup photo based on milestone title hash
       const fallbackPhoto = GALLERY_PHOTOS.length > 0
-        ? GALLERY_PHOTOS[Math.abs(m.title.split('').reduce((acc, c) => acc + c.codePointAt(0) ?? 0, 0)) % GALLERY_PHOTOS.length]
+        ? GALLERY_PHOTOS[Math.abs(m.title.split('').reduce((acc, c) => acc + (c.codePointAt(0) ?? 0), 0)) % GALLERY_PHOTOS.length]
         : null;
 
       const photo = matched || fallbackPhoto;
@@ -726,6 +726,7 @@ function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
               </m.p>
               <m.div variants={fadeUpItem} className="flex flex-wrap gap-4">
                 <m.button
+                  type="button"
                   onClick={() => setPage("join")}
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
@@ -735,6 +736,7 @@ function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </m.button>
                 <m.button
+                  type="button"
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setPage("timeline")}
@@ -1168,7 +1170,7 @@ function About() {
 }
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
-function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof MILESTONES[0]; index: number; onViewGallery: (filter: string) => void }) {
+function MilestoneCard({ milestone, index, onViewGallery }: Readonly<{ milestone: typeof MILESTONES[0]; index: number; onViewGallery: (filter: string) => void }>) {
   const hasGalleryPhotos = milestone.galleryFilter && GALLERY_PHOTOS.some(p => p.event === milestone.galleryFilter);
 
   return (
@@ -1198,8 +1200,8 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
           <p className="text-primary font-semibold italic text-base sm:text-lg">{milestone.tagline}</p>
         </div>
         <div className="space-y-4">
-          {milestone.description.split('\n\n').map((para, i) => (
-            <p key={i} className="text-gray-700 leading-relaxed text-sm sm:text-base">{para}</p>
+          {milestone.description.split('\n\n').map((para) => (
+            <p key={para} className="text-gray-700 leading-relaxed text-sm sm:text-base">{para}</p>
           ))}
         </div>
         <div className="mt-6 pt-6 border-t border-gray-200">
@@ -1220,6 +1222,7 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
             )}
             {milestone.galleryFilter && hasGalleryPhotos && (
               <button
+                type="button"
                 onClick={() => onViewGallery(milestone.galleryFilter!)}
                 className="inline-flex items-center gap-2 bg-surface hover:bg-gray-200 text-text-main font-semibold text-sm px-4 py-2 rounded-full transition-colors hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
               >
@@ -1234,7 +1237,7 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
   );
 }
 
-function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }) {
+function Timeline({ onViewGallery }: Readonly<{ onViewGallery: (filter: string) => void }>) {
   return (
     <div>
       {/* Hero Section */}
@@ -1261,7 +1264,7 @@ function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }
       <section className="py-16 sm:py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {MILESTONES.map((milestone, i) => (
-            <MilestoneCard key={i} milestone={milestone} index={i} onViewGallery={onViewGallery} />
+            <MilestoneCard key={milestone.title} milestone={milestone} index={i} onViewGallery={onViewGallery} />
           ))}
           <div className="flex justify-start pl-4 sm:pl-5 mt-4 sm:mt-8">
             <div className="w-3 h-3 rounded-full bg-primary animate-ping" />
@@ -1337,11 +1340,11 @@ function GalleryCard({
   photo,
   index,
   onClick,
-}: {
+}: Readonly<{
   photo: GalleryPhoto;
   index: number;
   onClick: () => void;
-}) {
+}>) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
@@ -1376,7 +1379,7 @@ function GalleryCard({
   );
 }
 
-function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setActiveFilter: (f: string) => void }) {
+function Gallery({ activeFilter, setActiveFilter }: Readonly<{ activeFilter: string; setActiveFilter: (f: string) => void }>) {
   const [lightbox, setLightbox] = useState<typeof GALLERY_PHOTOS[0] | null>(null);
   const [visibleCount, setVisibleCount] = useState(INITIAL_GALLERY_COUNT);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -1450,6 +1453,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
               className="flex flex-wrap justify-center gap-3"
             >
               <button
+                type="button"
                 onClick={() => handleFilterChange("All")}
                 className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === "All"
                     ? "bg-primary text-white shadow-md shadow-primary/25"
@@ -1461,6 +1465,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
               {allFilters.map((filter) => (
                 <button
                   key={filter.slug}
+                  type="button"
                   onClick={() => handleFilterChange(filter.slug)}
                   className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === filter.slug
                       ? "bg-primary text-white shadow-md shadow-primary/25"
@@ -1543,7 +1548,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
               onClick={e => e.stopPropagation()}
               className="relative max-w-3xl w-full rounded-3xl overflow-hidden shadow-2xl bg-white"
             >
-              <button onClick={() => setLightbox(null)} className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white p-2 rounded-full shadow transition-colors" aria-label="Close">
+              <button type="button" onClick={() => setLightbox(null)} className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white p-2 rounded-full shadow transition-colors" aria-label="Close">
                 <X className="w-5 h-5 text-text-main" />
               </button>
               <img src={lightbox.src} alt={lightbox.alt} loading="lazy" className="w-full object-cover max-h-[70vh]" />
@@ -1689,7 +1694,7 @@ function JoinUs() {
 }
 
 // ─── 404 Page ─────────────────────────────────────────────────────────────────
-function NotFound({ setPage }: { setPage: (p: Page) => void }) {
+function NotFound({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
   return (
     <div className="min-h-[75vh] flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background Decorative Glows */}
@@ -1785,6 +1790,7 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
               return (
                 <button
                   key={item.target}
+                  type="button"
                   onClick={() => setPage(item.target)}
                   className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-surface/70 hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors duration-200 group text-center"
                 >
