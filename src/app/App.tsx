@@ -988,7 +988,7 @@ function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
             >
               Become a Volunteer
             </m.button>
-            <m.button
+            {/* <m.button
               type="button"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
@@ -996,7 +996,7 @@ function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
               className="relative bg-surface hover:bg-gray-200 text-text-main px-8 py-4 rounded-full font-medium text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 cursor-pointer"
             >
               Donate Now
-            </m.button>
+            </m.button> */}
           </div>
         </m.div>
       </section>
