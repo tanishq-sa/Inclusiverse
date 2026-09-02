@@ -2037,7 +2037,7 @@ function ContactUs({ setPage }: { setPage: (p: Page) => void }) {
   );
 }
 
-const ALL_PAGES: Page[] = ["home", "about", "timeline", "gallery", "join", "404", "tos", "privacy", "cancellation", "no-refund", "contact"];
+const ALL_PAGES: Page[] = ["home", "about", "team", "timeline", "gallery", "join", "404", "tos", "privacy", "cancellation", "no-refund", "contact"];
 
 function getInitialPage(): Page {
   if (typeof window !== "undefined") {
