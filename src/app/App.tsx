@@ -240,204 +240,27 @@ function Footer({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
   );
 }
 
-// ─── Razorpay Type Declaration ────────────────────────────────────────────────
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
-
-// ─── Donate Modal with Razorpay ──────────────────────────────────────────────
-const PRESET_AMOUNTS = [100, 250, 500, 1000, 2500];
-
-const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
-
+// ─── Donate Modal ────────────────────────────────────────────────────────────
 function DonateModal({ onClose }: Readonly<{ onClose: () => void }>) {
-  const [selectedPreset, setSelectedPreset] = useState<number | "custom">(2500);
-  const [customAmount, setCustomAmount] = useState("2500");
-  const [amount, setAmount] = useState<number | "">(2500);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<"idle" | "success" | "error">("idle");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handlePresetClick = (value: number) => {
-    setSelectedPreset(value);
-    setAmount(value);
-    setCustomAmount(value.toString());
-  };
-
-  const handleCustomClick = () => {
-    setSelectedPreset("custom");
-    setTimeout(() => {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    }, 50);
-  };
-
-  const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\D/g, "");
-    setCustomAmount(val);
-    const parsed = val ? Number.parseInt(val, 10) : "";
-    setAmount(parsed);
-    if (typeof parsed === "number" && PRESET_AMOUNTS.includes(parsed)) {
-      setSelectedPreset(parsed);
-    } else {
-      setSelectedPreset("custom");
-    }
-  };
-
-  const finalAmount = typeof amount === "number" ? amount : 0;
-  const paymentButtonLabel = finalAmount >= 100
-    ? `Donate ₹${finalAmount.toLocaleString("en-IN")}`
-    : finalAmount > 0
-      ? "Minimum donation is ₹100"
-      : "Select or enter an amount";
-
-  const handlePayment = () => {
-    if (finalAmount < 100) return;
-    setIsProcessing(true);
-
-    const options = {
-      key: RAZORPAY_KEY_ID,
-      amount: finalAmount * 100, // Razorpay expects amount in paise
-      currency: "INR",
-      name: "Inclusiverse",
-      description: "Donation to Inclusiverse (Collected by Ashish)",
-      image: "/inclusiverse-logo.png",
-      handler: function (_response: any) {
-        setIsProcessing(false);
-        setPaymentStatus("success");
-      },
-      prefill: {
-        name: "",
-        email: "",
-        contact: "",
-      },
-      notes: {
-        purpose: "Donation to Inclusiverse",
-        collector: "Ashish (on behalf of Inclusiverse)",
-      },
-      theme: {
-        color: "#6b46c1",
-      },
-      modal: {
-        ondismiss: function () {
-          setIsProcessing(false);
-        },
-      },
-    };
-
-    try {
-      const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", function () {
-        setIsProcessing(false);
-        setPaymentStatus("error");
-      });
-      rzp.open();
-    } catch {
-      setIsProcessing(false);
-      setPaymentStatus("error");
-    }
-  };
-
-  // Success view
-  if (paymentStatus === "success") {
-    return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <m.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl text-center"
-        >
-          <m.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-            className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
-          >
-            <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </m.div>
-          <h3 className="text-2xl font-display font-bold text-text-main mb-2">Thank You! 🎉</h3>
-          <p className="text-gray-600 mb-6">
-            Your donation of <span className="font-bold text-primary">₹{finalAmount.toLocaleString("en-IN")}</span> has been received. You're making a real difference!
-          </p>
-          <m.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onClose}
-            className="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-full font-medium transition-colors"
-          >
-            Close
-          </m.button>
-        </m.div>
-      </div>
-    );
-  }
-
-  // Error view
-  if (paymentStatus === "error") {
-    return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <m.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl text-center"
-        >
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <X className="w-10 h-10 text-red-500" />
-          </div>
-          <h3 className="text-2xl font-display font-bold text-text-main mb-2">Payment Failed</h3>
-          <p className="text-gray-600 mb-6">
-            Something went wrong with your payment. Please try again.
-          </p>
-          <div className="flex gap-3 justify-center">
-            <m.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setPaymentStatus("idle")}
-              className="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-full font-medium transition-colors"
-            >
-              Try Again
-            </m.button>
-            <m.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={onClose}
-              className="bg-gray-100 hover:bg-gray-200 text-text-main px-8 py-3 rounded-full font-medium transition-colors"
-            >
-              Cancel
-            </m.button>
-          </div>
-        </m.div>
-      </div>
-    );
-  }
-
-  // Main donate form
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <m.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl border border-gray-100"
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full relative shadow-2xl border border-gray-100 flex flex-col items-center"
       >
-        {/* Close button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-text-main hover:bg-gray-100 rounded-full transition-colors"
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-text-main hover:bg-gray-100 rounded-full transition-colors z-10"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Header */}
-        <div className="text-center mb-5">
+        <div className="text-center mb-5 w-full">
           <m.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -447,182 +270,39 @@ function DonateModal({ onClose }: Readonly<{ onClose: () => void }>) {
             <img src="/inclusiverse-logo.png" alt="Inclusiverse" className="w-10 h-10 object-contain" />
           </m.div>
           <h3 className="text-2xl font-display font-bold text-text-main mb-1">Support Our Cause</h3>
-          <p className="text-gray-500 text-sm">Every contribution makes a difference</p>
+          <p className="text-gray-500 text-sm">Scan the QR code to donate</p>
         </div>
 
-        {/* Ashish Collector Disclosure - Placed informatively at top */}
-        <div className="bg-surface/90 border border-gray-200/80 rounded-2xl p-3.5 mb-5 text-center shadow-xs">
+        <div className="w-full rounded-2xl overflow-hidden mb-6 flex justify-center">
+          <img 
+            src="/RazorPayQR.jpg" 
+            alt="Donate QR Code" 
+            className="w-full max-w-[280px] h-auto object-contain drop-shadow-md" 
+          />
+        </div>
+
+        {/* Ashish Collector Disclosure */}
+        <div className="bg-surface/90 border border-gray-200/80 rounded-xl p-3 mb-5 w-full text-center shadow-xs">
           <p className="text-xs font-semibold text-gray-800 flex items-center justify-center gap-1.5">
             <Heart className="w-3.5 h-3.5 fill-primary text-primary flex-shrink-0" />
             <span>Ashish is collecting money on behalf of Inclusiverse</span>
           </p>
-          <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
-            All contributions directly support inclusive student initiatives & events.
-          </p>
         </div>
 
-        {/* Preset amount grid + Custom Button */}
-        <div className="grid grid-cols-3 gap-2.5 mb-4">
-          {PRESET_AMOUNTS.map((preset) => {
-            const isSelected = selectedPreset === preset;
-            return (
-              <m.button
-                key={preset}
-                type="button"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => handlePresetClick(preset)}
-                className={`py-3 rounded-xl font-semibold text-sm transition-colors border cursor-pointer ${
-                  isSelected
-                    ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
-                    : "bg-surface hover:bg-gray-100 text-text-main border-gray-200/80 hover:border-gray-300"
-                }`}
-              >
-                ₹{preset.toLocaleString("en-IN")}
-              </m.button>
-            );
-          })}
-
-          {/* Custom option button */}
-          <m.button
-            type="button"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={handleCustomClick}
-            className={`py-3 rounded-xl font-semibold text-sm transition-colors border cursor-pointer ${
-              selectedPreset === "custom"
-                ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
-                : "bg-surface hover:bg-gray-100 text-text-main border-gray-200/80 hover:border-gray-300"
-            }`}
-          >
-            Custom
-          </m.button>
-        </div>
-
-        {/* Custom amount input field - only shown when Custom is selected */}
-        <AnimatePresence>
-          {selectedPreset === "custom" && (
-            <m.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="mb-4"
-            >
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg select-none pointer-events-none">₹</span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Enter custom amount (min ₹100)"
-                  value={customAmount}
-                  onChange={handleCustomAmountChange}
-                  className={`w-full pl-10 pr-10 py-3.5 bg-gray-50/80 border-2 rounded-2xl text-base font-semibold text-text-main placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-colors ${
-                    customAmount && Number.parseInt(customAmount, 10) < 100
-                      ? "border-amber-400 ring-2 ring-amber-400/20 bg-white"
-                      : "border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/10 bg-white"
-                  }`}
-                />
-                {customAmount && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCustomAmount("");
-                      setAmount("");
-                      inputRef.current?.focus();
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              {customAmount && Number.parseInt(customAmount, 10) < 100 && (
-                <p className="text-xs text-amber-600 mt-1.5 ml-1 font-medium flex items-center gap-1">
-                  Minimum donation amount is ₹100
-                </p>
-              )}
-            </m.div>
-          )}
-        </AnimatePresence>
-
-        {/* Payment methods info */}
-        <div className="flex items-center justify-center gap-3.5 py-2 px-3 bg-gray-50/80 rounded-xl border border-gray-100 mb-5">
-          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span>UPI</span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Cards</span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Wallets</span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Netbanking</span>
-          </div>
-        </div>
-
-        {/* Pay button */}
         <m.button
           type="button"
-          whileHover={finalAmount >= 100 ? { scale: 1.02 } : {}}
-          whileTap={finalAmount >= 100 ? { scale: 0.98 } : {}}
-          onClick={handlePayment}
-          disabled={finalAmount < 100 || isProcessing}
-          className={`w-full py-4 rounded-2xl font-semibold text-base transition-colors ${
-            finalAmount >= 100
-              ? "bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/25 cursor-pointer"
-              : "bg-gray-100 text-gray-400 border border-gray-200/60 cursor-not-allowed"
-          }`}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onClose}
+          className="w-full bg-primary hover:bg-primary-hover text-white py-3.5 rounded-2xl font-semibold text-base transition-colors shadow-lg shadow-primary/25"
         >
-          {isProcessing ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin w-5 h-5 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              <span>Processing Payment...</span>
-            </span>
-          ) : (
-            paymentButtonLabel
-          )}
+          Done
         </m.button>
-
-        {/* Secure payment note */}
-        <div className="flex items-center justify-center gap-1.5 mt-3.5 text-gray-400">
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z" />
-          </svg>
-          <span className="text-xs font-medium">Secured by Razorpay</span>
-        </div>
-
-        {/* Non-refundable notice */}
-        <p className="text-[10px] text-center text-gray-400 mt-2 leading-relaxed">
-          All donations are <span className="font-semibold text-gray-500">non-refundable</span>. By donating, you agree to our{" "}
-          <a
-            href="?page=no-refund"
-            onClick={(e) => { e.preventDefault(); onClose(); setTimeout(() => { const u = new URL(window.location.href); u.searchParams.set("page","no-refund"); window.history.pushState(null,"",u.toString()); window.dispatchEvent(new PopStateEvent("popstate")); }, 10); }}
-            className="underline hover:text-gray-600 transition-colors"
-          >
-            No Refund Policy
-          </a>{" "}and{" "}
-          <a
-            href="?page=tos"
-            onClick={(e) => { e.preventDefault(); onClose(); setTimeout(() => { const u = new URL(window.location.href); u.searchParams.set("page","tos"); window.history.pushState(null,"",u.toString()); window.dispatchEvent(new PopStateEvent("popstate")); }, 10); }}
-            className="underline hover:text-gray-600 transition-colors"
-          >
-            Terms of Service
-          </a>.
-        </p>
       </m.div>
     </div>
   );
 }
+
 
 // ─── Timeline Milestones Data ──────────────────────────────────────────────────
 const MILESTONES = [
@@ -988,7 +668,7 @@ function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
             >
               Become a Volunteer
             </m.button>
-            {/* <m.button
+            <m.button
               type="button"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
@@ -996,7 +676,7 @@ function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
               className="relative bg-surface hover:bg-gray-200 text-text-main px-8 py-4 rounded-full font-medium text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 cursor-pointer"
             >
               Donate Now
-            </m.button> */}
+            </m.button>
           </div>
         </m.div>
       </section>
