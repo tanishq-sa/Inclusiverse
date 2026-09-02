@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Heart, Menu, X, Accessibility, ArrowRight, ChevronRight, PlayCircle, Camera, FileText, ChevronDown, ChevronUp, GraduationCap, Users, MapPin, Mail, Instagram, Linkedin, Home as HomeIcon, Compass, Sparkles, AlertCircle, ArrowLeft, Search, CheckCircle2, Send, Phone, ExternalLink } from "lucide-react";
+import { Heart, Menu, X, ArrowRight, ChevronRight, PlayCircle, Camera, FileText, GraduationCap, Users, MapPin, InstagramIcon, LinkedinIcon, Home as HomeIcon, Compass, Sparkles, CheckCircle2, ExternalLink } from "lucide-react";
 import { LazyMotion, domAnimation, m, AnimatePresence, Variants } from "motion/react";
 import { Skeleton } from "boneyard-js/react";
 import GALLERY_PHOTOS_RAW from "../data/photos.json";
@@ -14,19 +14,20 @@ const GALLERY_EVENTS = GALLERY_EVENTS_RAW as GalleryEvent[];
 
 
 // ─── Simple router ────────────────────────────────────────────────────────────
-export type Page = "home" | "about" | "team" | "timeline" | "gallery" | "join" | "404";
+type Page = "home" | "about" | "timeline" | "gallery" | "join" | "404" | "tos" | "privacy" | "cancellation" | "no-refund" | "contact";
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
-function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
+function Nav({ page, setPage, isDyslexic, toggleDyslexic }: Readonly<{
   page: Page;
   setPage: (p: Page) => void;
   isDyslexic: boolean;
   toggleDyslexic: () => void;
-}) {
+}>) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const link = (label: string, target: Page) => (
     <button
+      type="button"
       onClick={() => { setPage(target); setMenuOpen(false); }}
       className={`relative text-text-main hover:text-primary transition-colors font-medium py-1 ${page === target ? "text-primary font-semibold" : ""}`}
     >
@@ -45,7 +46,7 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <button onClick={() => setPage("home")} className="flex items-center gap-3 group focus:outline-none">
+          <button type="button" onClick={() => setPage("home")} className="flex items-center gap-3 group focus:outline-none">
             <m.img
               src="/inclusiverse-logo.png"
               alt="Inclusiverse Logo"
@@ -72,7 +73,7 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
             </m.button>
           </div>
 
-          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-text-main focus:outline-none">
+          <button type="button" onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-text-main focus:outline-none">
             {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
@@ -87,16 +88,20 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="md:hidden bg-white border-b border-gray-100 px-4 py-4 space-y-4 shadow-md"
           >
-            {(["home", "about", "team", "timeline", "gallery"] as Page[]).map((p) => (
-              <button
-                key={p}
-                onClick={() => { setPage(p); setMenuOpen(false); }}
-                className={`block w-full text-left font-medium capitalize py-1 transition-colors ${page === p ? "text-primary font-bold" : "text-text-main hover:text-primary"}`}
-              >
-                {p === "timeline" ? "Timeline" : p === "gallery" ? "Gallery" : p === "team" ? "Our Team" : p.charAt(0).toUpperCase() + p.slice(1)}
-              </button>
-            ))}
-            <button onClick={() => { setPage("join"); setMenuOpen(false); }} className="w-full bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-sm">
+            {(["home", "about", "timeline", "gallery"] as Page[]).map((p) => {
+              const label = p === "timeline" ? "Timeline" : p === "gallery" ? "Gallery" : p.charAt(0).toUpperCase() + p.slice(1);
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => { setPage(p); setMenuOpen(false); }}
+                  className={`block w-full text-left font-medium capitalize py-1 transition-colors ${page === p ? "text-primary font-bold" : "text-text-main hover:text-primary"}`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+            <button type="button" onClick={() => { setPage("join"); setMenuOpen(false); }} className="w-full bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-sm">
               Join Us
             </button>
           </m.div>
@@ -107,14 +112,14 @@ function Nav({ page, setPage, isDyslexic, toggleDyslexic }: {
 }
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer({ setPage }: { setPage: (p: Page) => void }) {
+function Footer({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
   return (
     <footer className="bg-text-main text-white pt-16 pb-12 mt-auto border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-gray-800/80">
           {/* Brand & Mission */}
           <div className="md:col-span-6 space-y-4">
-            <button onClick={() => setPage("home")} className="flex items-center gap-3 group text-left focus:outline-none">
+            <button type="button" onClick={() => setPage("home")} className="flex items-center gap-3 group text-left focus:outline-none">
               <img
                 src="/inclusiverse-logo.png"
                 alt="Inclusiverse Logo"
@@ -154,6 +159,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
               ] as [string, Page][]).map(([label, p]) => (
                 <li key={p}>
                   <button
+                    type="button"
                     onClick={() => setPage(p)}
                     className="hover:text-primary hover:translate-x-1 transition-[color,transform] duration-200 inline-flex items-center gap-1.5 text-left"
                   >
@@ -189,7 +195,7 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
                 className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-colors"
                 aria-label="Instagram"
               >
-                <Instagram className="w-4 h-4" />
+                <InstagramIcon className="w-4 h-4" />
               </a>
               <a
                 href="https://www.linkedin.com/company/inclusiverse-club"
@@ -198,9 +204,10 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
                 className="w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-gray-300 hover:text-white transition-colors"
                 aria-label="LinkedIn"
               >
-                <Linkedin className="w-4 h-4" />
+                <LinkedinIcon className="w-4 h-4" />
               </a>
               <button
+                type="button"
                 onClick={() => setPage("join")}
                 className="px-4 py-2 text-xs font-semibold bg-primary hover:bg-primary-hover text-white rounded-xl transition-colors shadow-sm"
               >
@@ -211,13 +218,32 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
         </div>
 
         {/* Bottom Bar with Credits */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>© {new Date().getFullYear()} Inclusiverse. All rights reserved.</p>
-          <div className="flex items-center gap-1.5 text-gray-400 font-medium bg-white/5 px-3.5 py-1.5 rounded-full border border-white/5">
-            <span>Designed & Developed by</span>
-            <span className="text-white font-semibold flex items-center gap-1">
-              Inclusiverse Team <Heart className="w-3 h-3 text-primary inline fill-primary" />
-            </span>
+        <div className="pt-8 border-t border-gray-800/60">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mb-4">
+            {([
+              ["Terms of Service", "tos"],
+              ["Privacy Policy", "privacy"],
+              ["Cancellation Policy", "cancellation"],
+              ["No Refund Policy", "no-refund"],
+              ["Contact Us", "contact"],
+            ] as [string, Page][]).map(([label, p]) => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className="text-xs text-gray-500 hover:text-gray-300 transition-colors underline-offset-2 hover:underline"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+            <p>© {new Date().getFullYear()} Inclusiverse. All rights reserved. Donations are non-refundable.</p>
+            <div className="flex items-center gap-1.5 text-gray-400 font-medium bg-white/5 px-3.5 py-1.5 rounded-full border border-white/5">
+              <span>Designed & Developed by</span>
+              <span className="text-white font-semibold flex items-center gap-1">
+                Inclusiverse Team <Heart className="w-3 h-3 text-primary inline fill-primary" />
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -225,198 +251,27 @@ function Footer({ setPage }: { setPage: (p: Page) => void }) {
   );
 }
 
-// ─── Razorpay Type Declaration ────────────────────────────────────────────────
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
-
-// ─── Donate Modal with Razorpay ──────────────────────────────────────────────
-const PRESET_AMOUNTS = [100, 250, 500, 1000, 2500];
-
-const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
-
-function DonateModal({ onClose }: { onClose: () => void }) {
-  const [selectedPreset, setSelectedPreset] = useState<number | "custom">(2500);
-  const [customAmount, setCustomAmount] = useState("2500");
-  const [amount, setAmount] = useState<number | "">(2500);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<"idle" | "success" | "error">("idle");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handlePresetClick = (value: number) => {
-    setSelectedPreset(value);
-    setAmount(value);
-    setCustomAmount(value.toString());
-  };
-
-  const handleCustomClick = () => {
-    setSelectedPreset("custom");
-    setTimeout(() => {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    }, 50);
-  };
-
-  const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/[^0-9]/g, "");
-    setCustomAmount(val);
-    const parsed = val ? parseInt(val, 10) : "";
-    setAmount(parsed);
-    if (typeof parsed === "number" && PRESET_AMOUNTS.includes(parsed)) {
-      setSelectedPreset(parsed);
-    } else {
-      setSelectedPreset("custom");
-    }
-  };
-
-  const finalAmount = typeof amount === "number" ? amount : 0;
-
-  const handlePayment = () => {
-    if (finalAmount < 100) return;
-    setIsProcessing(true);
-
-    const options = {
-      key: RAZORPAY_KEY_ID,
-      amount: finalAmount * 100, // Razorpay expects amount in paise
-      currency: "INR",
-      name: "Inclusiverse",
-      description: "Donation to Inclusiverse (Collected by Ashish)",
-      image: "/inclusiverse-logo.png",
-      handler: function (_response: any) {
-        setIsProcessing(false);
-        setPaymentStatus("success");
-      },
-      prefill: {
-        name: "",
-        email: "",
-        contact: "",
-      },
-      notes: {
-        purpose: "Donation to Inclusiverse",
-        collector: "Ashish (on behalf of Inclusiverse)",
-      },
-      theme: {
-        color: "#6b46c1",
-      },
-      modal: {
-        ondismiss: function () {
-          setIsProcessing(false);
-        },
-      },
-    };
-
-    try {
-      const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", function () {
-        setIsProcessing(false);
-        setPaymentStatus("error");
-      });
-      rzp.open();
-    } catch {
-      setIsProcessing(false);
-      setPaymentStatus("error");
-    }
-  };
-
-  // Success view
-  if (paymentStatus === "success") {
-    return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <m.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl text-center"
-        >
-          <m.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-            className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
-          >
-            <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </m.div>
-          <h3 className="text-2xl font-display font-bold text-text-main mb-2">Thank You! 🎉</h3>
-          <p className="text-gray-600 mb-6">
-            Your donation of <span className="font-bold text-primary">₹{finalAmount.toLocaleString("en-IN")}</span> has been received. You're making a real difference!
-          </p>
-          <m.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onClose}
-            className="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-full font-medium transition-colors"
-          >
-            Close
-          </m.button>
-        </m.div>
-      </div>
-    );
-  }
-
-  // Error view
-  if (paymentStatus === "error") {
-    return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <m.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl text-center"
-        >
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <X className="w-10 h-10 text-red-500" />
-          </div>
-          <h3 className="text-2xl font-display font-bold text-text-main mb-2">Payment Failed</h3>
-          <p className="text-gray-600 mb-6">
-            Something went wrong with your payment. Please try again.
-          </p>
-          <div className="flex gap-3 justify-center">
-            <m.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setPaymentStatus("idle")}
-              className="bg-primary hover:bg-primary-hover text-white px-8 py-3 rounded-full font-medium transition-colors"
-            >
-              Try Again
-            </m.button>
-            <m.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={onClose}
-              className="bg-gray-100 hover:bg-gray-200 text-text-main px-8 py-3 rounded-full font-medium transition-colors"
-            >
-              Cancel
-            </m.button>
-          </div>
-        </m.div>
-      </div>
-    );
-  }
-
-  // Main donate form
+// ─── Donate Modal ────────────────────────────────────────────────────────────
+function DonateModal({ onClose }: Readonly<{ onClose: () => void }>) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <m.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl border border-gray-100"
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full relative shadow-2xl border border-gray-100 flex flex-col items-center"
       >
-        {/* Close button */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-text-main hover:bg-gray-100 rounded-full transition-colors"
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-text-main hover:bg-gray-100 rounded-full transition-colors z-10"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Header */}
-        <div className="text-center mb-5">
+        <div className="text-center mb-5 w-full">
           <m.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -426,166 +281,39 @@ function DonateModal({ onClose }: { onClose: () => void }) {
             <img src="/inclusiverse-logo.png" alt="Inclusiverse" className="w-10 h-10 object-contain" />
           </m.div>
           <h3 className="text-2xl font-display font-bold text-text-main mb-1">Support Our Cause</h3>
-          <p className="text-gray-500 text-sm">Every contribution makes a difference</p>
+          <p className="text-gray-500 text-sm">Scan the QR code to donate</p>
         </div>
 
-        {/* Ashish Collector Disclosure - Placed informatively at top */}
-        <div className="bg-surface/90 border border-gray-200/80 rounded-2xl p-3.5 mb-5 text-center shadow-xs">
+        <div className="w-full rounded-2xl overflow-hidden mb-6 flex justify-center">
+          <img 
+            src="/RazorPayQR.jpg" 
+            alt="Donate QR Code" 
+            className="w-full max-w-[280px] h-auto object-contain drop-shadow-md" 
+          />
+        </div>
+
+        {/* Ashish Collector Disclosure */}
+        <div className="bg-surface/90 border border-gray-200/80 rounded-xl p-3 mb-5 w-full text-center shadow-xs">
           <p className="text-xs font-semibold text-gray-800 flex items-center justify-center gap-1.5">
             <Heart className="w-3.5 h-3.5 fill-primary text-primary flex-shrink-0" />
             <span>Ashish is collecting money on behalf of Inclusiverse</span>
           </p>
-          <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
-            All contributions directly support inclusive student initiatives & events.
-          </p>
         </div>
 
-        {/* Preset amount grid + Custom Button */}
-        <div className="grid grid-cols-3 gap-2.5 mb-4">
-          {PRESET_AMOUNTS.map((preset) => {
-            const isSelected = selectedPreset === preset;
-            return (
-              <m.button
-                key={preset}
-                type="button"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => handlePresetClick(preset)}
-                className={`py-3 rounded-xl font-semibold text-sm transition-colors border cursor-pointer ${
-                  isSelected
-                    ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
-                    : "bg-surface hover:bg-gray-100 text-text-main border-gray-200/80 hover:border-gray-300"
-                }`}
-              >
-                ₹{preset.toLocaleString("en-IN")}
-              </m.button>
-            );
-          })}
-
-          {/* Custom option button */}
-          <m.button
-            type="button"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={handleCustomClick}
-            className={`py-3 rounded-xl font-semibold text-sm transition-colors border cursor-pointer ${
-              selectedPreset === "custom"
-                ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
-                : "bg-surface hover:bg-gray-100 text-text-main border-gray-200/80 hover:border-gray-300"
-            }`}
-          >
-            Custom
-          </m.button>
-        </div>
-
-        {/* Custom amount input field - only shown when Custom is selected */}
-        <AnimatePresence>
-          {selectedPreset === "custom" && (
-            <m.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="mb-4"
-            >
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg select-none pointer-events-none">₹</span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Enter custom amount (min ₹100)"
-                  value={customAmount}
-                  onChange={handleCustomAmountChange}
-                  className={`w-full pl-10 pr-10 py-3.5 bg-gray-50/80 border-2 rounded-2xl text-base font-semibold text-text-main placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-colors ${
-                    customAmount && parseInt(customAmount, 10) < 100
-                      ? "border-amber-400 ring-2 ring-amber-400/20 bg-white"
-                      : "border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/10 bg-white"
-                  }`}
-                />
-                {customAmount && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCustomAmount("");
-                      setAmount("");
-                      inputRef.current?.focus();
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              {customAmount && parseInt(customAmount, 10) < 100 && (
-                <p className="text-xs text-amber-600 mt-1.5 ml-1 font-medium flex items-center gap-1">
-                  Minimum donation amount is ₹100
-                </p>
-              )}
-            </m.div>
-          )}
-        </AnimatePresence>
-
-        {/* Payment methods info */}
-        <div className="flex items-center justify-center gap-3.5 py-2 px-3 bg-gray-50/80 rounded-xl border border-gray-100 mb-5">
-          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span>UPI</span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Cards</span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Wallets</span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Netbanking</span>
-          </div>
-        </div>
-
-        {/* Pay button */}
         <m.button
-          whileHover={finalAmount >= 100 ? { scale: 1.02 } : {}}
-          whileTap={finalAmount >= 100 ? { scale: 0.98 } : {}}
-          onClick={handlePayment}
-          disabled={finalAmount < 100 || isProcessing}
-          className={`w-full py-4 rounded-2xl font-semibold text-base transition-colors ${
-            finalAmount >= 100
-              ? "bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/25 cursor-pointer"
-              : "bg-gray-100 text-gray-400 border border-gray-200/60 cursor-not-allowed"
-          }`}
+          type="button"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onClose}
+          className="w-full bg-primary hover:bg-primary-hover text-white py-3.5 rounded-2xl font-semibold text-base transition-colors shadow-lg shadow-primary/25"
         >
-          {isProcessing ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin w-5 h-5 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              <span>Processing Payment...</span>
-            </span>
-          ) : finalAmount >= 100 ? (
-            `Donate ₹${finalAmount.toLocaleString("en-IN")}`
-          ) : finalAmount > 0 ? (
-            "Minimum donation is ₹100"
-          ) : (
-            "Select or enter an amount"
-          )}
+          Done
         </m.button>
-
-        {/* Secure payment note */}
-        <div className="flex items-center justify-center gap-1.5 mt-3.5 text-gray-400">
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM12 17c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z" />
-          </svg>
-          <span className="text-xs font-medium">Secured by Razorpay</span>
-        </div>
       </m.div>
     </div>
   );
 }
+
 
 // ─── Timeline Milestones Data ──────────────────────────────────────────────────
 const MILESTONES = [
@@ -595,7 +323,7 @@ const MILESTONES = [
     tagline: "Where it all began.",
     description: "Beyond Barriers marked the beginning of the Inclusiverse journey. It was built around the belief that differences should never become limitations and that inclusion begins when we choose to understand one another.\n\nThe initiative laid the foundation for what Inclusiverse would become—a student-led community committed to creating opportunities for participation, connection, and equal opportunity.",
     closing: "Our first step beyond the barriers that divide us.",
-    reportUrl: "https://docs.google.com/document/d/1gtp75s_DaImsIL1ZtUwk366AknWk0Icp3nX8G3GE9Uc/edit?usp=drive_link",
+    reportUrl: "/reports/Beyond_Barriers_Activity_Report.pdf",
     galleryFilter: "beyond-barriers"
   },
   {
@@ -604,6 +332,7 @@ const MILESTONES = [
     tagline: "Bringing people together through sport.",
     description: "The State Unified Championship brought athletes with and without disabilities together on the same field, united by the spirit of sport.\n\nMore than a championship, it became a celebration of teamwork, friendship, determination, and participation. It showed us how sport can break down barriers and create connections that go far beyond the game.",
     closing: "Different abilities. One team. One spirit.",
+    reportUrl: "/reports/State_Unified_Championship_Report.pdf",
     galleryFilter: "state-unified-championship"
   },
   {
@@ -612,6 +341,7 @@ const MILESTONES = [
     tagline: "Celebrating participation.",
     description: "Emerging InClusiWarriors created an opportunity for specially-abled students to come to campus, participate in fun activities, and experience a space where they could simply be themselves.\n\nThe focus was never just on competition. It was about building confidence, encouraging interaction, creating friendships, and celebrating every individual's ability to participate.",
     closing: "Because every participant is a warrior in their own way.",
+    reportUrl: "/reports/Emerging_InclusiWarriors_Report.pdf",
     galleryFilter: "emerging-inclusiwarriors"
   },
   {
@@ -620,6 +350,7 @@ const MILESTONES = [
     tagline: "Innovation with inclusion at its core.",
     description: "With InclusiAI, we explored how technology and innovation can contribute to a more inclusive and accessible world.\n\nThe initiative brought together creativity, problem-solving, and technology, encouraging students to look at real-world challenges through an inclusive lens and imagine solutions that can make a difference.",
     closing: "Ideas that innovate. Solutions that include.",
+    reportUrl: "/reports/InclusiAI_Report.pdf",
     galleryFilter: "inclusiai"
   },
   {
@@ -628,6 +359,7 @@ const MILESTONES = [
     tagline: "Taking inclusion beyond the campus.",
     description: "Our visit to Asha Bhavan Special School, Satara marked another meaningful step in our journey.\n\nThrough interactions, activities, and shared experiences, students had the opportunity to connect with the children and understand inclusion through real human connections. The experience reminded us that sometimes the most meaningful impact comes from the simplest things—being present, listening, sharing, and caring.",
     closing: "Inclusion begins with empathy and comes alive through action.",
+    reportUrl: "/reports/Compassion_in_Action_Report.pdf",
     galleryFilter: "compassion-in-action-asha-bhavan"
   },
   {
@@ -636,6 +368,7 @@ const MILESTONES = [
     tagline: "Giving every voice a platform.",
     description: "Take a Stand created a space for students to express their perspectives, engage with important issues, and confidently make their voices heard.\n\nFor us, inclusion also means ensuring that people have the freedom and opportunity to speak, question, share, and be heard.",
     closing: "Because every voice deserves a space.",
+    reportUrl: "/reports/Take_a_Stand_Report.pdf",
     galleryFilter: "take-a-stand"
   },
 ];
@@ -654,7 +387,7 @@ const fadeUpItem: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
 };
 
-function Home({ setPage }: { setPage: (p: Page) => void }) {
+function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -672,13 +405,13 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
       // Find a matching photo for this milestone from GALLERY_PHOTOS
       const matched = GALLERY_PHOTOS.find(
         p => (m.galleryFilter && p.event === m.galleryFilter) ||
-             (p.cat && p.cat.toLowerCase() === m.title.toLowerCase()) ||
-             (p.caption && p.caption.toLowerCase().includes(m.title.toLowerCase()))
+             (p.cat?.toLowerCase() === m.title.toLowerCase()) ||
+             (p.caption?.toLowerCase().includes(m.title.toLowerCase()))
       );
 
       // Default backup photo based on milestone title hash
       const fallbackPhoto = GALLERY_PHOTOS.length > 0
-        ? GALLERY_PHOTOS[Math.abs(m.title.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)) % GALLERY_PHOTOS.length]
+        ? GALLERY_PHOTOS[Math.abs(m.title.split('').reduce((acc, c) => acc + (c.codePointAt(0) ?? 0), 0)) % GALLERY_PHOTOS.length]
         : null;
 
       const photo = matched || fallbackPhoto;
@@ -722,6 +455,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               </m.p>
               <m.div variants={fadeUpItem} className="flex flex-wrap gap-4">
                 <m.button
+                  type="button"
                   onClick={() => setPage("join")}
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
@@ -731,6 +465,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </m.button>
                 <m.button
+                  type="button"
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setPage("timeline")}
@@ -837,6 +572,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               <p className="text-gray-600 text-lg">Meaningful moments created through sports, art, and community inclusion.</p>
             </m.div>
             <m.button
+              type="button"
               whileHover={{ x: 4 }}
               onClick={() => setPage("timeline")}
               className="hidden md:flex items-center gap-2 text-primary font-semibold hover:text-primary-hover transition-colors cursor-pointer"
@@ -907,6 +643,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
 
           <div className="mt-10 text-center md:hidden">
             <button
+              type="button"
               onClick={() => setPage("timeline")}
               className="w-full py-3.5 px-6 rounded-2xl bg-white border border-gray-200 text-primary font-semibold text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
@@ -934,6 +671,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <m.button
+              type="button"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => setPage("join")}
@@ -942,6 +680,7 @@ function Home({ setPage }: { setPage: (p: Page) => void }) {
               Become a Volunteer
             </m.button>
             <m.button
+              type="button"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => setShowDonateModal(true)}
@@ -1267,7 +1006,7 @@ function About() {
 }
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
-function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof MILESTONES[0]; index: number; onViewGallery: (filter: string) => void }) {
+function MilestoneCard({ milestone, index, onViewGallery }: Readonly<{ milestone: typeof MILESTONES[0]; index: number; onViewGallery: (filter: string) => void }>) {
   const hasGalleryPhotos = milestone.galleryFilter && GALLERY_PHOTOS.some(p => p.event === milestone.galleryFilter);
 
   return (
@@ -1297,8 +1036,8 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
           <p className="text-primary font-semibold italic text-base sm:text-lg">{milestone.tagline}</p>
         </div>
         <div className="space-y-4">
-          {milestone.description.split('\n\n').map((para, i) => (
-            <p key={i} className="text-gray-700 leading-relaxed text-sm sm:text-base">{para}</p>
+          {milestone.description.split('\n\n').map((para) => (
+            <p key={para} className="text-gray-700 leading-relaxed text-sm sm:text-base">{para}</p>
           ))}
         </div>
         <div className="mt-6 pt-6 border-t border-gray-200">
@@ -1319,6 +1058,7 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
             )}
             {milestone.galleryFilter && hasGalleryPhotos && (
               <button
+                type="button"
                 onClick={() => onViewGallery(milestone.galleryFilter!)}
                 className="inline-flex items-center gap-2 bg-surface hover:bg-gray-200 text-text-main font-semibold text-sm px-4 py-2 rounded-full transition-colors hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2"
               >
@@ -1333,7 +1073,7 @@ function MilestoneCard({ milestone, index, onViewGallery }: { milestone: typeof 
   );
 }
 
-function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }) {
+function Timeline({ onViewGallery }: Readonly<{ onViewGallery: (filter: string) => void }>) {
   return (
     <div>
       {/* Hero Section */}
@@ -1360,7 +1100,7 @@ function Timeline({ onViewGallery }: { onViewGallery: (filter: string) => void }
       <section className="py-16 sm:py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {MILESTONES.map((milestone, i) => (
-            <MilestoneCard key={i} milestone={milestone} index={i} onViewGallery={onViewGallery} />
+            <MilestoneCard key={milestone.title} milestone={milestone} index={i} onViewGallery={onViewGallery} />
           ))}
           <div className="flex justify-start pl-4 sm:pl-5 mt-4 sm:mt-8">
             <div className="w-3 h-3 rounded-full bg-primary animate-ping" />
@@ -1436,11 +1176,11 @@ function GalleryCard({
   photo,
   index,
   onClick,
-}: {
+}: Readonly<{
   photo: GalleryPhoto;
   index: number;
   onClick: () => void;
-}) {
+}>) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
@@ -1475,7 +1215,7 @@ function GalleryCard({
   );
 }
 
-function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setActiveFilter: (f: string) => void }) {
+function Gallery({ activeFilter, setActiveFilter }: Readonly<{ activeFilter: string; setActiveFilter: (f: string) => void }>) {
   const [lightbox, setLightbox] = useState<typeof GALLERY_PHOTOS[0] | null>(null);
   const [visibleCount, setVisibleCount] = useState(INITIAL_GALLERY_COUNT);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -1549,6 +1289,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
               className="flex flex-wrap justify-center gap-3"
             >
               <button
+                type="button"
                 onClick={() => handleFilterChange("All")}
                 className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === "All"
                     ? "bg-primary text-white shadow-md shadow-primary/25"
@@ -1560,6 +1301,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
               {allFilters.map((filter) => (
                 <button
                   key={filter.slug}
+                  type="button"
                   onClick={() => handleFilterChange(filter.slug)}
                   className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 ${activeFilter === filter.slug
                       ? "bg-primary text-white shadow-md shadow-primary/25"
@@ -1642,7 +1384,7 @@ function Gallery({ activeFilter, setActiveFilter }: { activeFilter: string; setA
               onClick={e => e.stopPropagation()}
               className="relative max-w-3xl w-full rounded-3xl overflow-hidden shadow-2xl bg-white"
             >
-              <button onClick={() => setLightbox(null)} className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white p-2 rounded-full shadow transition-colors" aria-label="Close">
+              <button type="button" onClick={() => setLightbox(null)} className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white p-2 rounded-full shadow transition-colors" aria-label="Close">
                 <X className="w-5 h-5 text-text-main" />
               </button>
               <img src={lightbox.src} alt={lightbox.alt} loading="lazy" className="w-full object-cover max-h-[70vh]" />
@@ -1791,7 +1533,7 @@ function JoinUs() {
 }
 
 // ─── 404 Page ─────────────────────────────────────────────────────────────────
-function NotFound({ setPage }: { setPage: (p: Page) => void }) {
+function NotFound({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
   return (
     <div className="min-h-[75vh] flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background Decorative Glows */}
@@ -1887,6 +1629,7 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
               return (
                 <button
                   key={item.target}
+                  type="button"
                   onClick={() => setPage(item.target)}
                   className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-surface/70 hover:bg-primary/10 text-gray-700 hover:text-primary transition-colors duration-200 group text-center"
                 >
@@ -1902,26 +1645,420 @@ function NotFound({ setPage }: { setPage: (p: Page) => void }) {
   );
 }
 
+// ─── Legal Page Wrapper ────────────────────────────────────────────────────────
+function LegalPageWrapper({ title, subtitle, icon, children, setPage }: {
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  setPage: (p: Page) => void;
+}) {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-primary/10 via-white to-purple-50 border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <button
+            onClick={() => setPage("home")}
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors mb-8 group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </button>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              {icon}
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-display font-bold text-text-main">{title}</h1>
+              <p className="text-gray-500 text-sm mt-1">Last updated: August 2025</p>
+            </div>
+          </div>
+          <p className="text-gray-600 text-base leading-relaxed max-w-2xl">{subtitle}</p>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function LegalSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+      <h2 className="text-lg font-display font-bold text-text-main mb-4 pb-3 border-b border-gray-100">{title}</h2>
+      <div className="text-gray-600 text-sm leading-relaxed space-y-3">{children}</div>
+    </section>
+  );
+}
+
+// ─── Terms of Service ────────────────────────────────────────────────────────
+function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <LegalPageWrapper
+      title="Terms of Service"
+      subtitle="Please read these terms carefully before making a donation to Inclusiverse through our Razorpay-powered crowdfunding platform."
+      icon={<FileText className="w-6 h-6" />}
+      setPage={setPage}
+    >
+      <LegalSection title="1. Acceptance of Terms">
+        <p>By accessing our website and making a donation, you confirm that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree with any part of these terms, please do not proceed with your donation.</p>
+      </LegalSection>
+
+      <LegalSection title="2. About Inclusiverse">
+        <p>Inclusiverse is a student-led initiative operating under Christ University, Lavasa Campus. We organize inclusive events and activities for children with disabilities. Donations collected through this platform are managed by designated student volunteers on behalf of Inclusiverse.</p>
+        <p>All funds raised go directly toward organizing events, procuring materials, and supporting participants in our inclusive programs.</p>
+      </LegalSection>
+
+      <LegalSection title="3. Nature of Donations">
+        <p>All contributions made through this platform are <strong>voluntary donations</strong> to support Inclusiverse's crowdfunding initiatives. Donations are not purchases of goods or services. By donating, you acknowledge:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Your contribution is a voluntary gift to support Inclusiverse's mission.</li>
+          <li>Donations are <strong>strictly non-refundable</strong> once processed (see our No Refund Policy).</li>
+          <li>You will receive no goods, services, equity, or reward in exchange for your donation.</li>
+          <li>Inclusiverse is not a registered NGO or charitable trust; donations may not be tax-deductible.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="4. Payment Processing">
+        <p>All payments are processed securely through <strong>Razorpay</strong>, a third-party payment gateway. By making a payment, you also agree to Razorpay's Terms of Service and Privacy Policy available at <a href="https://razorpay.com/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline">razorpay.com/terms</a>.</p>
+        <p>We accept UPI, Credit/Debit Cards, Net Banking, and Wallets. All transactions are encrypted and secured by Razorpay's infrastructure.</p>
+      </LegalSection>
+
+      <LegalSection title="5. Use of Funds">
+        <p>Donated funds are used exclusively for Inclusiverse activities including but not limited to:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Event organization and logistics</li>
+          <li>Participant transportation and meals</li>
+          <li>Event materials, equipment, and supplies</li>
+          <li>Volunteer coordination</li>
+        </ul>
+        <p className="mt-2">We are committed to transparent and responsible use of all contributions.</p>
+      </LegalSection>
+
+      <LegalSection title="6. Donor Obligations">
+        <p>By donating, you confirm that:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>You are at least 18 years of age or have parental consent.</li>
+          <li>The funds used for donation are from legitimate sources.</li>
+          <li>You are not violating any applicable laws by making this donation.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="7. Changes to Terms">
+        <p>Inclusiverse reserves the right to modify these Terms of Service at any time. Continued use of the platform after changes constitutes acceptance of the revised terms. We encourage you to review this page periodically.</p>
+      </LegalSection>
+
+      <LegalSection title="8. Contact">
+        <p>For any questions regarding these terms, please <button onClick={() => setPage("contact")} className="text-primary underline hover:text-primary/80">contact us</button>.</p>
+      </LegalSection>
+    </LegalPageWrapper>
+  );
+}
+
+// ─── Privacy Policy ──────────────────────────────────────────────────────────
+function PrivacyPolicy({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <LegalPageWrapper
+      title="Privacy Policy"
+      subtitle="Your privacy matters to us. This policy explains how Inclusiverse collects, uses, and protects your information when you donate through our platform."
+      icon={<CheckCircle2 className="w-6 h-6" />}
+      setPage={setPage}
+    >
+      <LegalSection title="1. Information We Collect">
+        <p>When you make a donation through Razorpay, the following information may be collected:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li><strong>Personal details:</strong> Name, email address, phone number (optional, entered in Razorpay checkout)</li>
+          <li><strong>Transaction data:</strong> Payment amount, transaction ID, payment method used</li>
+          <li><strong>Technical data:</strong> Browser type, device information, IP address (collected automatically)</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="2. How We Use Your Information">
+        <p>The information collected is used solely for:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Processing and confirming your donation</li>
+          <li>Sending transaction receipts (via Razorpay)</li>
+          <li>Communicating updates about Inclusiverse (only if you opt in)</li>
+          <li>Internal reporting and fund reconciliation</li>
+        </ul>
+        <p className="mt-2">We do <strong>not</strong> sell, rent, or share your personal information with third parties for marketing purposes.</p>
+      </LegalSection>
+
+      <LegalSection title="3. Razorpay's Role">
+        <p>Payment information (card numbers, UPI IDs, bank details) is processed directly by Razorpay and is never stored on our servers. Razorpay is PCI-DSS compliant. Please review <a href="https://razorpay.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary underline">Razorpay's Privacy Policy</a> for details on how they handle your payment data.</p>
+      </LegalSection>
+
+      <LegalSection title="4. Data Security">
+        <p>We implement reasonable administrative and technical safeguards to protect your data. However, no internet transmission is 100% secure. We encourage donors to use secure networks when making payments.</p>
+      </LegalSection>
+
+      <LegalSection title="5. Data Retention">
+        <p>Transaction records are retained for accounting and compliance purposes for a minimum of 3 years. Personal information is retained only as long as necessary for the purposes described above.</p>
+      </LegalSection>
+
+      <LegalSection title="6. Your Rights">
+        <p>You have the right to:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Request access to the personal data we hold about you</li>
+          <li>Request correction of inaccurate information</li>
+          <li>Request deletion of your data (subject to legal obligations)</li>
+        </ul>
+        <p className="mt-2">To exercise these rights, please <button onClick={() => setPage("contact")} className="text-primary underline hover:text-primary/80">contact us</button>.</p>
+      </LegalSection>
+
+      <LegalSection title="7. Cookies">
+        <p>Our website may use minimal cookies for basic functionality (e.g., remembering accessibility preferences). We do not use tracking or advertising cookies. Razorpay's checkout may use cookies governed by their own policy.</p>
+      </LegalSection>
+
+      <LegalSection title="8. Changes to This Policy">
+        <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated revision date.</p>
+      </LegalSection>
+    </LegalPageWrapper>
+  );
+}
+
+// ─── Cancellation Policy ─────────────────────────────────────────────────────
+function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <LegalPageWrapper
+      title="Cancellation Policy"
+      subtitle="Important information about donation cancellations for Inclusiverse's crowdfunding initiative processed via Razorpay."
+      icon={<AlertCircle className="w-6 h-6" />}
+      setPage={setPage}
+    >
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-3">
+        <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="font-semibold text-amber-800 text-sm">Important Notice</p>
+          <p className="text-amber-700 text-sm mt-1">Donations to Inclusiverse are final and cannot be cancelled once the payment is initiated and confirmed. Please review your donation amount carefully before proceeding.</p>
+        </div>
+      </div>
+
+      <LegalSection title="1. Pre-Payment Cancellation">
+        <p>You may cancel or exit the Razorpay payment window at any time <strong>before</strong> confirming your payment. Simply close the Razorpay checkout or click "Cancel." No amount will be charged if the payment is not completed.</p>
+      </LegalSection>
+
+      <LegalSection title="2. Post-Payment Cancellation">
+        <p>Once a donation payment is <strong>successfully processed</strong> through Razorpay, it is considered final and <strong>cannot be cancelled</strong>. This is because:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Donations are immediately allocated toward Inclusiverse's event planning and operations.</li>
+          <li>Crowdfunding contributions are voluntary gifts with no obligation of return.</li>
+          <li>Processing and gateway fees incurred are non-recoverable.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="3. Failed Transactions">
+        <p>If your payment fails or is declined but an amount has been debited from your account, please note:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Failed transaction reversals are handled automatically by Razorpay and your bank, typically within 5–7 business days.</li>
+          <li>You will not be charged for failed transactions that do not result in a successful payment confirmation.</li>
+          <li>If you face any issues, please <button onClick={() => setPage("contact")} className="text-primary underline hover:text-primary/80">contact us</button> immediately with your transaction details.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="4. Duplicate Payments">
+        <p>If you accidentally make a duplicate donation, please contact us within 48 hours with both transaction IDs. We will review the case on a goodwill basis and may issue a refund for the duplicate amount at our sole discretion, subject to Razorpay's refund capabilities.</p>
+      </LegalSection>
+
+      <LegalSection title="5. Technical Errors">
+        <p>In case of technical errors where payment is deducted but not confirmed on our end, please reach out to us with your payment reference number. We will investigate with Razorpay and resolve the issue promptly.</p>
+      </LegalSection>
+    </LegalPageWrapper>
+  );
+}
+
+// ─── No Refund Policy ────────────────────────────────────────────────────────
+function NoRefundPolicy({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <LegalPageWrapper
+      title="No Refund Policy"
+      subtitle="All donations made to Inclusiverse through our Razorpay payment gateway are non-refundable. Please read this policy before contributing."
+      icon={<AlertCircle className="w-6 h-6" />}
+      setPage={setPage}
+    >
+      <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex gap-3">
+        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="font-semibold text-red-800 text-sm">No Refunds on Donations</p>
+          <p className="text-red-700 text-sm mt-1">All donations to Inclusiverse are strictly non-refundable. By completing your donation, you acknowledge and accept this policy in full.</p>
+        </div>
+      </div>
+
+      <LegalSection title="1. Non-Refundable Nature of Donations">
+        <p>Inclusiverse operates as a <strong>crowdfunding-based charitable initiative</strong>. All donations collected through our Razorpay-powered platform are:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Voluntary contributions made freely by the donor</li>
+          <li>Immediately directed toward planned events and operations</li>
+          <li>Not exchangeable for goods, services, or any monetary return</li>
+          <li><strong>Non-refundable</strong> under all circumstances once payment is successfully processed</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="2. Why We Cannot Issue Refunds">
+        <p>Our no-refund policy exists because:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li><strong>Crowdfunding nature:</strong> Like all crowdfunding platforms, contributions are pooled and used collectively toward a common cause.</li>
+          <li><strong>Operational commitments:</strong> Funds are planned and committed to event vendors, transportation, and participant support well in advance.</li>
+          <li><strong>Gateway fees:</strong> Razorpay charges payment processing fees which are deducted at the time of transaction and cannot be recovered.</li>
+          <li><strong>Voluntary contribution:</strong> Donations are gifts, not purchases, and do not carry a right to refund.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="3. Exceptions">
+        <p>The only exceptions where we may consider a refund at our <strong>sole discretion</strong> are:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>Verified duplicate payments (same donor, same amount, processed twice within minutes)</li>
+          <li>Payment debited but order/confirmation not received due to a verified technical failure</li>
+        </ul>
+        <p className="mt-2">Even in these exceptional cases, any refund is subject to Razorpay's refund timeline (typically 5–10 business days) and our internal review process. We do not guarantee a refund in any case.</p>
+      </LegalSection>
+
+      <LegalSection title="4. Chargebacks">
+        <p>Initiating an unauthorized chargeback or dispute for a valid donation transaction is a violation of these terms. We reserve the right to contest any chargeback with Razorpay and your card issuer by providing transaction evidence. Donors who initiate fraudulent chargebacks may be banned from future participation in Inclusiverse events.</p>
+      </LegalSection>
+
+      <LegalSection title="5. Donor Acknowledgment">
+        <p>By proceeding with a donation, you explicitly acknowledge that:</p>
+        <ul className="list-disc ml-5 space-y-1 mt-2">
+          <li>You have read and understood this No Refund Policy.</li>
+          <li>Your donation is final and non-refundable once processed.</li>
+          <li>You are donating voluntarily to support Inclusiverse's inclusive initiatives.</li>
+          <li>You will not dispute the charge unless a verified technical error has occurred.</li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="6. Contact for Concerns">
+        <p>If you have concerns before donating, please <button onClick={() => setPage("contact")} className="text-primary underline hover:text-primary/80">contact us</button> before making a payment. We're happy to answer any questions about how your funds will be used.</p>
+      </LegalSection>
+    </LegalPageWrapper>
+  );
+}
+
+
+// ─── Contact Us ───────────────────────────────────────────────────────────────
+function ContactUs({ setPage }: { setPage: (p: Page) => void }) {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-primary/10 via-white to-purple-50 border-b border-gray-100">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <button
+            onClick={() => setPage("home")}
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary transition-colors mb-8 group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </button>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              <Mail className="w-6 h-6" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-display font-bold text-text-main">Contact Us</h1>
+          </div>
+          <p className="text-gray-600 text-base leading-relaxed max-w-2xl">Have a question about your donation, our events, or our policies? Reach out directly — our student team typically responds within 1–2 business days.</p>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">
+        {/* Get in Touch */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+          <h3 className="font-display font-bold text-text-main mb-6 text-base">Get in Touch</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Mail className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Email</p>
+                <a href="mailto:inclusiverse.christuniversity@gmail.com" className="text-sm text-primary hover:underline break-all">inclusiverse.christuniversity@gmail.com</a>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Instagram className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Instagram</p>
+                <a href="https://www.instagram.com/inclusiverse.christuniversity" target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">@inclusiverse.christuniversity</a>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Linkedin className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">LinkedIn</p>
+                <a href="https://www.linkedin.com/company/inclusiverse-club" target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Inclusiverse Club</a>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Location</p>
+                <a href="https://maps.app.goo.gl/kV1XKQ1xFksGbzqU6" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-primary transition-colors">Christ University, Lavasa Campus</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Donation Queries */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+          <h3 className="font-display font-bold text-text-main mb-3 text-base">Donation Queries?</h3>
+          <p className="text-sm text-gray-500 leading-relaxed mb-5">For issues related to payments, duplicate transactions, or technical errors with Razorpay, please email us directly with your <strong>Razorpay Payment ID</strong> and we will get back to you within 2 business days.</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {(["Terms of Service", "Privacy Policy", "Cancellation Policy", "No Refund Policy"] as const).map((label) => {
+              const map: Record<string, Page> = {
+                "Terms of Service": "tos",
+                "Privacy Policy": "privacy",
+                "Cancellation Policy": "cancellation",
+                "No Refund Policy": "no-refund",
+              };
+              return (
+                <button
+                  key={label}
+                  onClick={() => setPage(map[label])}
+                  className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors group text-left"
+                >
+                  <ChevronRight className="w-3 h-3 text-primary/60 group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const ALL_PAGES: Page[] = ["home", "about", "timeline", "gallery", "join", "404", "tos", "privacy", "cancellation", "no-refund", "contact"];
+
 function getInitialPage(): Page {
   if (typeof window !== "undefined") {
     const params = new URLSearchParams(window.location.search);
     const p = params.get("page") as Page;
     if (p) {
-      if (["home", "about", "team", "timeline", "gallery", "join", "404"].includes(p)) {
+      if (ALL_PAGES.includes(p)) {
         return p;
       }
       return "404";
     }
     const hash = window.location.hash.replace("#", "") as Page;
     if (hash) {
-      if (["home", "about", "team", "timeline", "gallery", "join", "404"].includes(hash)) {
+      if (ALL_PAGES.includes(hash)) {
         return hash;
       }
       return "404";
     }
     const pathname = window.location.pathname.replace(/^\/|\/$/g, "");
     if (pathname && !["index.html", ""].includes(pathname)) {
-      if (["home", "about", "team", "timeline", "gallery", "join", "404"].includes(pathname)) {
+      if (ALL_PAGES.includes(pathname as Page)) {
         return pathname as Page;
       }
       return "404";
@@ -2045,6 +2182,31 @@ export default function App() {
     "404": (
       <Skeleton name="page-404" loading={pageLoading}>
         <NotFound setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    tos: (
+      <Skeleton name="page-tos" loading={pageLoading}>
+        <TermsOfService setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    privacy: (
+      <Skeleton name="page-privacy" loading={pageLoading}>
+        <PrivacyPolicy setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    cancellation: (
+      <Skeleton name="page-cancellation" loading={pageLoading}>
+        <CancellationPolicy setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    "no-refund": (
+      <Skeleton name="page-no-refund" loading={pageLoading}>
+        <NoRefundPolicy setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    contact: (
+      <Skeleton name="page-contact" loading={pageLoading}>
+        <ContactUs setPage={handleSetPage} />
       </Skeleton>
     ),
   }[page] || (
