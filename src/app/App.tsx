@@ -1402,6 +1402,7 @@ function Gallery({ activeFilter, setActiveFilter }: Readonly<{ activeFilter: str
 
 // ─── Join Us Page ─────────────────────────────────────────────────────────────
 const CHRIST_UNIVERSITY_VOLUNTEER_FORM_URL = "https://forms.gle/fEb1WZTyRLXr1mLA9";
+const OUTSIDE_VOLUNTEER_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScwkOV4thGYIzt_I9tnsy6gij6AK2E8byMk1PEB3gQv27_Nwg/viewform?usp=publish-editor";
 
 function JoinUs() {
   return (
@@ -1454,37 +1455,36 @@ function JoinUs() {
           </div>
         </m.a>
 
-        {/* Card 2: Outside Volunteer - Coming Soon */}
-        <m.div
-          whileHover={{ y: -4 }}
+        {/* Card 2: Outside Volunteer */}
+        <m.a
+          href={OUTSIDE_VOLUNTEER_FORM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ y: -6 }}
+          whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.3 }}
-          className="bg-white border-2 border-gray-200/80 rounded-3xl p-8 sm:p-10 flex flex-col justify-between shadow-sm relative text-left"
+          className="bg-white border-2 border-gray-200/80 hover:border-primary rounded-3xl p-8 sm:p-10 flex flex-col justify-between shadow-sm hover:shadow-xl transition-shadow duration-300 relative group cursor-pointer block text-left"
         >
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center shadow-xs">
-                <Users className="w-8 h-8" />
-              </div>
-              <span className="px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/70 text-amber-700 text-xs font-bold uppercase tracking-wide">
-                Coming Soon
-              </span>
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-colors duration-300 shadow-sm">
+              <Users className="w-8 h-8" />
             </div>
             <div className="inline-block px-3 py-1 rounded-full bg-surface text-gray-600 text-xs font-bold uppercase tracking-wider mb-3">
               Community & Global
             </div>
-            <h3 className="text-2xl sm:text-3xl font-display font-bold text-text-main mb-3">
-              Outside Volunteer
+            <h3 className="text-2xl sm:text-3xl font-display font-bold text-text-main mb-3 group-hover:text-primary transition-colors">
+              External Volunteer
             </h3>
             <p className="text-gray-600 text-base leading-relaxed mb-8">
-              Join our broader community from anywhere. Opportunities for creative design, social outreach, partner school collaborations, and mentorship will open soon.
+              Join our broader community from anywhere. Help with creative design, outreach, partner school collaborations, and mentorship opportunities.
             </p>
           </div>
 
-          <div className="w-full py-4 px-6 rounded-2xl bg-gray-100 border border-gray-200/70 text-gray-500 font-semibold text-base flex items-center justify-center gap-2 select-none cursor-not-allowed">
-            <span>Applications Opening Soon</span>
-            <Sparkles className="w-4 h-4 text-amber-500" />
+          <div className="w-full py-4 px-6 rounded-2xl bg-primary group-hover:bg-primary-hover text-white font-semibold text-base transition-colors shadow-md shadow-primary/25 group-hover:shadow-lg flex items-center justify-center gap-2 group-hover:gap-3">
+            <span>Apply via Google Form</span>
+            <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </div>
-        </m.div>
+        </m.a>
       </div>
 
       {/* Direct Contact & Social Links */}
