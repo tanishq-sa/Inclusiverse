@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Heart, Menu, X, ArrowRight, ChevronRight, PlayCircle, Camera, FileText, GraduationCap, Users, MapPin, InstagramIcon, LinkedinIcon, Home as HomeIcon, Compass, Sparkles, CheckCircle2, ExternalLink } from "lucide-react";
+import { Heart, Menu, X, ArrowRight, ChevronRight, PlayCircle, Camera, FileText, GraduationCap, Users, MapPin, InstagramIcon, LinkedinIcon, Home as HomeIcon, Compass, Sparkles, CheckCircle2, ExternalLink, Mail, Instagram, Linkedin } from "lucide-react";
 import { LazyMotion, domAnimation, m, AnimatePresence, Variants } from "motion/react";
 import { Skeleton } from "boneyard-js/react";
 import GALLERY_PHOTOS_RAW from "../data/photos.json";
@@ -14,7 +14,7 @@ const GALLERY_EVENTS = GALLERY_EVENTS_RAW as GalleryEvent[];
 
 
 // ─── Simple router ────────────────────────────────────────────────────────────
-type Page = "home" | "about" | "timeline" | "gallery" | "join" | "404" | "tos" | "privacy" | "cancellation" | "no-refund" | "contact";
+type Page = "home" | "about" | "team" | "timeline" | "gallery" | "join" | "404" | "tos" | "privacy" | "cancellation" | "no-refund" | "contact";
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
 function Nav({ page, setPage, isDyslexic, toggleDyslexic }: Readonly<{

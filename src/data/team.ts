@@ -46,11 +46,9 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "President",
     category: "Core Leadership",
     bio: "Student leader directing the vision and operations of Inclusiverse, orchestrating flagship initiatives, partnerships, and championing the cause of inclusion.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6ywsa7uRI26sVNZ7wqPeaEdJ9BkRWQVEvfPslJXUbCw&s",
-    imagePosition: "82% 90%",
-    imageScale: 4.2,
+    image: "/MayankSharma.jpg",
     email: "mayank.sharma@inclusiverse.org",
-    linkedin: "https://linkedin.com",
+    linkedin: "https://www.linkedin.com/in/mayank-sharma-191a85359/",
     initials: "MS"
   },
   {
@@ -59,11 +57,9 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Secretary",
     category: "Core Leadership",
     bio: "Student leader overseeing administrative coordination, strategic communications, event planning, and student volunteer mobilization.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJCbGLzh63kFqiM3T4bUdwYObSTFV89RYE6cO0pjAoRlIbEHxir4QYY58&s=10",
-    imagePosition: "72% 54%",
-    imageScale: 2.3,
+    image: "/NishitaGupta.jpg",
     email: "nishita.gupta@inclusiverse.org",
-    linkedin: "https://linkedin.com",
+    linkedin: "https://www.linkedin.com/in/-nishita-gupta/",
     initials: "NG"
   },
   // Advisory Board (Students)
@@ -75,7 +71,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     bio: "Student advisor providing strategic guidance, youth advocacy, and mentorship to scale inclusive events and impactful community programs.",
     image: "https://media.licdn.com/dms/image/v2/D4D03AQEbboHe3pYm6Q/profile-displayphoto-shrink_200_200/B4DZaq019zGwAY-/0/1746622703820?e=2147483647&v=beta&t=Q1GUltj3K_33ECGkcHijNLAl5M0troqBv9SBRlM4UpY", // Placeholder - user will upload image later
     email: "nitya.gupta@inclusiverse.org",
-    linkedin: "https://linkedin.com",
+    linkedin: "https://www.linkedin.com/in/nityaa-g/",
     initials: "NG"
   },
   {
@@ -86,7 +82,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     bio: "Student advisor contributing to community outreach, student engagement, and logistics to expand the reach and accessibility of our social initiatives.",
     image: "https://media.licdn.com/dms/image/v2/D5603AQFrUz3Ul72dvQ/profile-displayphoto-scale_200_200/B56Z3DbfzyIUAY-/0/1777100261111?e=2147483647&v=beta&t=3AmHmvPKDOMie5mTyJNCUz9Hy1bplklpIIDx6FNRIno", // Placeholder - user will upload image later
     email: "ashish@inclusiverse.org",
-    linkedin: "https://linkedin.com",
+    linkedin: "https://www.linkedin.com/in/ashish-kumar-b49517235/",
     initials: "A"
   },
   {
@@ -97,7 +93,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     bio: "Student advisor guiding digital initiatives, technical infrastructure, creative storytelling, and continuous innovation for Inclusiverse.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCyUoANsrmMKLkl7NayHtPUzyUgGvKsGPYYDe-rZnuxQ&s", // Placeholder - user will upload image later
     email: "tanishq.saini@inclusiverse.org",
-    linkedin: "https://linkedin.com",
+    linkedin: "https://www.linkedin.com/in/tanishq-saini7/",
     initials: "TS"
   }
 ];
