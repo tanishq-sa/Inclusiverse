@@ -6,7 +6,6 @@ import { MILESTONES } from "../data/milestones";
 import GALLERY_PHOTOS_RAW from "../../data/photos.json";
 import GALLERY_EVENTS_RAW from "../../data/events.json";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { DonateModal } from "../components/DonateModal";
 
 const GALLERY_PHOTOS = GALLERY_PHOTOS_RAW as GalleryPhoto[];
 const GALLERY_EVENTS = GALLERY_EVENTS_RAW as GalleryEvent[];
@@ -25,7 +24,6 @@ const fadeUpItem: Variants = {
 };
 
 export function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
-  const [showDonateModal, setShowDonateModal] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSlideshowPaused, setIsSlideshowPaused] = useState(false);
 
@@ -365,15 +363,6 @@ export function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
             >
               Become a Volunteer
             </m.button>
-            <m.button
-              type="button"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setShowDonateModal(true)}
-              className="relative bg-surface hover:bg-gray-200 text-text-main px-8 py-4 rounded-full font-medium text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 cursor-pointer"
-            >
-              Donate Now
-            </m.button>
           </div>
         </m.div>
       </section>
@@ -486,10 +475,6 @@ export function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
           </div>
         </div>
       </section>
-
-      <AnimatePresence>
-        {showDonateModal && <DonateModal onClose={() => setShowDonateModal(false)} />}
-      </AnimatePresence>
     </>
   );
 }

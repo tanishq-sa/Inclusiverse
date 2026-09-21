@@ -42,11 +42,11 @@ export function NoRefundPolicy({ setPage }: { setPage: (p: Page) => void }) {
         <p>Our no-refund policy exists because:</p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>
-            <strong>Event planning:</strong> Ticket sales are used to fund the event.
+            <strong>Event planning:</strong> Ticket sales are used to organize the event.
           </li>
           <li>
-            <strong>Operational commitments:</strong> Funds are planned and committed to event
-            vendors, transportation, and participant support well in advance.
+            <strong>Operational commitments:</strong> Ticket revenues are planned and committed to event
+            logistics well in advance.
           </li>
           <li>
             <strong>Gateway fees:</strong> Razorpay charges payment processing fees which are
@@ -107,8 +107,8 @@ export function NoRefundPolicy({ setPage }: { setPage: (p: Page) => void }) {
           >
             contact us
           </button>{" "}
-          before making a payment. We're happy to answer any questions about how your funds will be
-          used.
+          before making a payment. We're happy to answer any questions about how your payment will be
+          used to create an inclusive experience!
         </p>
       </LegalSection>
     </LegalPageWrapper>
