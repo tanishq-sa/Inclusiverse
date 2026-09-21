@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Ticket } from "lucide-react";
 import { m, AnimatePresence } from "motion/react";
 import { Page } from "../types";
 
@@ -65,6 +65,16 @@ export function Nav({
             {link("Team", "team")}
             {link("Timeline", "timeline")}
             {link("Gallery", "gallery")}
+            {/* Tickets CTA */}
+            <m.button
+              onClick={() => setPage("tickets")}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-full font-semibold text-sm transition-colors shadow-sm hover:shadow-md focus:outline-none cursor-pointer"
+            >
+              <Ticket className="w-4 h-4" />
+              Get Tickets
+            </m.button>
             <m.button
               onClick={() => setPage("join")}
               whileHover={{ scale: 1.04 }}
@@ -120,6 +130,17 @@ export function Nav({
                 </button>
               );
             })}
+            <button
+              type="button"
+              onClick={() => {
+                setPage("tickets");
+                setMenuOpen(false);
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-full font-semibold text-sm transition-colors shadow-sm cursor-pointer"
+            >
+              <Ticket className="w-4 h-4" />
+              Get Tickets
+            </button>
             <button
               type="button"
               onClick={() => {
