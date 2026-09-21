@@ -26,7 +26,7 @@ export function Footer({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
             <p className="text-gray-400 max-w-md text-sm leading-relaxed">
               A student-led initiative dedicated to creating joyful, barrier-free, and empowering
               experiences for children with disabilities. Dignity over sympathy, community over
-              charity.
+              isolation.
             </p>
             <a
               href="https://maps.app.goo.gl/kV1XKQ1xFksGbzqU6"

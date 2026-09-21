@@ -38,7 +38,7 @@ export function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) 
         </p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>
-            Ticket funds are immediately allocated toward Inclusiverse's event planning and operations.
+            Ticket sales are immediately allocated toward Inclusiverse's event planning and operations.
           </li>
           <li>Event tickets are standard purchases for our events.</li>
           <li>Processing and gateway fees incurred are non-recoverable.</li>

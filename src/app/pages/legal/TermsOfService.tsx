@@ -27,8 +27,8 @@ export function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
           Inclusiverse.
         </p>
         <p>
-          All funds raised go directly toward organizing events, procuring materials, and supporting
-          participants in our inclusive programs.
+          All ticket sales go directly toward organizing events, procuring materials, and supporting
+          the student-led initiatives of Inclusiverse.
         </p>
       </LegalSection>
 
@@ -70,7 +70,7 @@ export function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
         </p>
       </LegalSection>
 
-      <LegalSection title="5. Use of Funds">
+      <LegalSection title="5. Use of Revenue">
         <p>Ticket proceeds are used exclusively for Inclusiverse activities including but not limited to:</p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>Event organization and logistics</li>
@@ -85,7 +85,7 @@ export function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
         <p>By purchasing a ticket, you confirm that:</p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>You are at least 18 years of age or have parental consent.</li>
-          <li>The funds used for purchase are from legitimate sources.</li>
+          <li>The payment method used for purchase is from legitimate sources.</li>
           <li>You are not violating any applicable laws by making this purchase.</li>
         </ul>
       </LegalSection>

@@ -34,7 +34,7 @@ export function PrivacyPolicy({ setPage }: { setPage: (p: Page) => void }) {
           <li>Processing and confirming your ticket purchase</li>
           <li>Sending transaction receipts (via Razorpay)</li>
           <li>Communicating updates about Inclusiverse (only if you opt in)</li>
-          <li>Internal reporting and fund reconciliation</li>
+          <li>Internal reporting and financial reconciliation</li>
         </ul>
         <p className="mt-2">
           We do <strong>not</strong> sell, rent, or share your personal information with third
