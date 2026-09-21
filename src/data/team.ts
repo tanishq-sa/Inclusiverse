@@ -22,7 +22,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     role: "Faculty Coordinator",
     category: "Faculty Coordinators",
     bio: "Guiding and mentoring the student team, fostering inclusivity, community engagement, and youth leadership across the campus.",
-    image: "https://www.linkedin.com/in/avichal-sharma-eco01/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3B8xa%2BzkjRSOypLGJ1CRe%2FcQ%3D%3D",
+    image: "/Avichal.png",
     email: "avichal.sharma@christuniversity.in",
     linkedin: "https://www.linkedin.com/in/avichal-sharma-eco01/",
     initials: "AS"
