@@ -18,6 +18,28 @@ app.use(
 );
 app.use(express.json());
 
+// ─── Serverless MongoDB Connection Middleware ─────────────────────────────────
+let isConnected = false;
+app.use(async (req, res, next) => {
+  if (isConnected) return next();
+  if (!process.env.MONGO_URI) {
+    console.error("❌ FATAL: MONGO_URI environment variable is missing.");
+    return res.status(500).json({ error: "Server misconfiguration" });
+  }
+  
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 5000 // fail fast if unable to connect
+    });
+    isConnected = true;
+    console.log("✅ Connected to MongoDB");
+    next();
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err.message);
+    res.status(500).json({ error: "Database connection failed" });
+  }
+});
+
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use("/api/bookings", bookingsRouter);
 app.use("/api/settings", require("./routes/settings"));
@@ -25,16 +47,6 @@ app.use("/api/settings", require("./routes/settings"));
 app.get("/", (req, res) => {
   res.json({ status: "ok", message: "Chhichhore API is running 🎬" });
 });
-
-// ─── MongoDB Connection ────────────────────────────────────────────────────────
-if (!process.env.MONGO_URI) {
-  console.error("❌ FATAL: MONGO_URI environment variable is missing.");
-} else {
-  mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ Connected to MongoDB"))
-    .catch((err) => console.error("❌ MongoDB connection failed:", err.message));
-}
 
 // Only start the local server if we are not on Vercel
 if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
