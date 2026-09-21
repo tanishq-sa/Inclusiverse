@@ -139,7 +139,7 @@ export function Footer({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
             ))}
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-            <p>© {new Date().getFullYear()} Inclusiverse. All rights reserved. Donations are non-refundable.</p>
+            <p>© {new Date().getFullYear()} Inclusiverse. All rights reserved. Event tickets are non-refundable.</p>
             <div className="flex items-center gap-1.5 text-gray-400 font-medium bg-white/5 px-3.5 py-1.5 rounded-full border border-white/5">
               <span>Designed & Developed by</span>
               <span className="text-white font-semibold flex items-center gap-1">

@@ -7,12 +7,12 @@ export function PrivacyPolicy({ setPage }: { setPage: (p: Page) => void }) {
   return (
     <LegalPageWrapper
       title="Privacy Policy"
-      subtitle="Your privacy matters to us. This policy explains how Inclusiverse collects, uses, and protects your information when you donate through our platform."
+      subtitle="Your privacy matters to us. This policy explains how Inclusiverse collects, uses, and protects your information when you purchase tickets through our platform."
       icon={<CheckCircle2 className="w-6 h-6" />}
       setPage={setPage}
     >
       <LegalSection title="1. Information We Collect">
-        <p>When you make a donation through Razorpay, the following information may be collected:</p>
+        <p>When you purchase an event ticket through Razorpay, the following information may be collected:</p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>
             <strong>Personal details:</strong> Name, email address, phone number (optional, entered in
@@ -31,7 +31,7 @@ export function PrivacyPolicy({ setPage }: { setPage: (p: Page) => void }) {
       <LegalSection title="2. How We Use Your Information">
         <p>The information collected is used solely for:</p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
-          <li>Processing and confirming your donation</li>
+          <li>Processing and confirming your ticket purchase</li>
           <li>Sending transaction receipts (via Razorpay)</li>
           <li>Communicating updates about Inclusiverse (only if you opt in)</li>
           <li>Internal reporting and fund reconciliation</li>
@@ -61,7 +61,7 @@ export function PrivacyPolicy({ setPage }: { setPage: (p: Page) => void }) {
       <LegalSection title="4. Data Security">
         <p>
           We implement reasonable administrative and technical safeguards to protect your data.
-          However, no internet transmission is 100% secure. We encourage donors to use secure
+          However, no internet transmission is 100% secure. We encourage users to use secure
           networks when making payments.
         </p>
       </LegalSection>

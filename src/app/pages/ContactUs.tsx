@@ -23,7 +23,7 @@ export function ContactUs({ setPage }: { setPage: (p: Page) => void }) {
             <h1 className="text-3xl sm:text-4xl font-display font-bold text-text-main">Contact Us</h1>
           </div>
           <p className="text-gray-600 text-base leading-relaxed max-w-2xl">
-            Have a question about your donation, our events, or our policies? Reach out directly —
+            Have a question about your ticket purchase, our events, or our policies? Reach out directly —
             our student team typically responds within 1–2 business days.
           </p>
         </div>
@@ -107,9 +107,9 @@ export function ContactUs({ setPage }: { setPage: (p: Page) => void }) {
           </div>
         </div>
 
-        {/* Donation Queries */}
+        {/* Ticket Queries */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
-          <h3 className="font-display font-bold text-text-main mb-3 text-base">Donation Queries?</h3>
+          <h3 className="font-display font-bold text-text-main mb-3 text-base">Ticket & Payment Queries?</h3>
           <p className="text-sm text-gray-500 leading-relaxed mb-5">
             For issues related to payments, duplicate transactions, or technical errors with
             Razorpay, please email us directly with your <strong>Razorpay Payment ID</strong> and we
