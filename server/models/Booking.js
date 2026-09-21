@@ -29,6 +29,7 @@ const bookingSchema = new mongoose.Schema({
   razorpayPaymentId: { type: String, required: true },
   razorpayOrderId: { type: String },
   status: { type: String, default: "paid" },
+  emailSent: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);
