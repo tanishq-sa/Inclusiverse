@@ -90,10 +90,13 @@ router.post("/", async (req, res) => {
       status: "paid",
     });
 
-    // Send confirmation email (non-blocking: don't fail booking if mail fails)
-    sendConfirmation(booking).catch((err) =>
-      console.error("[Mail] Failed to send confirmation:", err.message)
-    );
+    // Send confirmation email MUST BE AWAITED on Vercel, otherwise the lambda function 
+    // dies before the email actually gets sent. We catch errors so it doesn't fail the booking.
+    try {
+      await sendConfirmation(booking);
+    } catch (err) {
+      console.error("[Mail] Failed to send confirmation:", err.message);
+    }
 
     res.status(201).json({
       success: true,
