@@ -134,12 +134,13 @@ router.post("/upload-payment", upload.single("screenshot"), async (req, res) => 
     ];
 
     let status;
-    let tickets = [];
+
+    // Always generate tickets upfront to satisfy the unique ticketId index constraint
+    const tickets = generateTickets(allAttendees);
 
     if (ocrResult.isValid && ocrResult.confidence === "high") {
-      // Auto-approved: generate tickets immediately
+      // Auto-approved
       status = "paid";
-      tickets = generateTickets(allAttendees);
     } else {
       // Needs manual review
       status = "pending_review";
@@ -211,12 +212,7 @@ router.post("/review-payment", requireAdmin, async (req, res) => {
     }
 
     if (action === "approve") {
-      // Generate tickets
-      const allAttendees = [
-        { name: booking.primaryName, regNo: booking.primaryRegNo, email: booking.primaryEmail },
-        ...booking.attendees,
-      ];
-      booking.tickets = generateTickets(allAttendees);
+      // Tickets were already generated during upload, just update status
       booking.status = "paid";
       booking.reviewedBy = "manual";
       booking.reviewedAt = new Date();
