@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { v4: uuidv4 } = require("uuid");
+const crypto = require("crypto");
 const Booking = require("../models/Booking");
 const { sendConfirmation } = require("../mail/sendConfirmation");
 
@@ -69,7 +69,7 @@ router.post("/", async (req, res) => {
     ];
 
     const tickets = allAttendees.map((a) => ({
-      ticketId: uuidv4(),
+      ticketId: crypto.randomUUID(),
       attendeeName: a.name,
       attendeeRegNo: a.regNo,
       attendeeEmail: a.email,
