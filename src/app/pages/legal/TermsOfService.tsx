@@ -7,22 +7,22 @@ export function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
   return (
     <LegalPageWrapper
       title="Terms of Service"
-      subtitle="Please read these terms carefully before making a donation to Inclusiverse through our Razorpay-powered crowdfunding platform."
+      subtitle="Please read these terms carefully before purchasing an event ticket to Inclusiverse through our Razorpay-powered platform."
       icon={<FileText className="w-6 h-6" />}
       setPage={setPage}
     >
       <LegalSection title="1. Acceptance of Terms">
         <p>
-          By accessing our website and making a donation, you confirm that you have read, understood,
+          By accessing our website and purchasing a ticket, you confirm that you have read, understood,
           and agree to be bound by these Terms of Service. If you do not agree with any part of
-          these terms, please do not proceed with your donation.
+          these terms, please do not proceed with your purchase.
         </p>
       </LegalSection>
 
       <LegalSection title="2. About Inclusiverse">
         <p>
           Inclusiverse is a student-led initiative operating under Christ University, Lavasa Campus.
-          We organize inclusive events and activities for children with disabilities. Donations
+          We organize inclusive events and activities for children with disabilities. Ticket proceeds
           collected through this platform are managed by designated student volunteers on behalf of
           Inclusiverse.
         </p>
@@ -32,22 +32,19 @@ export function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
         </p>
       </LegalSection>
 
-      <LegalSection title="3. Nature of Donations">
+      <LegalSection title="3. Nature of Tickets">
         <p>
-          All contributions made through this platform are <strong>voluntary donations</strong> to
-          support Inclusiverse's crowdfunding initiatives. Donations are not purchases of goods or
-          services. By donating, you acknowledge:
+          All ticket purchases made through this platform are <strong>event tickets</strong> for
+          Inclusiverse's initiatives. By purchasing, you acknowledge:
         </p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
-          <li>Your contribution is a voluntary gift to support Inclusiverse's mission.</li>
+          <li>Your purchase secures your entry for the designated event.</li>
           <li>
-            Donations are <strong>strictly non-refundable</strong> once processed (see our No Refund
+            Tickets are <strong>strictly non-refundable</strong> once processed (see our No Refund
             Policy).
           </li>
-          <li>You will receive no goods, services, equity, or reward in exchange for your donation.</li>
           <li>
-            Inclusiverse is not a registered NGO or charitable trust; donations may not be
-            tax-deductible.
+            Inclusiverse is a student-led initiative; ticket proceeds go toward event operations.
           </li>
         </ul>
       </LegalSection>
@@ -74,7 +71,7 @@ export function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
       </LegalSection>
 
       <LegalSection title="5. Use of Funds">
-        <p>Donated funds are used exclusively for Inclusiverse activities including but not limited to:</p>
+        <p>Ticket proceeds are used exclusively for Inclusiverse activities including but not limited to:</p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>Event organization and logistics</li>
           <li>Participant transportation and meals</li>
@@ -84,12 +81,12 @@ export function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
         <p className="mt-2">We are committed to transparent and responsible use of all contributions.</p>
       </LegalSection>
 
-      <LegalSection title="6. Donor Obligations">
-        <p>By donating, you confirm that:</p>
+      <LegalSection title="6. Attendee Obligations">
+        <p>By purchasing a ticket, you confirm that:</p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>You are at least 18 years of age or have parental consent.</li>
-          <li>The funds used for donation are from legitimate sources.</li>
-          <li>You are not violating any applicable laws by making this donation.</li>
+          <li>The funds used for purchase are from legitimate sources.</li>
+          <li>You are not violating any applicable laws by making this purchase.</li>
         </ul>
       </LegalSection>
 

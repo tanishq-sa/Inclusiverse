@@ -7,7 +7,7 @@ export function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) 
   return (
     <LegalPageWrapper
       title="Cancellation Policy"
-      subtitle="Important information about donation cancellations for Inclusiverse's crowdfunding initiative processed via Razorpay."
+      subtitle="Important information about event ticket cancellations for Inclusiverse processed via Razorpay."
       icon={<AlertCircle className="w-6 h-6" />}
       setPage={setPage}
     >
@@ -16,9 +16,9 @@ export function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) 
         <div>
           <p className="font-semibold text-amber-800 text-sm">Important Notice</p>
           <p className="text-amber-700 text-sm mt-1">
-            Donations to Inclusiverse are final and cannot be cancelled once the payment is
-            initiated and confirmed. Please review your donation amount carefully before
-            proceeding.
+          Event tickets for Inclusiverse are final and cannot be cancelled once the payment is
+          initiated and confirmed. Please review your purchase carefully before
+          proceeding.
           </p>
         </div>
       </div>
@@ -33,14 +33,14 @@ export function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) 
 
       <LegalSection title="2. Post-Payment Cancellation">
         <p>
-          Once a donation payment is <strong>successfully processed</strong> through Razorpay, it is
+          Once an event ticket payment is <strong>successfully processed</strong> through Razorpay, it is
           considered final and <strong>cannot be cancelled</strong>. This is because:
         </p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>
-            Donations are immediately allocated toward Inclusiverse's event planning and operations.
+            Ticket funds are immediately allocated toward Inclusiverse's event planning and operations.
           </li>
-          <li>Crowdfunding contributions are voluntary gifts with no obligation of return.</li>
+          <li>Event tickets are standard purchases for our events.</li>
           <li>Processing and gateway fees incurred are non-recoverable.</li>
         </ul>
       </LegalSection>
@@ -75,7 +75,7 @@ export function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) 
 
       <LegalSection title="4. Duplicate Payments">
         <p>
-          If you accidentally make a duplicate donation, please contact us within 48 hours with both
+          If you accidentally make a duplicate ticket purchase, please contact us within 48 hours with both
           transaction IDs. We will review the case on a goodwill basis and may issue a refund for the
           duplicate amount at our sole discretion, subject to Razorpay's refund capabilities.
         </p>

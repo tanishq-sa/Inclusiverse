@@ -13,6 +13,8 @@ export const ALL_PAGES: Page[] = [
   "cancellation",
   "no-refund",
   "contact",
+  "tickets",
+  "admin",
 ];
 
 export const PAGE_METADATA: Record<Page, { title: string; description: string }> = {
@@ -64,7 +66,7 @@ export const PAGE_METADATA: Record<Page, { title: string; description: string }>
   "no-refund": {
     title: "No Refund Policy — Inclusiverse",
     description:
-      "Non-profit initiative contribution and non-refundable donation policy for Inclusiverse.",
+      "Non-refundable ticket policy for Inclusiverse events.",
   },
   contact: {
     title: "Contact Us — Inclusiverse",
@@ -74,5 +76,14 @@ export const PAGE_METADATA: Record<Page, { title: string; description: string }>
   "404": {
     title: "Page Not Found — Inclusiverse",
     description: "The page you are looking for does not exist or has been moved.",
+  },
+  tickets: {
+    title: "Chhichhore Movie Screening Tickets — Inclusiverse",
+    description:
+      "Book your tickets for the Chhichhore movie screening on 1st October 2025, 9PM–11PM at Actinity Hub. Organised by Inclusiverse, Christ University Lavasa.",
+  },
+  admin: {
+    title: "Admin Panel — Inclusiverse",
+    description: "Inclusiverse event admin dashboard.",
   },
 };
