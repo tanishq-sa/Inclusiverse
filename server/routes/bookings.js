@@ -51,7 +51,7 @@ function generateTickets(allAttendees) {
 }
 
 // ─── Fixed pricing map ───────────────────────────────────────────────────────
-const PRICE_MAP = { 1: 49, 2: 99, 3: 139, 4: 179, 5: 209 };
+const PRICE_MAP = { 1: 59, 2: 99, 3: 139, 4: 179, 5: 219 };
 
 function getExpectedAmount(attendeeCount) {
   return PRICE_MAP[attendeeCount] || null;

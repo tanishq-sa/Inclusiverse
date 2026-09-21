@@ -3,11 +3,11 @@
  *
  * Base price: ₹59 per person
  * Group discounts applied as fixed totals:
- * 1 person → ₹49  (save ₹10)
+ * 1 person → ₹59  (no discount)
  * 2 people → ₹99  (save ₹19)
  * 3 people → ₹139 (save ₹38)
  * 4 people → ₹179 (save ₹57)
- * 5 people → ₹209 (save ₹86)
+ * 5 people → ₹219 (save ₹76)
  */
 
 export const BASE_PRICE_PER_PERSON = 59;
@@ -26,16 +26,16 @@ export interface TicketPricing {
 }
 
 const FIXED_TOTALS: Record<number, number> = {
-  1: 49,
+  1: 59,
   2: 99,
   3: 139,
   4: 179,
-  5: 209,
+  5: 219,
 };
 
 export function getTotal(count: number): number {
   const clamped = Math.min(Math.max(1, count), 5);
-  return FIXED_TOTALS[clamped] || 49;
+  return FIXED_TOTALS[clamped] || 59;
 }
 
 export function useTicketPricing(attendeeCount: number): TicketPricing {
@@ -51,7 +51,7 @@ export function useTicketPricing(attendeeCount: number): TicketPricing {
   });
 
   const originalTotal = safeCount * BASE_PRICE_PER_PERSON;
-  const total = FIXED_TOTALS[safeCount] || 49;
+  const total = FIXED_TOTALS[safeCount] || 59;
   const savings = originalTotal - total;
 
   return { breakdown, originalTotal, total, savings };

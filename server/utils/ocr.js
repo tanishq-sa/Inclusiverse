@@ -62,16 +62,11 @@ function analyzePaymentText(text, expectedAmount) {
   const hasFailKeyword = failKeywords.some((kw) => normalizedText.includes(kw));
   if (hasFailKeyword) reasons.push("Found failure keyword");
 
-  // Check for the expected amount
-  const amountStr = String(expectedAmount);
-  // Look for the amount with various formats: "₹49", "49.00", "Rs 49", "INR 49"
-  const amountPatterns = [
-    amountStr,
-    `${amountStr}.00`,
-    `${amountStr}.0`,
-  ];
-  const hasAmount = amountPatterns.some((p) => normalizedText.includes(p));
-  if (hasAmount) reasons.push(`Found amount ₹${expectedAmount}`);
+  // Look for the exact expected amount as a standalone number (e.g., matching "59" or "59.00" but not "759")
+  // We use a negative lookbehind (?<!:) to prevent matching minutes in a timestamp (like "12:59")
+  const exactAmountRegex = new RegExp(`(?<!:)\\b${expectedAmount}(?:\\.00?)?\\b`);
+  const hasAmount = exactAmountRegex.test(normalizedText);
+  if (hasAmount) reasons.push(`Found exact amount ₹${expectedAmount}`);
 
   // Determine confidence
   if (hasFailKeyword) {

@@ -40,7 +40,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 // ─── QR code images mapped by total amount ──────────────────────────────────
 const QR_IMAGES: Record<number, string> = {
-  49: "/gpay-qr-49.jpg",
+  59: "/gpay-qr-59.jpg",
   99: "/gpay-qr-99.jpg",
   139: "/gpay-qr-139.jpg",
   179: "/gpay-qr-179.jpg",
