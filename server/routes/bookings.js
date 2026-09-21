@@ -142,7 +142,14 @@ router.post("/checkin", requireAdmin, async (req, res) => {
 
     // Atomic update prevents race conditions if QR is scanned multiple times rapidly
     const booking = await Booking.findOneAndUpdate(
-      { "tickets.ticketId": ticketId, "tickets.checkedIn": false },
+      {
+        tickets: {
+          $elemMatch: {
+            ticketId: ticketId,
+            checkedIn: false,
+          },
+        },
+      },
       {
         $set: {
           "tickets.$.checkedIn": true,
@@ -196,7 +203,14 @@ router.post("/manual-checkin", requireAdmin, async (req, res) => {
 
     // Atomic update to prevent race conditions
     const booking = await Booking.findOneAndUpdate(
-      { "tickets.ticketId": ticketId, "tickets.checkedIn": false },
+      {
+        tickets: {
+          $elemMatch: {
+            ticketId: ticketId,
+            checkedIn: false,
+          },
+        },
+      },
       {
         $set: {
           "tickets.$.checkedIn": true,
