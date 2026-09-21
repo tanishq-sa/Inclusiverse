@@ -140,13 +140,26 @@ router.post("/checkin", requireAdmin, async (req, res) => {
       return res.status(400).json({ error: "ticketId is required" });
     }
 
-    const booking = await Booking.findOne({ "tickets.ticketId": ticketId });
-    if (!booking) {
-      return res.status(404).json({ error: "Invalid ticket — not found" });
-    }
+    // Atomic update prevents race conditions if QR is scanned multiple times rapidly
+    const booking = await Booking.findOneAndUpdate(
+      { "tickets.ticketId": ticketId, "tickets.checkedIn": false },
+      {
+        $set: {
+          "tickets.$.checkedIn": true,
+          "tickets.$.checkedInAt": new Date(),
+          "tickets.$.checkedInBy": "qr",
+        },
+      },
+      { new: true }
+    );
 
-    const ticket = booking.tickets.find((t) => t.ticketId === ticketId);
-    if (ticket.checkedIn) {
+    if (!booking) {
+      // If no document was updated, it's either invalid or already checked in
+      const existing = await Booking.findOne({ "tickets.ticketId": ticketId });
+      if (!existing) {
+        return res.status(404).json({ error: "Invalid ticket — not found" });
+      }
+      const ticket = existing.tickets.find((t) => t.ticketId === ticketId);
       return res.status(409).json({
         error: "Already checked in",
         attendeeName: ticket.attendeeName,
@@ -155,10 +168,7 @@ router.post("/checkin", requireAdmin, async (req, res) => {
       });
     }
 
-    ticket.checkedIn = true;
-    ticket.checkedInAt = new Date();
-    ticket.checkedInBy = "qr";
-    await booking.save();
+    const ticket = booking.tickets.find((t) => t.ticketId === ticketId);
 
     res.json({
       success: true,
@@ -184,24 +194,35 @@ router.post("/manual-checkin", requireAdmin, async (req, res) => {
       return res.status(400).json({ error: "ticketId is required" });
     }
 
-    const booking = await Booking.findOne({ "tickets.ticketId": ticketId });
-    if (!booking) {
-      return res.status(404).json({ error: "Ticket not found" });
-    }
+    // Atomic update to prevent race conditions
+    const booking = await Booking.findOneAndUpdate(
+      { "tickets.ticketId": ticketId, "tickets.checkedIn": false },
+      {
+        $set: {
+          "tickets.$.checkedIn": true,
+          "tickets.$.checkedInAt": new Date(),
+          "tickets.$.checkedInBy": "manual",
+        },
+      },
+      { new: true }
+    );
 
-    const ticket = booking.tickets.find((t) => t.ticketId === ticketId);
-    if (ticket.checkedIn) {
+    if (!booking) {
+      // Check if it's already checked in or invalid
+      const existing = await Booking.findOne({ "tickets.ticketId": ticketId });
+      if (!existing) {
+        return res.status(404).json({ error: "Invalid ticket — not found" });
+      }
+      const ticket = existing.tickets.find((t) => t.ticketId === ticketId);
       return res.status(409).json({
         error: "Already checked in",
         attendeeName: ticket.attendeeName,
+        attendeeRegNo: ticket.attendeeRegNo,
         checkedInAt: ticket.checkedInAt,
       });
     }
 
-    ticket.checkedIn = true;
-    ticket.checkedInAt = new Date();
-    ticket.checkedInBy = "manual";
-    await booking.save();
+    const ticket = booking.tickets.find((t) => t.ticketId === ticketId);
 
     res.json({
       success: true,
