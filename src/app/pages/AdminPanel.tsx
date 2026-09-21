@@ -648,6 +648,25 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [downloading, setDownloading] = useState<"emails" | "full" | null>(null);
   const [settings, setSettings] = useState<any>({ ticketsEnabled: true });
   const [settingsLoading, setSettingsLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+
+  const handleResendFailedEmails = async () => {
+    if (!window.confirm("Are you sure you want to resend failed ticket emails?")) return;
+    setResending(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/resend-failed-emails`, {
+        method: "POST",
+        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+      });
+      const data = await res.json();
+      alert(data.message);
+      if (data.success) fetchBookings();
+    } catch (err) {
+      alert("Failed to trigger resend. Please check the network.");
+    } finally {
+      setResending(false);
+    }
+  };
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -885,6 +904,15 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                     />
                   </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleResendFailedEmails}
+                  disabled={resending}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-50 border border-orange-200 text-sm font-medium text-orange-700 hover:bg-orange-100 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
+                >
+                  {resending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  Resend Failed Emails
+                </button>
                 <button
                   type="button"
                   onClick={() => downloadCSV("emails")}
