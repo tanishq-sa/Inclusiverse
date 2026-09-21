@@ -1,9 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_RAZORPAY_KEY_ID: string;
-  readonly VITE_RAZORPAY_KEY_SECRET: string;
-  // Add more VITE_ env variables here as needed
+  readonly VITE_API_BASE_URL: string;
+  readonly VITE_ADMIN_PASSCODE: string;
 }
 
 interface ImportMeta {
@@ -12,7 +11,3 @@ interface ImportMeta {
 
 declare module 'react-dom/client';
 declare module 'canvas-confetti';
-
-interface Window {
-  Razorpay: any;
-}

@@ -22,6 +22,11 @@ import {
   Camera,
   CameraOff,
   ClipboardList,
+  ImageIcon,
+  ThumbsUp,
+  ThumbsDown,
+  Mail,
+  Pencil,
 } from "lucide-react";
 import { m, AnimatePresence } from "motion/react";
 import { Html5Qrcode } from "html5-qrcode";
@@ -55,8 +60,14 @@ interface Booking {
   tickets: TicketInfo[];
   attendeeCount: number;
   totalAmount: number;
-  razorpayPaymentId: string;
+  razorpayPaymentId?: string;
+  paymentMethod?: string;
+  paymentScreenshotUrl?: string;
   status: string;
+  emailSent?: boolean;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  rejectionReason?: string;
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
@@ -635,9 +646,279 @@ function CheckInTab() {
   );
 }
 
+// ─── Reviews Tab ────────────────────────────────────────────────────────────────
+function ReviewsTab() {
+  const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [editingEmail, setEditingEmail] = useState<{ bookingId: string; ticketId?: string; current: string } | null>(null);
+  const [newEmail, setNewEmail] = useState("");
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const fetchPending = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/pending-reviews`, {
+        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+      });
+      const data = await res.json();
+      setPendingBookings(data.bookings || []);
+    } catch (err) {
+      console.error("Failed to fetch pending reviews", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchPending(); }, []);
+
+  const handleReview = async (bookingId: string, action: "approve" | "reject") => {
+    const reason = action === "reject" ? window.prompt("Rejection reason (optional):") : undefined;
+    if (action === "reject" && reason === null) return; // user cancelled prompt
+
+    setProcessingId(bookingId);
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/review-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        body: JSON.stringify({ bookingId, action, reason: reason || undefined }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        fetchPending();
+      } else {
+        alert(data.error || "Failed to process review");
+      }
+    } catch {
+      alert("Network error — please try again.");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleEditEmail = async () => {
+    if (!editingEmail || !newEmail.trim()) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/edit-email`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        body: JSON.stringify({
+          bookingId: editingEmail.bookingId,
+          ticketId: editingEmail.ticketId,
+          newEmail: newEmail.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Email updated!");
+        setEditingEmail(null);
+        setNewEmail("");
+        fetchPending();
+      } else {
+        alert(data.error || "Failed to update email");
+      }
+    } catch {
+      alert("Network error");
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-display font-bold text-text-main flex items-center gap-2">
+          <ClipboardList className="w-5 h-5 text-primary" />
+          Pending Reviews
+          {pendingBookings.length > 0 && (
+            <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
+              {pendingBookings.length}
+            </span>
+          )}
+        </h2>
+        <button
+          type="button"
+          onClick={fetchPending}
+          disabled={loading}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface border border-gray-200 text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer disabled:opacity-50"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : pendingBookings.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center">
+          <CheckCircle2 className="w-12 h-12 text-green-300 mx-auto mb-3" />
+          <p className="font-semibold text-gray-600">All caught up!</p>
+          <p className="text-sm text-gray-400 mt-1">No bookings are pending review.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {pendingBookings.map((b) => (
+            <div key={b._id} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-5 py-4 bg-amber-50/50 border-b border-amber-100">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono font-bold text-primary text-sm tracking-wider">{b.bookingId}</span>
+                    <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                      Pending Review
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    <strong>{b.primaryName}</strong> · {b.primaryRegNo} · {b.primaryEmail}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {b.attendeeCount} {b.attendeeCount === 1 ? "attendee" : "attendees"} · ₹{b.totalAmount} · {new Date(b.createdAt).toLocaleString("en-IN")}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 mt-3 sm:mt-0">
+                  <button
+                    type="button"
+                    onClick={() => handleReview(b.bookingId, "approve")}
+                    disabled={processingId === b.bookingId}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {processingId === b.bookingId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ThumbsUp className="w-3.5 h-3.5" />}
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleReview(b.bookingId, "reject")}
+                    disabled={processingId === b.bookingId}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    <ThumbsDown className="w-3.5 h-3.5" />
+                    Reject
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Payment Screenshot */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Payment Screenshot</p>
+                  {b.paymentScreenshotUrl ? (
+                    <div>
+                      <img
+                        src={b.paymentScreenshotUrl}
+                        alt="Payment screenshot"
+                        className="w-full max-h-64 object-contain rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => setPreviewImage(b.paymentScreenshotUrl!)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPreviewImage(b.paymentScreenshotUrl!)}
+                        className="mt-2 text-xs text-primary font-medium cursor-pointer hover:underline"
+                      >
+                        View full size →
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-100 rounded-xl p-8 text-center text-gray-400 text-sm">
+                      No screenshot uploaded
+                    </div>
+                  )}
+                </div>
+
+                {/* Attendee Details */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Attendees</p>
+                  <div className="space-y-2">
+                    {[
+                      { name: b.primaryName, regNo: b.primaryRegNo, email: b.primaryEmail, isPrimary: true },
+                      ...b.attendees.map((a) => ({ ...a, isPrimary: false })),
+                    ].map((att, i) => (
+                      <div key={i} className="flex items-center justify-between bg-surface rounded-xl px-3 py-2.5">
+                        <div>
+                          <p className="text-sm font-medium text-text-main">
+                            {att.name}
+                            {att.isPrimary && <span className="text-xs text-primary ml-1.5">(Primary)</span>}
+                          </p>
+                          <p className="text-xs text-gray-400">{att.regNo} · {att.email}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingEmail({ bookingId: b.bookingId, current: att.email });
+                            setNewEmail(att.email);
+                          }}
+                          className="text-gray-400 hover:text-primary transition-colors cursor-pointer p-1"
+                          title="Edit email"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Edit Email Modal */}
+      {editingEmail && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setEditingEmail(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-display font-bold text-text-main text-lg mb-4 flex items-center gap-2">
+              <Mail className="w-5 h-5 text-primary" />
+              Edit Email
+            </h3>
+            <p className="text-sm text-gray-500 mb-3">Current: <strong>{editingEmail.current}</strong></p>
+            <input
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              placeholder="New email address"
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary mb-4"
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleEditEmail}
+                className="flex-1 bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 rounded-xl transition-colors cursor-pointer text-sm"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditingEmail(null)}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl transition-colors cursor-pointer text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full-size Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 cursor-pointer"
+          onClick={() => setPreviewImage(null)}
+        >
+          <img
+            src={previewImage}
+            alt="Payment screenshot full size"
+            className="max-w-full max-h-full object-contain rounded-xl"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Admin Dashboard ──────────────────────────────────────────────────────
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
-  const [tab, setTab] = useState<"bookings" | "checkin">("bookings");
+  const [tab, setTab] = useState<"bookings" | "checkin" | "reviews">("bookings");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -804,6 +1085,18 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               </button>
               <button
                 type="button"
+                onClick={() => setTab("reviews")}
+                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  tab === "reviews"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <ClipboardList className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
+                Reviews
+              </button>
+              <button
+                type="button"
                 onClick={() => setTab("checkin")}
                 className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   tab === "checkin"
@@ -848,6 +1141,16 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           </button>
           <button
             type="button"
+            onClick={() => setTab("reviews")}
+            className={`flex-1 py-2.5 text-xs font-semibold text-center transition-all cursor-pointer ${
+              tab === "reviews" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-gray-500"
+            }`}
+          >
+            <ClipboardList className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
+            Reviews
+          </button>
+          <button
+            type="button"
             onClick={() => setTab("checkin")}
             className={`flex-1 py-2.5 text-xs font-semibold text-center transition-all cursor-pointer ${
               tab === "checkin" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-gray-500"
@@ -862,6 +1165,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {tab === "checkin" ? (
           <CheckInTab />
+        ) : tab === "reviews" ? (
+          <ReviewsTab />
         ) : (
           <>
             {/* Stats */}

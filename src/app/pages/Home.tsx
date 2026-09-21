@@ -6,6 +6,7 @@ import { MILESTONES } from "../data/milestones";
 import GALLERY_PHOTOS_RAW from "../../data/photos.json";
 import GALLERY_EVENTS_RAW from "../../data/events.json";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { DonateModal } from "../components/DonateModal";
 
 const GALLERY_PHOTOS = GALLERY_PHOTOS_RAW as GalleryPhoto[];
 const GALLERY_EVENTS = GALLERY_EVENTS_RAW as GalleryEvent[];
@@ -26,6 +27,7 @@ const fadeUpItem: Variants = {
 export function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSlideshowPaused, setIsSlideshowPaused] = useState(false);
+  const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
 
   // Dynamic events count derived directly from Timeline MILESTONES & registered events
   const dynamicEventsCount = React.useMemo(() => {
@@ -118,6 +120,16 @@ export function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
                 >
                   <PlayCircle className="w-5 h-5 text-gray-500" />
                   Our Journey
+                </m.button>
+                <m.button
+                  type="button"
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => setIsDonateModalOpen(true)}
+                  className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-8 py-4 rounded-full font-medium text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center gap-2 shadow-sm cursor-pointer"
+                >
+                  <Heart className="w-5 h-5 fill-red-500 text-red-500" />
+                  Donate
                 </m.button>
               </m.div>
             </m.div>
@@ -475,6 +487,9 @@ export function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
           </div>
         </div>
       </section>
+
+      {/* Donate Modal */}
+      {isDonateModalOpen && <DonateModal onClose={() => setIsDonateModalOpen(false)} />}
     </>
   );
 }

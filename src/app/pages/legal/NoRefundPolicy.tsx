@@ -7,7 +7,7 @@ export function NoRefundPolicy({ setPage }: { setPage: (p: Page) => void }) {
   return (
     <LegalPageWrapper
       title="No Refund Policy"
-      subtitle="All event ticket purchases made for Inclusiverse through our Razorpay payment gateway are non-refundable. Please read this policy before contributing."
+      subtitle="All event ticket purchases made for Inclusiverse are non-refundable. Please read this policy before contributing."
       icon={<AlertCircle className="w-6 h-6" />}
       setPage={setPage}
     >
@@ -25,7 +25,7 @@ export function NoRefundPolicy({ setPage }: { setPage: (p: Page) => void }) {
       <LegalSection title="1. Non-Refundable Nature of Tickets">
         <p>
           Inclusiverse operates as a <strong>student-led initiative</strong>. All
-          event ticket payments collected through our Razorpay-powered platform are:
+          event ticket payments collected through our platform are:
         </p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>Final purchases for event entry</li>
@@ -49,8 +49,8 @@ export function NoRefundPolicy({ setPage }: { setPage: (p: Page) => void }) {
             logistics well in advance.
           </li>
           <li>
-            <strong>Gateway fees:</strong> Razorpay charges payment processing fees which are
-            deducted at the time of transaction and cannot be recovered.
+            <strong>Payment verification:</strong> Tickets are processed upon verification
+            and cannot be recovered.
           </li>
           <li>
             <strong>Final purchase:</strong> Tickets are purchases for an event, not refundable goods.
@@ -72,7 +72,7 @@ export function NoRefundPolicy({ setPage }: { setPage: (p: Page) => void }) {
           </li>
         </ul>
         <p className="mt-2">
-          Even in these exceptional cases, any refund is subject to Razorpay's refund timeline
+          Even in these exceptional cases, any refund is subject to processing timelines
           (typically 5–10 business days) and our internal review process. We do not guarantee a
           refund in any case.
         </p>
@@ -81,8 +81,8 @@ export function NoRefundPolicy({ setPage }: { setPage: (p: Page) => void }) {
       <LegalSection title="4. Chargebacks">
         <p>
           Initiating an unauthorized chargeback or dispute for a valid ticket transaction is a
-          violation of these terms. We reserve the right to contest any chargeback with Razorpay and
-          your card issuer by providing transaction evidence. Attendees who initiate fraudulent
+          violation of these terms. We reserve the right to contest any chargeback with your bank
+          by providing transaction evidence. Attendees who initiate fraudulent
           chargebacks may be banned from future participation in Inclusiverse events.
         </p>
       </LegalSection>

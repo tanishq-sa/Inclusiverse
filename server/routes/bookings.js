@@ -1,8 +1,24 @@
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
+const multer = require("multer");
 const Booking = require("../models/Booking");
 const { sendConfirmation } = require("../mail/sendConfirmation");
+const { uploadToR2 } = require("../utils/r2Upload");
+const { extractTextFromImage, analyzePaymentText } = require("../utils/ocr");
+
+// Multer setup — store in memory for serverless
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"), false);
+    }
+  },
+});
 
 // ─── Helper: generate a booking ID ───────────────────────────────────────────
 function generateBookingId() {
@@ -23,8 +39,271 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+// ─── Helper: generate tickets for a booking ──────────────────────────────────
+function generateTickets(allAttendees) {
+  return allAttendees.map((a) => ({
+    ticketId: crypto.randomUUID(),
+    attendeeName: a.name,
+    attendeeRegNo: a.regNo,
+    attendeeEmail: a.email,
+    checkedIn: false,
+  }));
+}
+
+// ─── Fixed pricing map ───────────────────────────────────────────────────────
+const PRICE_MAP = { 1: 49, 2: 99, 3: 139, 4: 179, 5: 209 };
+
+function getExpectedAmount(attendeeCount) {
+  return PRICE_MAP[attendeeCount] || null;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /api/bookings  — create a booking after successful Razorpay payment
+// POST /api/bookings/upload-payment — new GPay flow
+// ─────────────────────────────────────────────────────────────────────────────
+router.post("/upload-payment", upload.single("screenshot"), async (req, res) => {
+  try {
+    const { primaryName, primaryRegNo, primaryEmail, attendees, totalAmount } = req.body;
+
+    // Parse attendees if it's a JSON string (from FormData)
+    let extraAttendees = [];
+    if (attendees) {
+      try {
+        extraAttendees = typeof attendees === "string" ? JSON.parse(attendees) : attendees;
+      } catch {
+        extraAttendees = [];
+      }
+    }
+
+    // Validation
+    if (!primaryName || !primaryRegNo || !primaryEmail) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    if (!/^\d{8}$/.test(primaryRegNo)) {
+      return res.status(400).json({ error: "Registration number must be exactly 8 digits" });
+    }
+
+    if (!primaryEmail.toLowerCase().endsWith("christuniversity.in")) {
+      return res.status(400).json({ error: "Email must be a Christ University email" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "Payment screenshot is required" });
+    }
+
+    const attendeeCount = 1 + extraAttendees.length;
+    const expectedAmount = getExpectedAmount(attendeeCount);
+    const submittedAmount = parseInt(totalAmount, 10);
+
+    if (!expectedAmount || submittedAmount !== expectedAmount) {
+      return res.status(400).json({ error: `Invalid amount. Expected ₹${expectedAmount} for ${attendeeCount} attendee(s).` });
+    }
+
+    // 1) Upload screenshot to Cloudflare R2
+    let screenshotUrl;
+    try {
+      screenshotUrl = await uploadToR2(req.file.buffer, req.file.originalname, req.file.mimetype);
+    } catch (err) {
+      console.error("[R2 Upload]", err.message);
+      return res.status(500).json({ error: "Failed to upload screenshot. Please try again." });
+    }
+
+    // 2) Generate unique booking ID
+    let bookingId;
+    let attempts = 0;
+    do {
+      bookingId = generateBookingId();
+      attempts++;
+    } while ((await Booking.exists({ bookingId })) && attempts < 10);
+
+    // 3) Run OCR to verify payment
+    let ocrResult = { isValid: false, confidence: "none", reasons: ["OCR skipped"] };
+    try {
+      const extractedText = await extractTextFromImage(req.file.buffer, req.file.originalname);
+      ocrResult = analyzePaymentText(extractedText, expectedAmount);
+      console.log(`[OCR] Booking ${bookingId}: confidence=${ocrResult.confidence}, valid=${ocrResult.isValid}, reasons=${ocrResult.reasons.join("; ")}`);
+    } catch (err) {
+      console.error(`[OCR] Failed for booking ${bookingId}:`, err.message);
+      ocrResult = { isValid: false, confidence: "none", reasons: ["OCR failed: " + err.message] };
+    }
+
+    // 4) Determine status based on OCR result
+    const allAttendees = [
+      { name: primaryName, regNo: primaryRegNo, email: primaryEmail },
+      ...extraAttendees,
+    ];
+
+    let status;
+    let tickets = [];
+
+    if (ocrResult.isValid && ocrResult.confidence === "high") {
+      // Auto-approved: generate tickets immediately
+      status = "paid";
+      tickets = generateTickets(allAttendees);
+    } else {
+      // Needs manual review
+      status = "pending_review";
+    }
+
+    const booking = await Booking.create({
+      bookingId,
+      primaryName,
+      primaryRegNo,
+      primaryEmail,
+      attendees: extraAttendees,
+      tickets,
+      attendeeCount,
+      totalAmount: expectedAmount,
+      paymentMethod: "gpay",
+      paymentScreenshotUrl: screenshotUrl,
+      status,
+      reviewedBy: status === "paid" ? "auto-ocr" : undefined,
+      reviewedAt: status === "paid" ? new Date() : undefined,
+    });
+
+    // 5) If auto-approved, send confirmation email
+    if (status === "paid") {
+      try {
+        const emailPromise = sendConfirmation(booking);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Email sending timed out after 7s")), 7000)
+        );
+        await Promise.race([emailPromise, timeoutPromise]);
+        booking.emailSent = true;
+        await booking.save();
+      } catch (err) {
+        console.error("[Mail] Failed to send confirmation:", err.message);
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      bookingId: booking.bookingId,
+      status,
+      message: status === "paid"
+        ? "Payment verified! Your tickets have been emailed."
+        : "Screenshot received! Your booking is under review. You'll get an email once approved.",
+    });
+  } catch (err) {
+    console.error("[POST /api/bookings/upload-payment]", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/bookings/review-payment — admin approve/reject (admin only)
+// ─────────────────────────────────────────────────────────────────────────────
+router.post("/review-payment", requireAdmin, async (req, res) => {
+  try {
+    const { bookingId, action, reason } = req.body;
+
+    if (!bookingId || !["approve", "reject"].includes(action)) {
+      return res.status(400).json({ error: "bookingId and action (approve/reject) are required" });
+    }
+
+    const booking = await Booking.findOne({ bookingId });
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    if (booking.status !== "pending_review") {
+      return res.status(409).json({ error: `Booking is already ${booking.status}` });
+    }
+
+    if (action === "approve") {
+      // Generate tickets
+      const allAttendees = [
+        { name: booking.primaryName, regNo: booking.primaryRegNo, email: booking.primaryEmail },
+        ...booking.attendees,
+      ];
+      booking.tickets = generateTickets(allAttendees);
+      booking.status = "paid";
+      booking.reviewedBy = "manual";
+      booking.reviewedAt = new Date();
+      await booking.save();
+
+      // Send confirmation email
+      try {
+        await sendConfirmation(booking);
+        booking.emailSent = true;
+        await booking.save();
+      } catch (err) {
+        console.error("[Mail] Failed to send after approval:", err.message);
+      }
+
+      res.json({
+        success: true,
+        message: `Booking ${bookingId} approved. Tickets generated & email sent.`,
+      });
+    } else {
+      // Reject
+      booking.status = "rejected";
+      booking.rejectionReason = reason || "Payment could not be verified";
+      booking.reviewedBy = "manual";
+      booking.reviewedAt = new Date();
+      await booking.save();
+
+      res.json({
+        success: true,
+        message: `Booking ${bookingId} rejected.`,
+      });
+    }
+  } catch (err) {
+    console.error("[POST /api/bookings/review-payment]", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PATCH /api/bookings/edit-email — admin edit attendee email (admin only)
+// ─────────────────────────────────────────────────────────────────────────────
+router.patch("/edit-email", requireAdmin, async (req, res) => {
+  try {
+    const { bookingId, ticketId, newEmail } = req.body;
+
+    if (!bookingId || !newEmail) {
+      return res.status(400).json({ error: "bookingId and newEmail are required" });
+    }
+
+    const booking = await Booking.findOne({ bookingId });
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    // If ticketId is provided, update that specific ticket's email
+    if (ticketId) {
+      const ticket = booking.tickets.find((t) => t.ticketId === ticketId);
+      if (!ticket) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+      ticket.attendeeEmail = newEmail;
+
+      // Also update the matching attendee in the attendees array
+      if (ticket.attendeeName === booking.primaryName && ticket.attendeeRegNo === booking.primaryRegNo) {
+        booking.primaryEmail = newEmail;
+      } else {
+        const att = booking.attendees.find((a) => a.regNo === ticket.attendeeRegNo);
+        if (att) att.email = newEmail;
+      }
+    } else {
+      // Update primary email
+      booking.primaryEmail = newEmail;
+      // Also update in tickets if matching
+      const primaryTicket = booking.tickets.find((t) => t.attendeeRegNo === booking.primaryRegNo);
+      if (primaryTicket) primaryTicket.attendeeEmail = newEmail;
+    }
+
+    await booking.save();
+
+    res.json({ success: true, message: "Email updated successfully" });
+  } catch (err) {
+    console.error("[PATCH /api/bookings/edit-email]", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/bookings  — legacy Razorpay booking (keep for existing bookings)
 // ─────────────────────────────────────────────────────────────────────────────
 router.post("/", async (req, res) => {
   try {
@@ -32,13 +311,12 @@ router.post("/", async (req, res) => {
       primaryName,
       primaryRegNo,
       primaryEmail,
-      attendees,          // array of { name, regNo, email }
+      attendees,
       totalAmount,
       razorpayPaymentId,
       razorpayOrderId,
     } = req.body;
 
-    // Basic validation
     if (!primaryName || !primaryRegNo || !primaryEmail || !razorpayPaymentId) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -54,7 +332,6 @@ router.post("/", async (req, res) => {
     const extraAttendees = Array.isArray(attendees) ? attendees : [];
     const attendeeCount = 1 + extraAttendees.length;
 
-    // Generate unique booking ID (retry on collision)
     let bookingId;
     let attempts = 0;
     do {
@@ -62,19 +339,12 @@ router.post("/", async (req, res) => {
       attempts++;
     } while ((await Booking.exists({ bookingId })) && attempts < 10);
 
-    // Generate tickets — one per attendee (primary + extras)
     const allAttendees = [
       { name: primaryName, regNo: primaryRegNo, email: primaryEmail },
       ...extraAttendees,
     ];
 
-    const tickets = allAttendees.map((a) => ({
-      ticketId: crypto.randomUUID(),
-      attendeeName: a.name,
-      attendeeRegNo: a.regNo,
-      attendeeEmail: a.email,
-      checkedIn: false,
-    }));
+    const tickets = generateTickets(allAttendees);
 
     const booking = await Booking.create({
       bookingId,
@@ -87,19 +357,16 @@ router.post("/", async (req, res) => {
       totalAmount,
       razorpayPaymentId,
       razorpayOrderId,
+      paymentMethod: "razorpay",
       status: "paid",
     });
 
-    // Send confirmation email MUST BE AWAITED on Vercel, but we wrap it in a timeout
-    // so that if the SMTP server hangs, it doesn't freeze the user's browser forever!
     try {
       const emailPromise = sendConfirmation(booking);
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Email sending timed out after 7s")), 7000)
       );
       await Promise.race([emailPromise, timeoutPromise]);
-      
-      // If we reach here, email was sent successfully
       booking.emailSent = true;
       await booking.save();
     } catch (err) {
@@ -131,6 +398,19 @@ router.get("/", requireAdmin, async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET /api/bookings/pending-reviews — bookings needing manual review (admin)
+// ─────────────────────────────────────────────────────────────────────────────
+router.get("/pending-reviews", requireAdmin, async (req, res) => {
+  try {
+    const bookings = await Booking.find({ status: "pending_review" }).sort({ createdAt: -1 });
+    res.json({ success: true, count: bookings.length, bookings });
+  } catch (err) {
+    console.error("[GET /api/bookings/pending-reviews]", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings/checkin  — scan QR code to check-in (admin only)
 // ─────────────────────────────────────────────────────────────────────────────
 router.post("/checkin", requireAdmin, async (req, res) => {
@@ -140,7 +420,6 @@ router.post("/checkin", requireAdmin, async (req, res) => {
       return res.status(400).json({ error: "ticketId is required" });
     }
 
-    // Atomic update prevents race conditions if QR is scanned multiple times rapidly
     const booking = await Booking.findOneAndUpdate(
       {
         tickets: {
@@ -161,7 +440,6 @@ router.post("/checkin", requireAdmin, async (req, res) => {
     );
 
     if (!booking) {
-      // If no document was updated, it's either invalid or already checked in
       const existing = await Booking.findOne({ "tickets.ticketId": ticketId });
       if (!existing) {
         return res.status(404).json({ error: "Invalid ticket — not found" });
@@ -201,7 +479,6 @@ router.post("/manual-checkin", requireAdmin, async (req, res) => {
       return res.status(400).json({ error: "ticketId is required" });
     }
 
-    // Atomic update to prevent race conditions
     const booking = await Booking.findOneAndUpdate(
       {
         tickets: {
@@ -222,7 +499,6 @@ router.post("/manual-checkin", requireAdmin, async (req, res) => {
     );
 
     if (!booking) {
-      // Check if it's already checked in or invalid
       const existing = await Booking.findOne({ "tickets.ticketId": ticketId });
       if (!existing) {
         return res.status(404).json({ error: "Invalid ticket — not found" });
@@ -326,11 +602,11 @@ router.get("/export", requireAdmin, async (req, res) => {
       }
     } else {
       csvRows.push(
-        "Booking ID,Created At,Primary Name,Primary Reg No,Primary Email,Attendee Count,Total Amount (₹),Razorpay Payment ID,Status,Email Sent"
+        "Booking ID,Created At,Primary Name,Primary Reg No,Primary Email,Attendee Count,Total Amount (₹),Payment Method,Status,Email Sent"
       );
       for (const b of bookings) {
         csvRows.push(
-          `"${b.bookingId}","${new Date(b.createdAt).toISOString()}","${b.primaryName}","${b.primaryRegNo}","${b.primaryEmail}",${b.attendeeCount},${b.totalAmount},"${b.razorpayPaymentId}","${b.status}","${b.emailSent ? 'Yes' : 'No'}"`
+          `"${b.bookingId}","${new Date(b.createdAt).toISOString()}","${b.primaryName}","${b.primaryRegNo}","${b.primaryEmail}",${b.attendeeCount},${b.totalAmount},"${b.paymentMethod || "razorpay"}","${b.status}","${b.emailSent ? "Yes" : "No"}"`
         );
       }
     }
@@ -351,9 +627,8 @@ router.get("/export", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 router.post("/resend-failed-emails", requireAdmin, async (req, res) => {
   try {
-    // Find all bookings where emailSent is false or doesn't exist
-    const failedBookings = await Booking.find({ emailSent: { $ne: true } });
-    
+    const failedBookings = await Booking.find({ emailSent: { $ne: true }, status: "paid" });
+
     if (failedBookings.length === 0) {
       return res.json({ success: true, message: "No failed emails found. All caught up!" });
     }
@@ -361,7 +636,6 @@ router.post("/resend-failed-emails", requireAdmin, async (req, res) => {
     let successCount = 0;
     let failCount = 0;
 
-    // Loop and try sending them
     for (const booking of failedBookings) {
       try {
         await sendConfirmation(booking);
@@ -378,7 +652,7 @@ router.post("/resend-failed-emails", requireAdmin, async (req, res) => {
       success: true,
       message: `Resent ${successCount} emails. ${failCount} still failed.`,
       successCount,
-      failCount
+      failCount,
     });
   } catch (err) {
     console.error("[POST /api/bookings/resend-failed-emails]", err);

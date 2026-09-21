@@ -26,10 +26,15 @@ const bookingSchema = new mongoose.Schema({
   tickets: [ticketSchema], // one ticket per attendee (including primary)
   attendeeCount: { type: Number, required: true },
   totalAmount: { type: Number, required: true },
-  razorpayPaymentId: { type: String, required: true },
+  razorpayPaymentId: { type: String }, // now optional — only for legacy Razorpay bookings
   razorpayOrderId: { type: String },
-  status: { type: String, default: "paid" },
+  paymentMethod: { type: String, enum: ["razorpay", "gpay"], default: "gpay" },
+  paymentScreenshotUrl: { type: String }, // Cloudflare R2 URL for GPay screenshot
+  status: { type: String, enum: ["pending", "pending_review", "paid", "rejected"], default: "pending" },
   emailSent: { type: Boolean, default: false },
+  reviewedBy: { type: String }, // admin action: "auto-ocr" or "manual"
+  reviewedAt: { type: Date },
+  rejectionReason: { type: String },
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);

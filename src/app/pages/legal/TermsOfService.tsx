@@ -7,7 +7,7 @@ export function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
   return (
     <LegalPageWrapper
       title="Terms of Service"
-      subtitle="Please read these terms carefully before purchasing an event ticket to Inclusiverse through our Razorpay-powered platform."
+      subtitle="Please read these terms carefully before purchasing an event ticket to Inclusiverse through our platform."
       icon={<FileText className="w-6 h-6" />}
       setPage={setPage}
     >
@@ -51,22 +51,10 @@ export function TermsOfService({ setPage }: { setPage: (p: Page) => void }) {
 
       <LegalSection title="4. Payment Processing">
         <p>
-          All payments are processed securely through <strong>Razorpay</strong>, a third-party
-          payment gateway. By making a payment, you also agree to Razorpay's Terms of Service and
-          Privacy Policy available at{" "}
-          <a
-            href="https://razorpay.com/terms"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline"
-          >
-            razorpay.com/terms
-          </a>
-          .
+          All payments are verified manually or automatically via payment screenshots.
         </p>
         <p>
-          We accept UPI, Credit/Debit Cards, Net Banking, and Wallets. All transactions are
-          encrypted and secured by Razorpay's infrastructure.
+          We accept Google Pay, PhonePe, and other UPI apps.
         </p>
       </LegalSection>
 

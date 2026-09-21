@@ -7,7 +7,7 @@ export function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) 
   return (
     <LegalPageWrapper
       title="Cancellation Policy"
-      subtitle="Important information about event ticket cancellations for Inclusiverse processed via Razorpay."
+      subtitle="Important information about event ticket cancellations for Inclusiverse."
       icon={<AlertCircle className="w-6 h-6" />}
       setPage={setPage}
     >
@@ -25,15 +25,15 @@ export function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) 
 
       <LegalSection title="1. Pre-Payment Cancellation">
         <p>
-          You may cancel or exit the Razorpay payment window at any time <strong>before</strong>{" "}
-          confirming your payment. Simply close the Razorpay checkout or click "Cancel." No amount
+          You may cancel your booking at any time <strong>before</strong>{" "}
+          completing the payment. Simply do not submit your payment screenshot. No amount
           will be charged if the payment is not completed.
         </p>
       </LegalSection>
 
       <LegalSection title="2. Post-Payment Cancellation">
         <p>
-          Once an event ticket payment is <strong>successfully processed</strong> through Razorpay, it is
+          Once an event ticket payment is <strong>successfully verified</strong>, it is
           considered final and <strong>cannot be cancelled</strong>. This is because:
         </p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
@@ -52,7 +52,7 @@ export function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) 
         </p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>
-            Failed transaction reversals are handled automatically by Razorpay and your bank,
+            Failed transaction reversals are handled automatically by your bank,
             typically within 5–7 business days.
           </li>
           <li>
@@ -77,14 +77,14 @@ export function CancellationPolicy({ setPage }: { setPage: (p: Page) => void }) 
         <p>
           If you accidentally make a duplicate ticket purchase, please contact us within 48 hours with both
           transaction IDs. We will review the case on a goodwill basis and may issue a refund for the
-          duplicate amount at our sole discretion, subject to Razorpay's refund capabilities.
+          duplicate amount at our sole discretion.
         </p>
       </LegalSection>
 
       <LegalSection title="5. Technical Errors">
         <p>
           In case of technical errors where payment is deducted but not confirmed on our end, please
-          reach out to us with your payment reference number. We will investigate with Razorpay and
+          reach out to us with your payment reference number. We will investigate and
           resolve the issue promptly.
         </p>
       </LegalSection>

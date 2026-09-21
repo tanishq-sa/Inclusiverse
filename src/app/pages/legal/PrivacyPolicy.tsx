@@ -12,11 +12,10 @@ export function PrivacyPolicy({ setPage }: { setPage: (p: Page) => void }) {
       setPage={setPage}
     >
       <LegalSection title="1. Information We Collect">
-        <p>When you purchase an event ticket through Razorpay, the following information may be collected:</p>
+        <p>When you purchase an event ticket, the following information may be collected:</p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>
-            <strong>Personal details:</strong> Name, email address, phone number (optional, entered in
-            Razorpay checkout)
+            <strong>Personal details:</strong> Name, email address, and registration number
           </li>
           <li>
             <strong>Transaction data:</strong> Payment amount, transaction ID, payment method used
@@ -32,7 +31,7 @@ export function PrivacyPolicy({ setPage }: { setPage: (p: Page) => void }) {
         <p>The information collected is used solely for:</p>
         <ul className="list-disc ml-5 space-y-1 mt-2">
           <li>Processing and confirming your ticket purchase</li>
-          <li>Sending transaction receipts (via Razorpay)</li>
+          <li>Sending transaction receipts</li>
           <li>Communicating updates about Inclusiverse (only if you opt in)</li>
           <li>Internal reporting and financial reconciliation</li>
         </ul>
@@ -42,19 +41,11 @@ export function PrivacyPolicy({ setPage }: { setPage: (p: Page) => void }) {
         </p>
       </LegalSection>
 
-      <LegalSection title="3. Razorpay's Role">
+      <LegalSection title="3. Third-Party Services">
         <p>
-          Payment information (card numbers, UPI IDs, bank details) is processed directly by
-          Razorpay and is never stored on our servers. Razorpay is PCI-DSS compliant. Please review{" "}
-          <a
-            href="https://razorpay.com/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline"
-          >
-            Razorpay's Privacy Policy
-          </a>{" "}
-          for details on how they handle your payment data.
+          We use third-party services for hosting, analytics, and security. We ensure that our
+          partners adhere to strict privacy and data protection standards. Payment screenshots
+          are stored securely via Cloudflare R2 and processed via OCR.space.
         </p>
       </LegalSection>
 
@@ -97,8 +88,7 @@ export function PrivacyPolicy({ setPage }: { setPage: (p: Page) => void }) {
       <LegalSection title="7. Cookies">
         <p>
           Our website may use minimal cookies for basic functionality (e.g., remembering
-          accessibility preferences). We do not use tracking or advertising cookies. Razorpay's
-          checkout may use cookies governed by their own policy.
+          accessibility preferences). We do not use tracking or advertising cookies.
         </p>
       </LegalSection>
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Film,
   Calendar,
@@ -13,6 +13,9 @@ import {
   ChevronRight,
   Users,
   Ticket,
+  Upload,
+  Image as ImageIcon,
+  ClockIcon,
 } from "lucide-react";
 import { m, AnimatePresence } from "motion/react";
 import { useTicketPricing } from "../hooks/useTicketPricing";
@@ -34,7 +37,15 @@ interface FormErrors {
 const CHRIST_EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.christuniversity\.in$/i;
 const REG_NO_REGEX = /^\d{8}$/;
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
-const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "";
+
+// ─── QR code images mapped by total amount ──────────────────────────────────
+const QR_IMAGES: Record<number, string> = {
+  49: "/gpay-qr-49.jpg",
+  99: "/gpay-qr-99.jpg",
+  139: "/gpay-qr-139.jpg",
+  179: "/gpay-qr-179.jpg",
+  219: "/gpay-qr-219.jpg",
+};
 
 // ─── Validation ────────────────────────────────────────────────────────────────
 function validateAttendee(a: AttendeeForm): FormErrors {
@@ -169,14 +180,18 @@ function SuccessScreen({
   primaryName,
   total,
   attendeeCount,
+  status,
   setPage,
 }: {
   bookingId: string;
   primaryName: string;
   total: number;
   attendeeCount: number;
+  status: string;
   setPage: (p: Page) => void;
 }) {
+  const isPending = status === "pending_review";
+
   return (
     <m.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -184,14 +199,30 @@ function SuccessScreen({
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       className="max-w-lg mx-auto text-center py-20 px-4"
     >
-      <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-        <CheckCircle2 className="w-10 h-10 text-green-600" />
+      <div className={`w-20 h-20 rounded-full ${isPending ? "bg-amber-100" : "bg-green-100"} flex items-center justify-center mx-auto mb-6`}>
+        {isPending ? (
+          <ClockIcon className="w-10 h-10 text-amber-600" />
+        ) : (
+          <CheckCircle2 className="w-10 h-10 text-green-600" />
+        )}
       </div>
-      <h2 className="text-3xl font-display font-bold text-text-main mb-2">You're In! 🎬</h2>
+      <h2 className="text-3xl font-display font-bold text-text-main mb-2">
+        {isPending ? "Under Review ⏳" : "You're In! 🎬"}
+      </h2>
       <p className="text-gray-500 mb-6 text-base leading-relaxed">
-        Hi <strong>{primaryName}</strong>, your booking for{" "}
-        <strong>{attendeeCount} {attendeeCount === 1 ? "person" : "people"}</strong> is confirmed.
-        A confirmation email has been sent to your Christ email.
+        {isPending ? (
+          <>
+            Hi <strong>{primaryName}</strong>, your payment screenshot has been received for{" "}
+            <strong>{attendeeCount} {attendeeCount === 1 ? "person" : "people"}</strong>.
+            Our team will verify it shortly, and you'll receive your tickets via email once approved.
+          </>
+        ) : (
+          <>
+            Hi <strong>{primaryName}</strong>, your booking for{" "}
+            <strong>{attendeeCount} {attendeeCount === 1 ? "person" : "people"}</strong> is confirmed.
+            A confirmation email with your QR ticket(s) has been sent to your Christ email.
+          </>
+        )}
       </p>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-6 text-left space-y-4">
@@ -204,6 +235,12 @@ function SuccessScreen({
           <span className="font-bold text-text-main text-lg">₹{total}</span>
         </div>
         <div className="flex justify-between items-center border-t border-gray-100 pt-4">
+          <span className="text-sm text-gray-500 font-medium">Status</span>
+          <span className={`text-sm font-semibold px-3 py-1 rounded-full ${isPending ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}>
+            {isPending ? "Pending Review" : "Confirmed"}
+          </span>
+        </div>
+        <div className="flex justify-between items-center border-t border-gray-100 pt-4">
           <span className="text-sm text-gray-500 font-medium">Event</span>
           <span className="text-sm font-semibold text-text-main">Chhichhore · 1 Oct · 9PM</span>
         </div>
@@ -213,10 +250,13 @@ function SuccessScreen({
         </div>
       </div>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 text-left">
+      <div className={`${isPending ? "bg-amber-50 border-amber-200" : "bg-amber-50 border-amber-200"} border rounded-xl p-4 mb-8 text-left`}>
         <p className="text-xs text-amber-800 leading-relaxed">
-          📌 <strong>Carry this Booking ID</strong> ({bookingId}) for entry at the venue. Payment is
-          non-refundable per our No Refund Policy.
+          {isPending ? (
+            <>📌 <strong>Save this Booking ID</strong> ({bookingId}). You'll receive an email with your QR tickets once your payment is verified.</>
+          ) : (
+            <>📌 <strong>Carry this Booking ID</strong> ({bookingId}) for entry at the venue. Payment is non-refundable per our No Refund Policy.</>
+          )}
         </p>
       </div>
 
@@ -246,10 +286,17 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
     bookingId: string;
     total: number;
     attendeeCount: number;
+    status: string;
   } | null>(null);
 
   const [ticketsEnabled, setTicketsEnabled] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
+
+  // Payment flow state
+  const [step, setStep] = useState<"form" | "payment">("form");
+  const [screenshot, setScreenshot] = useState<File | null>(null);
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     const fetchSettings = async () => {
@@ -269,7 +316,8 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
   }, []);
 
   const attendeeCount = 1 + extras.length;
-  const { breakdown, total } = useTicketPricing(attendeeCount);
+  const { breakdown, originalTotal, total, savings } = useTicketPricing(attendeeCount);
+  const qrImage = QR_IMAGES[total];
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const updatePrimary = (field: keyof AttendeeForm, value: string) => {
@@ -287,6 +335,7 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
   };
 
   const addExtra = () => {
+    if (attendeeCount >= 5) return; // max 5
     setExtras((prev) => [...prev, emptyAttendee()]);
     setExtrasErrors((prev) => [...prev, {}]);
   };
@@ -308,71 +357,76 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
     );
   };
 
-  // ── Razorpay checkout ─────────────────────────────────────────────────────
-  const handlePayment = () => {
+  // ── Proceed to payment step ───────────────────────────────────────────────
+  const handleProceedToPayment = () => {
     if (!validateAll()) {
       setGlobalError("Please fix the errors above before proceeding.");
+      return;
+    }
+    setGlobalError(null);
+    setStep("payment");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // ── File upload handler ───────────────────────────────────────────────────
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setGlobalError("Please upload an image file (PNG, JPG, etc.)");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setGlobalError("File size must be under 5MB");
+      return;
+    }
+
+    setScreenshot(file);
+    setScreenshotPreview(URL.createObjectURL(file));
+    setGlobalError(null);
+  };
+
+  // ── Submit payment screenshot ─────────────────────────────────────────────
+  const handleSubmitPayment = async () => {
+    if (!screenshot) {
+      setGlobalError("Please upload a screenshot of your payment.");
       return;
     }
 
     setSubmitting(true);
     setGlobalError(null);
 
-    const options = {
-      key: RAZORPAY_KEY_ID,
-      amount: total * 100, // in paise
-      currency: "INR",
-      name: "Inclusiverse",
-      description: `Chhichhore Movie Screening — ${attendeeCount} ${attendeeCount === 1 ? "ticket" : "tickets"}`,
-      image: "/inclusiverse-logo.png",
-      handler: async (response: { razorpay_payment_id: string; razorpay_order_id?: string }) => {
-        try {
-          const res = await fetch(`${API_BASE}/api/bookings`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              primaryName: primary.name,
-              primaryRegNo: primary.regNo,
-              primaryEmail: primary.email,
-              attendees: extras,
-              totalAmount: total,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpayOrderId: response.razorpay_order_id || "",
-            }),
-          });
+    try {
+      const formData = new FormData();
+      formData.append("primaryName", primary.name);
+      formData.append("primaryRegNo", primary.regNo);
+      formData.append("primaryEmail", primary.email);
+      formData.append("attendees", JSON.stringify(extras));
+      formData.append("totalAmount", String(total));
+      formData.append("screenshot", screenshot);
 
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Failed to save booking");
+      const res = await fetch(`${API_BASE}/api/bookings/upload-payment`, {
+        method: "POST",
+        body: formData,
+      });
 
-          setSuccess({
-            bookingId: data.bookingId,
-            total,
-            attendeeCount,
-          });
-        } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : "Something went wrong";
-          setGlobalError(`Payment captured but booking save failed: ${message}. Please contact us with your payment ID.`);
-        } finally {
-          setSubmitting(false);
-        }
-      },
-      prefill: {
-        name: primary.name,
-        email: primary.email,
-      },
-      theme: { color: "#C62828" },
-      modal: {
-        ondismiss: () => setSubmitting(false),
-      },
-    };
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to submit booking");
 
-    // @ts-ignore – Razorpay loaded via script tag
-    const rzp = new window.Razorpay(options);
-    rzp.on("payment.failed", (response: { error: { description: string } }) => {
-      setGlobalError(`Payment failed: ${response.error.description}`);
+      setSuccess({
+        bookingId: data.bookingId,
+        total,
+        attendeeCount,
+        status: data.status,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      setGlobalError(message);
+    } finally {
       setSubmitting(false);
-    });
-    rzp.open();
+    }
   };
 
   // ── Success state ─────────────────────────────────────────────────────────
@@ -383,6 +437,7 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
         primaryName={primary.name}
         total={success.total}
         attendeeCount={success.attendeeCount}
+        status={success.status}
         setPage={setPage}
       />
     );
@@ -392,15 +447,14 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
   return (
     <div className="min-h-screen bg-surface">
       {/* ── Hero Banner ── */}
-      <div 
+      <div
         className="text-white relative overflow-hidden bg-cover bg-center"
-        style={{ 
+        style={{
           backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.85)), url('https://cdn.district.in/movies-assets/images/cinema/Chhichhore-hori-30835a40-79cc-11f1-92c0-3fe6bd48cdb7.jpg?im=Resize,width=720')`
         }}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative z-10">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-            {/* Film icon badge */}
             <div className="w-24 h-24 rounded-3xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm shadow-2xl">
               <Film className="w-12 h-12 text-white" />
             </div>
@@ -453,7 +507,173 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
+        ) : step === "payment" ? (
+          /* ── Payment Step: QR + Upload ── */
+          <div className="max-w-2xl mx-auto space-y-6">
+            {/* Back button */}
+            <button
+              type="button"
+              onClick={() => { setStep("form"); setScreenshot(null); setScreenshotPreview(null); }}
+              className="text-sm text-gray-500 hover:text-primary transition-colors cursor-pointer flex items-center gap-1"
+            >
+              ← Back to form
+            </button>
+
+            {/* Step indicator */}
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-sm font-bold">✓</div>
+                <span className="text-sm text-green-600 font-medium">Details</span>
+              </div>
+              <div className="flex-1 h-0.5 bg-primary/30 rounded-full" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">2</div>
+                <span className="text-sm text-primary font-semibold">Payment</span>
+              </div>
+            </div>
+
+            {/* Payment Card */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-primary to-primary-hover px-6 py-5">
+                <h3 className="font-display font-bold text-white text-lg flex items-center gap-2">
+                  <IndianRupee className="w-5 h-5" />
+                  Pay ₹{total} via Google Pay
+                </h3>
+                <p className="text-white/80 text-sm mt-1">
+                  {attendeeCount} {attendeeCount === 1 ? "ticket" : "tickets"} for Chhichhore Movie Screening
+                </p>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* QR Code */}
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-4 font-medium">
+                    Scan this QR code with Google Pay, PhonePe, or any UPI app
+                  </p>
+                  {qrImage ? (
+                    <div className="inline-block bg-white border-2 border-gray-100 rounded-2xl p-4 shadow-sm">
+                      <img
+                        src={qrImage}
+                        alt={`Pay ₹${total} via UPI`}
+                        className="w-64 h-64 object-contain mx-auto"
+                      />
+                    </div>
+                  ) : (
+                    <div className="inline-block bg-gray-100 rounded-2xl p-8 text-gray-400">
+                      <p className="text-sm">QR code not available for this amount</p>
+                    </div>
+                  )}
+                  <div className="mt-4 bg-primary/5 rounded-xl p-3 inline-block">
+                    <p className="text-2xl font-display font-bold text-primary">₹{total}</p>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">After payment</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+
+                {/* Upload Screenshot */}
+                <div>
+                  <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <Upload className="w-4 h-4 text-primary" />
+                    Upload Payment Screenshot
+                  </p>
+
+                  {screenshotPreview ? (
+                    <div className="relative">
+                      <img
+                        src={screenshotPreview}
+                        alt="Payment screenshot preview"
+                        className="w-full max-h-80 object-contain rounded-xl border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => { setScreenshot(null); setScreenshotPreview(null); }}
+                        className="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors cursor-pointer shadow-lg"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      <p className="mt-2 text-xs text-green-600 font-medium flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Screenshot attached: {screenshot?.name}
+                      </p>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full border-2 border-dashed border-gray-300 hover:border-primary rounded-2xl p-8 text-center cursor-pointer group transition-all hover:bg-primary/5"
+                    >
+                      <ImageIcon className="w-10 h-10 text-gray-300 group-hover:text-primary/60 mx-auto mb-3 transition-colors" />
+                      <p className="text-sm font-medium text-gray-500 group-hover:text-primary transition-colors">
+                        Tap to upload screenshot
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
+                    </button>
+                  )}
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                </div>
+
+                {/* Global error */}
+                {globalError && (
+                  <m.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4"
+                  >
+                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-700">{globalError}</p>
+                  </m.div>
+                )}
+
+                {/* Submit */}
+                <button
+                  type="button"
+                  onClick={handleSubmitPayment}
+                  disabled={submitting || !screenshot}
+                  className="w-full bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-colors shadow-md shadow-primary/25 flex items-center justify-center gap-2 cursor-pointer text-base"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Submitting…
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Submit Payment Proof
+                    </>
+                  )}
+                </button>
+
+                <p className="text-center text-xs text-gray-400 leading-relaxed">
+                  Your payment will be verified automatically or reviewed by our team.
+                  <br />
+                  Non-refundable per our{" "}
+                  <button
+                    type="button"
+                    onClick={() => setPage("no-refund")}
+                    className="text-primary underline underline-offset-2 cursor-pointer"
+                  >
+                    No Refund Policy
+                  </button>
+                  .
+                </p>
+              </div>
+            </div>
+          </div>
         ) : (
+          /* ── Form Step ── */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
           {/* ── Left: Form ── */}
@@ -463,7 +683,7 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
                 <Users className="w-5 h-5 text-primary" />
                 Attendee Details
               </h2>
-              <span className="text-sm text-gray-400">{attendeeCount} {attendeeCount === 1 ? "person" : "people"}</span>
+              <span className="text-sm text-gray-400">{attendeeCount} {attendeeCount === 1 ? "person" : "people"} (max 5)</span>
             </div>
 
             <AnimatePresence mode="popLayout">
@@ -492,14 +712,16 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
             </AnimatePresence>
 
             {/* Add person button */}
-            <button
-              type="button"
-              onClick={addExtra}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed border-gray-300 hover:border-primary hover:bg-primary/5 text-gray-500 hover:text-primary transition-all font-semibold text-sm group cursor-pointer"
-            >
-              <UserPlus className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              Add Another Person
-            </button>
+            {attendeeCount < 5 && (
+              <button
+                type="button"
+                onClick={addExtra}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed border-gray-300 hover:border-primary hover:bg-primary/5 text-gray-500 hover:text-primary transition-all font-semibold text-sm group cursor-pointer"
+              >
+                <UserPlus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                Add Another Person
+              </button>
+            )}
 
             {/* Global error */}
             {globalError && (
@@ -552,40 +774,45 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
                 <div className="px-5 py-4 border-t border-gray-100 bg-surface">
                   <div className="flex items-center justify-between">
                     <span className="font-display font-bold text-text-main">Total</span>
-                    <m.span
-                      key={total}
-                      initial={{ scale: 1.15, color: "#C62828" }}
-                      animate={{ scale: 1, color: "#1A1A1A" }}
-                      transition={{ duration: 0.3 }}
-                      className="text-2xl font-display font-bold"
-                    >
-                      ₹{total}
-                    </m.span>
+                    <div className="flex items-center gap-3">
+                      {savings > 0 && (
+                        <span className="text-gray-400 line-through font-semibold text-lg">
+                          ₹{originalTotal}
+                        </span>
+                      )}
+                      <m.span
+                        key={total}
+                        initial={{ scale: 1.15, color: "#C62828" }}
+                        animate={{ scale: 1, color: "#1A1A1A" }}
+                        transition={{ duration: 0.3 }}
+                        className="text-2xl font-display font-bold"
+                      >
+                        ₹{total}
+                      </m.span>
+                    </div>
                   </div>
+                  {savings > 0 && (
+                    <div className="mt-2 text-right">
+                      <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                        You save ₹{savings}!
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Pay button */}
+                {/* Proceed button */}
                 <div className="px-5 py-4">
                   <button
                     type="button"
-                    onClick={handlePayment}
+                    onClick={handleProceedToPayment}
                     disabled={submitting}
                     className="w-full bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-colors shadow-md shadow-primary/25 flex items-center justify-center gap-2 cursor-pointer text-base"
                   >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Processing…
-                      </>
-                    ) : (
-                      <>
-                        <IndianRupee className="w-4 h-4" />
-                        Pay ₹{total} with Razorpay
-                      </>
-                    )}
+                    <IndianRupee className="w-4 h-4" />
+                    Proceed to Pay ₹{total}
                   </button>
                   <p className="text-center text-xs text-gray-400 mt-3 leading-relaxed">
-                    Payments are secure & encrypted via Razorpay.
+                    Pay via Google Pay / UPI.
                     <br />
                     Non-refundable per our{" "}
                     <button
