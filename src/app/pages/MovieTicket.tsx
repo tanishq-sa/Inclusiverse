@@ -209,7 +209,7 @@ function SuccessScreen({
         </div>
         <div className="flex justify-between items-center border-t border-gray-100 pt-4">
           <span className="text-sm text-gray-500 font-medium">Venue</span>
-          <span className="text-sm font-semibold text-text-main">Actinity Hub</span>
+          <span className="text-sm font-semibold text-text-main">Activity Hub</span>
         </div>
       </div>
 
@@ -392,13 +392,13 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
   return (
     <div className="min-h-screen bg-surface">
       {/* ── Hero Banner ── */}
-      <div className="bg-gradient-to-br from-[#1a0000] via-primary to-[#8B0000] text-white relative overflow-hidden">
-        {/* decorative blobs */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-white/20 blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-white/10 blur-2xl" />
-        </div>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative">
+      <div 
+        className="text-white relative overflow-hidden bg-cover bg-center"
+        style={{ 
+          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.85)), url('https://cdn.district.in/movies-assets/images/cinema/Chhichhore-hori-30835a40-79cc-11f1-92c0-3fe6bd48cdb7.jpg?im=Resize,width=720')`
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative z-10">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
             {/* Film icon badge */}
             <div className="w-24 h-24 rounded-3xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm shadow-2xl">
@@ -406,7 +406,7 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
             </div>
             <div className="text-center sm:text-left">
               <div className="inline-block px-3 py-1 bg-white/15 border border-white/25 rounded-full text-xs font-bold uppercase tracking-widest mb-3 backdrop-blur-sm">
-                🎟️ Inclusiverse Presents
+                Inclusiverse Presents
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold mb-4 leading-tight">
                 Chhichhore
@@ -418,11 +418,11 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-white/70" />
-                  9:00 PM – 11:00 PM
+                  8:00 PM – 11:00 PM
                 </span>
                 <span className="flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-white/70" />
-                  Actinity Hub
+                  Activity Hub
                 </span>
               </div>
             </div>
