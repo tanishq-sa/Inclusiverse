@@ -19,6 +19,8 @@ import { TermsOfService } from "./pages/legal/TermsOfService";
 import { PrivacyPolicy } from "./pages/legal/PrivacyPolicy";
 import { CancellationPolicy } from "./pages/legal/CancellationPolicy";
 import { NoRefundPolicy } from "./pages/legal/NoRefundPolicy";
+import { MovieTicket } from "./pages/MovieTicket";
+import { AdminPanel } from "./pages/AdminPanel";
 
 export type { Page };
 
@@ -210,6 +212,16 @@ export default function App() {
     contact: (
       <Skeleton name="page-contact" loading={pageLoading}>
         <ContactUs setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    tickets: (
+      <Skeleton name="page-tickets" loading={pageLoading}>
+        <MovieTicket setPage={handleSetPage} />
+      </Skeleton>
+    ),
+    admin: (
+      <Skeleton name="page-admin" loading={pageLoading}>
+        <AdminPanel />
       </Skeleton>
     ),
   }[page] || (

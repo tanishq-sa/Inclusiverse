@@ -10,7 +10,9 @@ export type Page =
   | "privacy"
   | "cancellation"
   | "no-refund"
-  | "contact";
+  | "contact"
+  | "tickets"
+  | "admin";
 
 export interface GalleryPhoto {
   src: string;
