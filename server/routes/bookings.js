@@ -90,10 +90,18 @@ router.post("/", async (req, res) => {
       status: "paid",
     });
 
-    // Send confirmation email MUST BE AWAITED on Vercel, otherwise the lambda function 
-    // dies before the email actually gets sent. We catch errors so it doesn't fail the booking.
+    // Send confirmation email MUST BE AWAITED on Vercel, but we wrap it in a timeout
+    // so that if the SMTP server hangs, it doesn't freeze the user's browser forever!
     try {
-      await sendConfirmation(booking);
+      const emailPromise = sendConfirmation(booking);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Email sending timed out after 7s")), 7000)
+      );
+      await Promise.race([emailPromise, timeoutPromise]);
+      
+      // If we reach here, email was sent successfully
+      booking.emailSent = true;
+      await booking.save();
     } catch (err) {
       console.error("[Mail] Failed to send confirmation:", err.message);
     }
@@ -283,11 +291,11 @@ router.get("/export", requireAdmin, async (req, res) => {
       }
     } else {
       csvRows.push(
-        "Booking ID,Created At,Primary Name,Primary Reg No,Primary Email,Attendee Count,Total Amount (₹),Razorpay Payment ID,Status"
+        "Booking ID,Created At,Primary Name,Primary Reg No,Primary Email,Attendee Count,Total Amount (₹),Razorpay Payment ID,Status,Email Sent"
       );
       for (const b of bookings) {
         csvRows.push(
-          `"${b.bookingId}","${new Date(b.createdAt).toISOString()}","${b.primaryName}","${b.primaryRegNo}","${b.primaryEmail}",${b.attendeeCount},${b.totalAmount},"${b.razorpayPaymentId}","${b.status}"`
+          `"${b.bookingId}","${new Date(b.createdAt).toISOString()}","${b.primaryName}","${b.primaryRegNo}","${b.primaryEmail}",${b.attendeeCount},${b.totalAmount},"${b.razorpayPaymentId}","${b.status}","${b.emailSent ? 'Yes' : 'No'}"`
         );
       }
     }
@@ -299,6 +307,46 @@ router.get("/export", requireAdmin, async (req, res) => {
     res.send(csv);
   } catch (err) {
     console.error("[GET /api/bookings/export]", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/bookings/resend-failed-emails  — send to bookings that failed (admin only)
+// ─────────────────────────────────────────────────────────────────────────────
+router.post("/resend-failed-emails", requireAdmin, async (req, res) => {
+  try {
+    // Find all bookings where emailSent is false or doesn't exist
+    const failedBookings = await Booking.find({ emailSent: { $ne: true } });
+    
+    if (failedBookings.length === 0) {
+      return res.json({ success: true, message: "No failed emails found. All caught up!" });
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    // Loop and try sending them
+    for (const booking of failedBookings) {
+      try {
+        await sendConfirmation(booking);
+        booking.emailSent = true;
+        await booking.save();
+        successCount++;
+      } catch (err) {
+        console.error(`[Mail] Failed to resend for ${booking.bookingId}:`, err.message);
+        failCount++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Resent ${successCount} emails. ${failCount} still failed.`,
+      successCount,
+      failCount
+    });
+  } catch (err) {
+    console.error("[POST /api/bookings/resend-failed-emails]", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
