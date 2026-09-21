@@ -250,10 +250,10 @@ function CheckInToast({ result, onDismiss }: { result: CheckInResult; onDismiss:
 
   return (
     <m.div
-      initial={{ opacity: 0, y: -20, scale: 0.95 }}
+      initial={{ opacity: 0, y: 50, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      className={`${bg} border rounded-2xl p-5 shadow-lg`}
+      exit={{ opacity: 0, y: 50, scale: 0.95 }}
+      className={`fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 ${bg} border rounded-2xl p-5 shadow-2xl`}
     >
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0 mt-0.5">{icon}</div>
