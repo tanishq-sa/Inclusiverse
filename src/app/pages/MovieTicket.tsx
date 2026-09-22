@@ -493,7 +493,7 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
             </div>
             <div className="flex items-center gap-2 px-4 py-2 bg-black/40 border border-white/10 rounded-xl backdrop-blur-md shadow-lg">
               <Clock className="w-4 h-4 text-white/70" />
-              <span>8:00 PM – 11:00 PM</span>
+              <span>7:00 PM – 10:00 PM</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 bg-black/40 border border-white/10 rounded-xl backdrop-blur-md shadow-lg">
               <MapPin className="w-4 h-4 text-white/70" />
