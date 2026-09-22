@@ -38,11 +38,11 @@ const CHRIST_EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.christuniversit
 const REG_NO_REGEX = /^(\d{6}|\d{8})$/;
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
-import qr59 from "/gpay-qr-59.jpg";
-import qr99 from "/gpay-qr-99.jpg";
-import qr139 from "/gpay-qr-139.jpg";
-import qr179 from "/gpay-qr-179.jpg";
-import qr219 from "/gpay-qr-219.jpg";
+import qr59 from "@/assets/gpay-qr-59.png";
+import qr99 from "@/assets/gpay-qr-99.png";
+import qr139 from "@/assets/gpay-qr-139.png";
+import qr179 from "@/assets/gpay-qr-179.png";
+import qr219 from "@/assets/gpay-qr-219.png";
 
 // ─── QR code images mapped by total amount ──────────────────────────────────
 const QR_IMAGES: Record<number, string> = {
