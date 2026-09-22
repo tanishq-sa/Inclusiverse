@@ -537,7 +537,7 @@ router.post("/manual-checkin", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 router.get("/checkin-stats", requireAdmin, async (req, res) => {
   try {
-    const bookings = await Booking.find();
+    const bookings = await Booking.find({ status: "paid" });
     let totalTickets = 0;
     let checkedIn = 0;
 
@@ -594,7 +594,7 @@ router.get("/all-tickets", requireAdmin, async (req, res) => {
 router.get("/export", requireAdmin, async (req, res) => {
   try {
     const type = req.query.type === "full" ? "full" : "emails";
-    const bookings = await Booking.find().sort({ createdAt: -1 });
+    const bookings = await Booking.find({ status: "paid" }).sort({ createdAt: -1 });
 
     let csvRows = [];
     if (type === "emails") {
