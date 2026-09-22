@@ -1240,8 +1240,9 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   useEffect(() => { fetchBookings(); fetchSettings(); }, []);
 
   // ── Computed stats ──────────────────────────────────────────────────────
-  const totalRevenue = bookings.reduce((s, b) => s + b.totalAmount, 0);
-  const totalAttendees = bookings.reduce((s, b) => s + b.attendeeCount, 0);
+  const validBookings = bookings.filter((b) => b.status === "paid");
+  const totalRevenue = validBookings.reduce((s, b) => s + b.totalAmount, 0);
+  const totalAttendees = validBookings.reduce((s, b) => s + b.attendeeCount, 0);
 
   // ── Filtered + sorted ───────────────────────────────────────────────────
   const filtered = useMemo(() => {
@@ -1437,8 +1438,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <>
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <StatCard icon={Ticket} label="Total Bookings" value={bookings.length} sub={`${filtered.length} shown`} />
-              <StatCard icon={Users} label="Total Attendees" value={totalAttendees} />
+              <StatCard icon={Ticket} label="Paid Bookings" value={validBookings.length} sub={`${bookings.length} total across all statuses`} />
+              <StatCard icon={Users} label="Paid Attendees" value={totalAttendees} />
               <StatCard icon={IndianRupee} label="Total Revenue" value={`₹${totalRevenue.toLocaleString("en-IN")}`} />
             </div>
 
