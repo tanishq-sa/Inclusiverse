@@ -35,7 +35,7 @@ interface FormErrors {
 }
 
 const CHRIST_EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.christuniversity\.in$/i;
-const REG_NO_REGEX = /^\d{8}$/;
+const REG_NO_REGEX = /^(\d{6}|\d{8})$/;
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 // ─── QR code images mapped by total amount ──────────────────────────────────
@@ -51,7 +51,7 @@ const QR_IMAGES: Record<number, string> = {
 function validateAttendee(a: AttendeeForm): FormErrors {
   const errors: FormErrors = {};
   if (!a.name.trim()) errors.name = "Name is required";
-  if (!REG_NO_REGEX.test(a.regNo)) errors.regNo = "Registration number must be exactly 8 digits";
+  if (!REG_NO_REGEX.test(a.regNo)) errors.regNo = "Registration number must be 6 or 8 digits";
   if (!CHRIST_EMAIL_REGEX.test(a.email)) errors.email = "Must be a valid @christuniversity.in email";
   return errors;
 }
@@ -108,7 +108,7 @@ function AttendeeCard({
       </div>
 
       {/* Fields */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-5">
         {/* Name */}
         <div>
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
@@ -138,7 +138,7 @@ function AttendeeCard({
             type="text"
             value={attendee.regNo}
             onChange={(e) => onChange("regNo", e.target.value.replace(/\D/g, "").slice(0, 8))}
-            placeholder="8-digit number"
+            placeholder="6 or 8 digits"
             maxLength={8}
             className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-text-main placeholder:text-gray-400 outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono tracking-widest ${errors.regNo ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
               }`}
@@ -225,7 +225,7 @@ function SuccessScreen({
         )}
       </p>
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-6 text-left space-y-4">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-6 mb-5 sm:mb-6 text-left space-y-3 sm:space-y-4">
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-500 font-medium">Booking ID</span>
           <span className="font-mono font-bold text-primary text-base tracking-widest">{bookingId}</span>
@@ -294,6 +294,7 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
 
   // Payment flow state
   const [step, setStep] = useState<"form" | "payment">("form");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -364,6 +365,11 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
       return;
     }
     setGlobalError(null);
+    setShowConfirmModal(true);
+  };
+
+  const confirmAndProceed = () => {
+    setShowConfirmModal(false);
     setStep("payment");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -544,7 +550,7 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
                 </p>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-5 sm:p-6 space-y-5 sm:space-y-6">
                 {/* QR Code */}
                 <div className="text-center">
                   <p className="text-sm text-gray-600 mb-4 font-medium">
@@ -674,7 +680,7 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
           </div>
         ) : (
           /* ── Form Step ── */
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
 
           {/* ── Left: Form ── */}
           <div className="lg:col-span-2 space-y-5">
@@ -831,6 +837,67 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
         </div>
         )}
       </div>
+
+      {/* ── Confirmation Modal ── */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <m.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowConfirmModal(false)}
+            />
+            <m.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 flex flex-col max-h-[85vh]"
+            >
+              <div className="p-6 border-b border-gray-100 bg-surface">
+                <h3 className="font-display font-bold text-xl text-text-main">Confirm Details</h3>
+                <p className="text-sm text-gray-500 mt-1">Please review the details before proceeding to payment.</p>
+              </div>
+              
+              <div className="p-6 overflow-y-auto space-y-4">
+                {[
+                  { ...primary, isPrimary: true },
+                  ...extras.map((e) => ({ ...e, isPrimary: false }))
+                ].map((att, idx) => (
+                  <div key={idx} className="bg-surface rounded-xl p-4 border border-gray-100">
+                    <p className="font-medium text-text-main flex items-center justify-between">
+                      <span>{att.name}</span>
+                      {att.isPrimary && <span className="text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full">Primary</span>}
+                    </p>
+                    <div className="mt-2 text-sm text-gray-600 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <p><span className="text-gray-400">Reg No / Emp ID:</span> <span className="font-mono">{att.regNo}</span></p>
+                      <p><span className="text-gray-400">Email:</span> {att.email}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-6 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmAndProceed}
+                  className="flex-1 px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold shadow-md shadow-primary/25 transition-colors cursor-pointer"
+                >
+                  Go to Payment
+                </button>
+              </div>
+            </m.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

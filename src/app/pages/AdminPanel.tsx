@@ -565,77 +565,134 @@ function CheckInTab() {
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-surface border-b border-gray-100">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Reg No</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Booking</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Checked In At</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Method</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((t, idx) => (
-                  <tr
-                    key={t.ticketId}
-                    className={`border-b border-gray-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"} ${
-                      t.checkedIn ? "" : "hover:bg-primary/5"
-                    } transition-colors`}
-                  >
-                    <td className="px-4 py-3">
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-surface border-b border-gray-100">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Reg No</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Booking</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Checked In At</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Method</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((t, idx) => (
+                    <tr
+                      key={t.ticketId}
+                      className={`border-b border-gray-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"} ${
+                        t.checkedIn ? "" : "hover:bg-primary/5"
+                      } transition-colors`}
+                    >
+                      <td className="px-4 py-3">
+                        {t.checkedIn ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                            <CheckCircle2 className="w-3 h-3" /> In
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+                            <UserX className="w-3 h-3" /> Pending
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-text-main whitespace-nowrap">{t.attendeeName}</td>
+                      <td className="px-4 py-3 font-mono text-gray-500 text-xs">{t.attendeeRegNo}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs max-w-[180px] truncate">{t.attendeeEmail}</td>
+                      <td className="px-4 py-3">
+                        <span className="font-mono font-bold text-primary text-xs tracking-wider">{t.bookingId}</span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
+                        {t.checkedInAt
+                          ? new Date(t.checkedInAt).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-xs">
+                        {t.checkedInBy ? (
+                          <span className={`px-2 py-0.5 rounded-full font-semibold ${
+                            t.checkedInBy === "qr" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
+                          }`}>
+                            {t.checkedInBy === "qr" ? "📱 QR" : "✋ Manual"}
+                          </span>
+                        ) : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {!t.checkedIn && (
+                          <button
+                            type="button"
+                            onClick={() => handleCheckIn(t.ticketId, "manual")}
+                            disabled={processingId === t.ticketId}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary-hover transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            {processingId === t.ticketId ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserCheck className="w-3 h-3" />}
+                            Check In
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden flex flex-col divide-y divide-gray-100">
+              {filtered.map((t) => (
+                <div key={t.ticketId} className="p-4 bg-white space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-primary text-xs tracking-wider">{t.bookingId}</span>
                       {t.checkedIn ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
                           <CheckCircle2 className="w-3 h-3" /> In
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500">
                           <UserX className="w-3 h-3" /> Pending
                         </span>
                       )}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-text-main whitespace-nowrap">{t.attendeeName}</td>
-                    <td className="px-4 py-3 font-mono text-gray-500 text-xs">{t.attendeeRegNo}</td>
-                    <td className="px-4 py-3 text-gray-500 text-xs max-w-[180px] truncate">{t.attendeeEmail}</td>
-                    <td className="px-4 py-3">
-                      <span className="font-mono font-bold text-primary text-xs tracking-wider">{t.bookingId}</span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
+                    </div>
+                    {t.checkedInBy && (
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                        t.checkedInBy === "qr" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
+                      }`}>
+                        {t.checkedInBy === "qr" ? "📱 QR" : "✋ Manual"}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <p className="font-medium text-text-main text-sm">{t.attendeeName}</p>
+                    <p className="text-xs text-gray-500 font-mono mt-0.5">{t.attendeeRegNo}</p>
+                    <p className="text-xs text-gray-500 truncate mt-0.5">{t.attendeeEmail}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+                    <span className="text-xs text-gray-400">
                       {t.checkedInAt
                         ? new Date(t.checkedInAt).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })
-                        : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-xs">
-                      {t.checkedInBy ? (
-                        <span className={`px-2 py-0.5 rounded-full font-semibold ${
-                          t.checkedInBy === "qr" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
-                        }`}>
-                          {t.checkedInBy === "qr" ? "📱 QR" : "✋ Manual"}
-                        </span>
-                      ) : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      {!t.checkedIn && (
-                        <button
-                          type="button"
-                          onClick={() => handleCheckIn(t.ticketId, "manual")}
-                          disabled={processingId === t.ticketId}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary-hover transition-colors cursor-pointer disabled:opacity-50"
-                        >
-                          {processingId === t.ticketId ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserCheck className="w-3 h-3" />}
-                          Check In
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        : "Not checked in yet"}
+                    </span>
+                    {!t.checkedIn && (
+                      <button
+                        type="button"
+                        onClick={() => handleCheckIn(t.ticketId, "manual")}
+                        disabled={processingId === t.ticketId}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary-hover transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        {processingId === t.ticketId ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserCheck className="w-3 h-3" />}
+                        Check In
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
@@ -776,12 +833,12 @@ function ReviewsTab() {
                     {b.attendeeCount} {b.attendeeCount === 1 ? "attendee" : "attendees"} · ₹{b.totalAmount} · {new Date(b.createdAt).toLocaleString("en-IN")}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 mt-3 sm:mt-0">
+                <div className="flex sm:items-center gap-2 mt-4 sm:mt-0 w-full sm:w-auto">
                   <button
                     type="button"
                     onClick={() => handleReview(b.bookingId, "approve")}
                     disabled={processingId === b.bookingId}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {processingId === b.bookingId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ThumbsUp className="w-3.5 h-3.5" />}
                     Approve
@@ -790,7 +847,7 @@ function ReviewsTab() {
                     type="button"
                     onClick={() => handleReview(b.bookingId, "reject")}
                     disabled={processingId === b.bookingId}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
                     Reject
