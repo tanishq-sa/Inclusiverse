@@ -1349,6 +1349,18 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                 <ScanLine className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
                 Check-In
               </button>
+              <button
+                type="button"
+                onClick={() => setTab("ocr")}
+                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  tab === "ocr"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <ImageIcon className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
+                OCR Logs
+              </button>
             </div>
             <button
               type="button"

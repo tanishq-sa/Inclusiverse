@@ -421,6 +421,7 @@ router.post("/checkin", requireAdmin, async (req, res) => {
 
     const booking = await Booking.findOneAndUpdate(
       {
+        status: "paid",
         tickets: {
           $elemMatch: {
             ticketId: ticketId,
@@ -442,6 +443,11 @@ router.post("/checkin", requireAdmin, async (req, res) => {
       const existing = await Booking.findOne({ "tickets.ticketId": ticketId });
       if (!existing) {
         return res.status(404).json({ error: "Invalid ticket — not found" });
+      }
+      if (existing.status !== "paid") {
+        return res.status(403).json({ 
+          error: `Ticket invalid: Booking is ${existing.status.replace('_', ' ')}` 
+        });
       }
       const ticket = existing.tickets.find((t) => t.ticketId === ticketId);
       return res.status(409).json({
@@ -559,7 +565,7 @@ router.get("/checkin-stats", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 router.get("/all-tickets", requireAdmin, async (req, res) => {
   try {
-    const bookings = await Booking.find().sort({ createdAt: -1 });
+    const bookings = await Booking.find({ status: "paid" }).sort({ createdAt: -1 });
     const tickets = [];
     for (const b of bookings) {
       for (const t of b.tickets) {
