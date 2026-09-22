@@ -607,12 +607,14 @@ router.get("/export", requireAdmin, async (req, res) => {
       }
     } else {
       csvRows.push(
-        "Booking ID,Created At,Primary Name,Primary Reg No,Primary Email,Attendee Count,Total Amount (₹),Payment Method,Status,Email Sent"
+        "Booking ID,Ticket ID,Created At,Attendee Name,Attendee Reg No,Attendee Email,Checked In,Checked In At,Total Amount (₹),Payment Method,Status"
       );
       for (const b of bookings) {
-        csvRows.push(
-          `"${b.bookingId}","${new Date(b.createdAt).toISOString()}","${b.primaryName}","${b.primaryRegNo}","${b.primaryEmail}",${b.attendeeCount},${b.totalAmount},"${b.paymentMethod || "razorpay"}","${b.status}","${b.emailSent ? "Yes" : "No"}"`
-        );
+        for (const t of b.tickets) {
+          csvRows.push(
+            `"${b.bookingId}","${t.ticketId}","${new Date(b.createdAt).toISOString()}","${t.attendeeName}","${t.attendeeRegNo}","${t.attendeeEmail}","${t.checkedIn ? 'Yes' : 'No'}","${t.checkedInAt ? new Date(t.checkedInAt).toISOString() : ''}",${b.totalAmount},"${b.paymentMethod || "razorpay"}","${b.status}"`
+          );
+        }
       }
     }
 
