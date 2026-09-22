@@ -1254,7 +1254,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           b.primaryName.toLowerCase().includes(q) ||
           b.primaryEmail.toLowerCase().includes(q) ||
           b.primaryRegNo.includes(q) ||
-          b.bookingId.toLowerCase().includes(q)
+          b.bookingId.toLowerCase().includes(q) ||
+          b.attendees.some(
+            (a) =>
+              a.name.toLowerCase().includes(q) ||
+              a.email.toLowerCase().includes(q) ||
+              a.regNo.includes(q)
+          )
       )
       .sort((a, b) => {
         const av = a[sortField] as string | number;
