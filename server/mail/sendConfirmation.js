@@ -132,7 +132,7 @@ async function sendConfirmation(booking) {
                       <tr>
                         <td style="padding: 8px 0;">
                           <span style="font-size: 13px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📅 Date & Time</span><br/>
-                          <span style="font-size: 16px; color: #1a1a1a; font-weight: 600; margin-top: 4px; display: block;">1st October 2025 &bull; 9:00 PM – 11:00 PM</span>
+                          <span style="font-size: 16px; color: #1a1a1a; font-weight: 600; margin-top: 4px; display: block;">1st October 2025 &bull; 7:00 PM – 10:00 PM</span>
                         </td>
                       </tr>
                       <tr>
