@@ -68,16 +68,21 @@ function analyzePaymentText(text, expectedAmount) {
   const hasAmount = exactAmountRegex.test(normalizedText);
   if (hasAmount) reasons.push(`Found exact amount ₹${expectedAmount}`);
 
+  // Check for the payee name
+  const payeeKeywords = ["shreeja", "mukherjee"];
+  const hasPayee = payeeKeywords.some((kw) => normalizedText.includes(kw));
+  if (hasPayee) reasons.push("Found correct payee (Shreeja Mukherjee)");
+
   // Determine confidence
   if (hasFailKeyword) {
     return { isValid: false, confidence: "high", reasons };
   }
 
-  if (hasSuccessKeyword && hasAmount) {
+  if (hasSuccessKeyword && hasAmount && hasPayee) {
     return { isValid: true, confidence: "high", reasons };
   }
 
-  if (hasSuccessKeyword || hasAmount) {
+  if (hasSuccessKeyword || hasAmount || hasPayee) {
     return { isValid: false, confidence: "low", reasons: [...reasons, "Partial match — needs manual review"] };
   }
 

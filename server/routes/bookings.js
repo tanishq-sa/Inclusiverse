@@ -79,8 +79,8 @@ router.post("/upload-payment", upload.single("screenshot"), async (req, res) => 
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    if (!/^\d{8}$/.test(primaryRegNo)) {
-      return res.status(400).json({ error: "Registration number must be exactly 8 digits" });
+    if (!/^(\d{6}|\d{8})$/.test(primaryRegNo)) {
+      return res.status(400).json({ error: "Registration number must be 6 or 8 digits" });
     }
 
     if (!primaryEmail.toLowerCase().endsWith("christuniversity.in")) {

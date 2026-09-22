@@ -86,8 +86,8 @@ function AttendeeCard({
           <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
             <span className="text-xs font-bold text-primary">{index + 1}</span>
           </div>
-          <span className="text-sm font-semibold text-text-main">
-            {isPrimary ? "Your Details (Primary)" : `Person ${index + 1}`}
+          <span className="text-sm font-semibold text-text-main truncate max-w-[200px] sm:max-w-[250px]">
+            {attendee.name.trim() ? attendee.name : (isPrimary ? "Your Details (Primary)" : `Person ${index + 1}`)}
           </span>
           {isPrimary && (
             <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">
@@ -456,35 +456,28 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
       <div
         className="text-white relative overflow-hidden bg-cover bg-center"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.85)), url('https://cdn.district.in/movies-assets/images/cinema/Chhichhore-hori-30835a40-79cc-11f1-92c0-3fe6bd48cdb7.jpg?im=Resize,width=720')`
+          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url('/Chhichhore_Movie_Screening.png')`
         }}
       >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative z-10">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-            <div className="w-24 h-24 rounded-3xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm shadow-2xl">
-              <Film className="w-12 h-12 text-white" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 relative z-10 flex flex-col items-center text-center">
+          <div className="inline-block px-4 py-1.5 bg-white/10 border border-white/20 rounded-full text-xs font-bold uppercase tracking-[0.2em] mb-6 backdrop-blur-md text-white/90 shadow-xl">
+            Inclusiverse Presents
+          </div>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-extrabold mb-8 leading-tight tracking-tight drop-shadow-2xl">
+            Chhichhore
+          </h1>
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-sm font-medium text-white/90">
+            <div className="flex items-center gap-2 px-4 py-2 bg-black/40 border border-white/10 rounded-xl backdrop-blur-md shadow-lg">
+              <Calendar className="w-4 h-4 text-white/70" />
+              <span>1st October 2025</span>
             </div>
-            <div className="text-center sm:text-left">
-              <div className="inline-block px-3 py-1 bg-white/15 border border-white/25 rounded-full text-xs font-bold uppercase tracking-widest mb-3 backdrop-blur-sm">
-                Inclusiverse Presents
-              </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold mb-4 leading-tight">
-                Chhichhore
-              </h1>
-              <div className="flex flex-wrap justify-center sm:justify-start gap-4 text-sm font-medium text-white/90">
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-white/70" />
-                  1st October 2025
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-white/70" />
-                  8:00 PM – 11:00 PM
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-white/70" />
-                  Activity Hub
-                </span>
-              </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-black/40 border border-white/10 rounded-xl backdrop-blur-md shadow-lg">
+              <Clock className="w-4 h-4 text-white/70" />
+              <span>8:00 PM – 11:00 PM</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-black/40 border border-white/10 rounded-xl backdrop-blur-md shadow-lg">
+              <MapPin className="w-4 h-4 text-white/70" />
+              <span>Activity Hub</span>
             </div>
           </div>
         </div>
@@ -557,21 +550,16 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
                     Scan this QR code with Google Pay, PhonePe, or any UPI app
                   </p>
                   {qrImage ? (
-                    <div className="inline-block bg-white border-2 border-gray-100 rounded-2xl p-4 shadow-sm">
-                      <img
-                        src={qrImage}
-                        alt={`Pay ₹${total} via UPI`}
-                        className="w-64 h-64 object-contain mx-auto"
-                      />
-                    </div>
+                    <img
+                      src={qrImage}
+                      alt={`Pay ₹${total} via UPI`}
+                      className="max-w-[280px] w-full mx-auto rounded-2xl border border-gray-200 shadow-sm object-contain"
+                    />
                   ) : (
                     <div className="inline-block bg-gray-100 rounded-2xl p-8 text-gray-400">
                       <p className="text-sm">QR code not available for this amount</p>
                     </div>
                   )}
-                  <div className="mt-4 bg-primary/5 rounded-xl p-3 inline-block">
-                    <p className="text-2xl font-display font-bold text-primary">₹{total}</p>
-                  </div>
                 </div>
 
                 {/* Divider */}
@@ -757,22 +745,28 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
                 {/* Breakdown */}
                 <div className="px-5 py-4 space-y-2.5">
                   <AnimatePresence mode="popLayout">
-                    {breakdown.map((item) => (
-                      <m.div
-                        key={item.person}
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex items-center justify-between text-sm"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Ticket className="w-3.5 h-3.5 text-primary/60" />
-                          <span className="text-gray-600">{item.label}</span>
-                        </div>
-                        <span className="font-semibold text-text-main">₹{item.cost}</span>
-                      </m.div>
-                    ))}
+                    {breakdown.map((item, idx) => {
+                      const allAttendees = [primary, ...extras];
+                      const attendee = allAttendees[idx];
+                      const displayName = attendee?.name.trim() || item.label;
+
+                      return (
+                        <m.div
+                          key={item.person}
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="flex items-center justify-between text-sm"
+                        >
+                          <div className="flex items-center gap-2 min-w-0 pr-4">
+                            <Ticket className="w-3.5 h-3.5 text-primary/60 flex-shrink-0" />
+                            <span className="text-gray-600 truncate" title={displayName}>{displayName}</span>
+                          </div>
+                          <span className="font-semibold text-text-main flex-shrink-0">₹{item.cost}</span>
+                        </m.div>
+                      );
+                    })}
                   </AnimatePresence>
                 </div>
 
@@ -870,9 +864,15 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
                       <span>{att.name}</span>
                       {att.isPrimary && <span className="text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full">Primary</span>}
                     </p>
-                    <div className="mt-2 text-sm text-gray-600 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <p><span className="text-gray-400">Reg No / Emp ID:</span> <span className="font-mono">{att.regNo}</span></p>
-                      <p><span className="text-gray-400">Email:</span> {att.email}</p>
+                    <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs text-gray-400 font-medium mb-0.5">Reg No / Emp ID</span>
+                        <span className="font-mono text-sm font-medium text-gray-700">{att.regNo}</span>
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs text-gray-400 font-medium mb-0.5">Email</span>
+                        <span className="text-sm font-medium text-gray-700 break-all">{att.email}</span>
+                      </div>
                     </div>
                   </div>
                 ))}
