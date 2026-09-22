@@ -38,13 +38,19 @@ const CHRIST_EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.christuniversit
 const REG_NO_REGEX = /^(\d{6}|\d{8})$/;
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
+import qr59 from "/gpay-qr-59.jpg";
+import qr99 from "/gpay-qr-99.jpg";
+import qr139 from "/gpay-qr-139.jpg";
+import qr179 from "/gpay-qr-179.jpg";
+import qr219 from "/gpay-qr-219.jpg";
+
 // ─── QR code images mapped by total amount ──────────────────────────────────
 const QR_IMAGES: Record<number, string> = {
-  59: "/gpay-qr-59.jpg",
-  99: "/gpay-qr-99.jpg",
-  139: "/gpay-qr-139.jpg",
-  179: "/gpay-qr-179.jpg",
-  219: "/gpay-qr-219.jpg",
+  59: qr59,
+  99: qr99,
+  139: qr139,
+  179: qr179,
+  219: qr219,
 };
 
 // ─── Validation ────────────────────────────────────────────────────────────────
@@ -670,165 +676,165 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
           /* ── Form Step ── */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
 
-          {/* ── Left: Form ── */}
-          <div className="lg:col-span-2 space-y-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-display font-bold text-text-main flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" />
-                Attendee Details
-              </h2>
-              <span className="text-sm text-gray-400">{attendeeCount} {attendeeCount === 1 ? "person" : "people"} (max 5)</span>
+            {/* ── Left: Form ── */}
+            <div className="lg:col-span-2 space-y-5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-display font-bold text-text-main flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
+                  Attendee Details
+                </h2>
+                <span className="text-sm text-gray-400">{attendeeCount} {attendeeCount === 1 ? "person" : "people"} (max 5)</span>
+              </div>
+
+              <AnimatePresence mode="popLayout">
+                {/* Primary */}
+                <AttendeeCard
+                  key="primary"
+                  attendee={primary}
+                  index={0}
+                  onChange={updatePrimary}
+                  errors={primaryErrors}
+                  isPrimary
+                />
+
+                {/* Extra attendees */}
+                {extras.map((extra, idx) => (
+                  <AttendeeCard
+                    key={`extra-${idx}`}
+                    attendee={extra}
+                    index={idx + 1}
+                    onChange={(field, value) => updateExtra(idx, field, value)}
+                    onRemove={() => removeExtra(idx)}
+                    errors={extrasErrors[idx] || {}}
+                    isPrimary={false}
+                  />
+                ))}
+              </AnimatePresence>
+
+              {/* Add person button */}
+              {attendeeCount < 5 && (
+                <button
+                  type="button"
+                  onClick={addExtra}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed border-gray-300 hover:border-primary hover:bg-primary/5 text-gray-500 hover:text-primary transition-all font-semibold text-sm group cursor-pointer"
+                >
+                  <UserPlus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Add Another Person
+                </button>
+              )}
+
+              {/* Global error */}
+              {globalError && (
+                <m.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4"
+                >
+                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700">{globalError}</p>
+                </m.div>
+              )}
             </div>
 
-            <AnimatePresence mode="popLayout">
-              {/* Primary */}
-              <AttendeeCard
-                key="primary"
-                attendee={primary}
-                index={0}
-                onChange={updatePrimary}
-                errors={primaryErrors}
-                isPrimary
-              />
-
-              {/* Extra attendees */}
-              {extras.map((extra, idx) => (
-                <AttendeeCard
-                  key={`extra-${idx}`}
-                  attendee={extra}
-                  index={idx + 1}
-                  onChange={(field, value) => updateExtra(idx, field, value)}
-                  onRemove={() => removeExtra(idx)}
-                  errors={extrasErrors[idx] || {}}
-                  isPrimary={false}
-                />
-              ))}
-            </AnimatePresence>
-
-            {/* Add person button */}
-            {attendeeCount < 5 && (
-              <button
-                type="button"
-                onClick={addExtra}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed border-gray-300 hover:border-primary hover:bg-primary/5 text-gray-500 hover:text-primary transition-all font-semibold text-sm group cursor-pointer"
-              >
-                <UserPlus className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                Add Another Person
-              </button>
-            )}
-
-            {/* Global error */}
-            {globalError && (
-              <m.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4"
-              >
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700">{globalError}</p>
-              </m.div>
-            )}
-          </div>
-
-          {/* ── Right: Price Card ── */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                {/* Card header */}
-                <div className="bg-gradient-to-r from-primary to-primary-hover px-5 py-4">
-                  <h3 className="font-display font-bold text-white flex items-center gap-2">
-                    <IndianRupee className="w-4 h-4" />
-                    Price Summary
-                  </h3>
-                </div>
-
-                {/* Breakdown */}
-                <div className="px-5 py-4 space-y-2.5">
-                  <AnimatePresence mode="popLayout">
-                    {breakdown.map((item, idx) => {
-                      const allAttendees = [primary, ...extras];
-                      const attendee = allAttendees[idx];
-                      const displayName = attendee?.name.trim() || item.label;
-
-                      return (
-                        <m.div
-                          key={item.person}
-                          initial={{ opacity: 0, x: 10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -10 }}
-                          transition={{ duration: 0.2 }}
-                          className="flex items-center justify-between text-sm"
-                        >
-                          <div className="flex items-center gap-2 min-w-0 pr-4">
-                            <Ticket className="w-3.5 h-3.5 text-primary/60 flex-shrink-0" />
-                            <span className="text-gray-600 truncate" title={displayName}>{displayName}</span>
-                          </div>
-                          <span className="font-semibold text-text-main flex-shrink-0">₹{item.cost}</span>
-                        </m.div>
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
-
-                {/* Total */}
-                <div className="px-5 py-4 border-t border-gray-100 bg-surface">
-                  <div className="flex items-center justify-between">
-                    <span className="font-display font-bold text-text-main">Total</span>
-                    <div className="flex items-center gap-3">
-                      {savings > 0 && (
-                        <span className="text-gray-400 line-through font-semibold text-lg">
-                          ₹{originalTotal}
-                        </span>
-                      )}
-                      <m.span
-                        key={total}
-                        initial={{ scale: 1.15, color: "#C62828" }}
-                        animate={{ scale: 1, color: "#1A1A1A" }}
-                        transition={{ duration: 0.3 }}
-                        className="text-2xl font-display font-bold"
-                      >
-                        ₹{total}
-                      </m.span>
-                    </div>
+            {/* ── Right: Price Card ── */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24">
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                  {/* Card header */}
+                  <div className="bg-gradient-to-r from-primary to-primary-hover px-5 py-4">
+                    <h3 className="font-display font-bold text-white flex items-center gap-2">
+                      <IndianRupee className="w-4 h-4" />
+                      Price Summary
+                    </h3>
                   </div>
-                  {savings > 0 && (
-                    <div className="mt-2 text-right">
-                      <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                        You save ₹{savings}!
-                      </span>
-                    </div>
-                  )}
-                </div>
 
-                {/* Proceed button */}
-                <div className="px-5 py-4">
-                  <button
-                    type="button"
-                    onClick={handleProceedToPayment}
-                    disabled={submitting}
-                    className="w-full bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-colors shadow-md shadow-primary/25 flex items-center justify-center gap-2 cursor-pointer text-base"
-                  >
-                    <IndianRupee className="w-4 h-4" />
-                    Proceed to Pay ₹{total}
-                  </button>
-                  <p className="text-center text-xs text-gray-400 mt-3 leading-relaxed">
-                    Pay via Google Pay / UPI.
-                    <br />
-                    Non-refundable per our{" "}
+                  {/* Breakdown */}
+                  <div className="px-5 py-4 space-y-2.5">
+                    <AnimatePresence mode="popLayout">
+                      {breakdown.map((item, idx) => {
+                        const allAttendees = [primary, ...extras];
+                        const attendee = allAttendees[idx];
+                        const displayName = attendee?.name.trim() || item.label;
+
+                        return (
+                          <m.div
+                            key={item.person}
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex items-center justify-between text-sm"
+                          >
+                            <div className="flex items-center gap-2 min-w-0 pr-4">
+                              <Ticket className="w-3.5 h-3.5 text-primary/60 flex-shrink-0" />
+                              <span className="text-gray-600 truncate" title={displayName}>{displayName}</span>
+                            </div>
+                            <span className="font-semibold text-text-main flex-shrink-0">₹{item.cost}</span>
+                          </m.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Total */}
+                  <div className="px-5 py-4 border-t border-gray-100 bg-surface">
+                    <div className="flex items-center justify-between">
+                      <span className="font-display font-bold text-text-main">Total</span>
+                      <div className="flex items-center gap-3">
+                        {savings > 0 && (
+                          <span className="text-gray-400 line-through font-semibold text-lg">
+                            ₹{originalTotal}
+                          </span>
+                        )}
+                        <m.span
+                          key={total}
+                          initial={{ scale: 1.15, color: "#C62828" }}
+                          animate={{ scale: 1, color: "#1A1A1A" }}
+                          transition={{ duration: 0.3 }}
+                          className="text-2xl font-display font-bold"
+                        >
+                          ₹{total}
+                        </m.span>
+                      </div>
+                    </div>
+                    {savings > 0 && (
+                      <div className="mt-2 text-right">
+                        <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                          You save ₹{savings}!
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Proceed button */}
+                  <div className="px-5 py-4">
                     <button
                       type="button"
-                      onClick={() => setPage("no-refund")}
-                      className="text-primary underline underline-offset-2 cursor-pointer"
+                      onClick={handleProceedToPayment}
+                      disabled={submitting}
+                      className="w-full bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-colors shadow-md shadow-primary/25 flex items-center justify-center gap-2 cursor-pointer text-base"
                     >
-                      No Refund Policy
+                      <IndianRupee className="w-4 h-4" />
+                      Proceed to Pay ₹{total}
                     </button>
-                    .
-                  </p>
+                    <p className="text-center text-xs text-gray-400 mt-3 leading-relaxed">
+                      Pay via Google Pay / UPI.
+                      <br />
+                      Non-refundable per our{" "}
+                      <button
+                        type="button"
+                        onClick={() => setPage("no-refund")}
+                        className="text-primary underline underline-offset-2 cursor-pointer"
+                      >
+                        No Refund Policy
+                      </button>
+                      .
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         )}
       </div>
 
@@ -853,7 +859,7 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
                 <h3 className="font-display font-bold text-xl text-text-main">Confirm Details</h3>
                 <p className="text-sm text-gray-500 mt-1">Please review the details before proceeding to payment.</p>
               </div>
-              
+
               <div className="p-6 overflow-y-auto space-y-4">
                 {[
                   { ...primary, isPrimary: true },
