@@ -1655,11 +1655,23 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
 // ─── Exported Page ─────────────────────────────────────────────────────────────
 export function AdminPanel() {
-  const [unlocked, setUnlocked] = useState(false);
+  const [unlocked, setUnlocked] = useState(() => {
+    return sessionStorage.getItem("adminUnlocked") === "true";
+  });
+
+  const handleUnlock = () => {
+    sessionStorage.setItem("adminUnlocked", "true");
+    setUnlocked(true);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminUnlocked");
+    setUnlocked(false);
+  };
 
   return unlocked ? (
-    <AdminDashboard onLogout={() => setUnlocked(false)} />
+    <AdminDashboard onLogout={handleLogout} />
   ) : (
-    <PasscodeGate onUnlock={() => setUnlocked(true)} />
+    <PasscodeGate onUnlock={handleUnlock} />
   );
 }

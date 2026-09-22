@@ -282,8 +282,22 @@ function SuccessScreen({
 export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
   const emptyAttendee = (): AttendeeForm => ({ name: "", regNo: "", email: "" });
 
-  const [primary, setPrimary] = useState<AttendeeForm>(emptyAttendee());
-  const [extras, setExtras] = useState<AttendeeForm[]>([]);
+  const [primary, setPrimary] = useState<AttendeeForm>(() => {
+    const saved = sessionStorage.getItem("movieTicketPrimary");
+    return saved ? JSON.parse(saved) : emptyAttendee();
+  });
+  const [extras, setExtras] = useState<AttendeeForm[]>(() => {
+    const saved = sessionStorage.getItem("movieTicketExtras");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  React.useEffect(() => {
+    sessionStorage.setItem("movieTicketPrimary", JSON.stringify(primary));
+  }, [primary]);
+
+  React.useEffect(() => {
+    sessionStorage.setItem("movieTicketExtras", JSON.stringify(extras));
+  }, [extras]);
   const [primaryErrors, setPrimaryErrors] = useState<FormErrors>({});
   const [extrasErrors, setExtrasErrors] = useState<FormErrors[]>([]);
   const [submitting, setSubmitting] = useState(false);
