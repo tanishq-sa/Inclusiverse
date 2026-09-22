@@ -160,6 +160,9 @@ router.post("/upload-payment", upload.single("screenshot"), async (req, res) => 
       status,
       reviewedBy: status === "paid" ? "auto-ocr" : undefined,
       reviewedAt: status === "paid" ? new Date() : undefined,
+      ocrReasons: ocrResult.reasons,
+      ocrConfidence: ocrResult.confidence,
+      ocrIsValid: ocrResult.isValid,
     });
 
     // 5) If auto-approved, send confirmation email

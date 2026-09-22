@@ -35,6 +35,9 @@ const bookingSchema = new mongoose.Schema({
   reviewedBy: { type: String }, // admin action: "auto-ocr" or "manual"
   reviewedAt: { type: Date },
   rejectionReason: { type: String },
+  ocrReasons: [{ type: String }],
+  ocrConfidence: { type: String },
+  ocrIsValid: { type: Boolean },
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);

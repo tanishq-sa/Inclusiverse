@@ -68,6 +68,9 @@ interface Booking {
   reviewedBy?: string;
   reviewedAt?: string;
   rejectionReason?: string;
+  ocrReasons?: string[];
+  ocrConfidence?: string;
+  ocrIsValid?: boolean;
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
@@ -324,6 +327,28 @@ function CheckInTab() {
 
   useEffect(() => { fetchData(); }, []);
 
+  const exportAttendance = () => {
+    const headers = ["Ticket ID", "Attendee Name", "Reg No / Emp ID", "Email", "Booking ID", "Checked In", "Checked In At"];
+    const rows = tickets.map(t => [
+      t.ticketId,
+      `"${t.attendeeName}"`,
+      t.attendeeRegNo,
+      t.attendeeEmail,
+      t.bookingId,
+      t.checkedIn ? "Yes" : "No",
+      t.checkedInAt ? `"${new Date(t.checkedInAt).toLocaleString("en-IN")}"` : ""
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "attendance_list.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleCheckIn = async (ticketId: string, method: "qr" | "manual") => {
     setProcessingId(ticketId);
     try {
@@ -343,7 +368,6 @@ function CheckInTab() {
           attendeeRegNo: data.attendeeRegNo,
           bookingId: data.bookingId,
         });
-        fetchData(); // refresh
       } else if (res.status === 409) {
         setCheckInResult({
           type: "already",
@@ -364,6 +388,7 @@ function CheckInTab() {
       });
     } finally {
       setProcessingId(null);
+      fetchData(); // ALWAYS refresh to ensure current state
     }
   };
 
@@ -397,6 +422,17 @@ function CheckInTab() {
           <CheckInToast result={checkInResult} onDismiss={() => setCheckInResult(null)} />
         )}
       </AnimatePresence>
+
+      {/* Action Bar */}
+      <div className="flex justify-end">
+        <button
+          onClick={exportAttendance}
+          className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-50 shadow-sm transition-colors cursor-pointer"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </button>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -973,9 +1009,158 @@ function ReviewsTab() {
   );
 }
 
+// ─── OCR Logs Tab ─────────────────────────────────────────────────────────────
+function OCRLogsTab() {
+  const [logs, setLogs] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const fetchLogs = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings`, {
+        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+      });
+      const data = await res.json();
+      const gpayBookings = (data.bookings || []).filter((b: Booking) => b.paymentMethod === "gpay" && b.paymentScreenshotUrl);
+      setLogs(gpayBookings);
+    } catch (err) {
+      console.error("Failed to fetch OCR logs", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchLogs(); }, []);
+
+  const handleReview = async (bookingId: string, action: "approve" | "reject") => {
+    const reason = action === "reject" ? window.prompt("Rejection reason (optional):") : undefined;
+    if (action === "reject" && reason === null) return;
+
+    setProcessingId(bookingId);
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/review-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        body: JSON.stringify({ bookingId, action, reason: reason || undefined }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        fetchLogs();
+      } else {
+        alert(data.error || "Failed to process review");
+      }
+    } catch {
+      alert("Network error — please try again.");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  if (loading) {
+    return <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
+
+  if (logs.length === 0) {
+    return <div className="py-20 flex flex-col items-center text-center text-gray-400">
+      <ImageIcon className="w-12 h-12 mb-3 opacity-30" />
+      <p>No OCR logs found.</p>
+    </div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      {logs.map((b) => (
+        <div key={b._id} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col md:flex-row">
+          {/* Screenshot */}
+          <div className="w-full md:w-64 bg-gray-100 flex-shrink-0 cursor-pointer border-b md:border-b-0 md:border-r border-gray-200" onClick={() => setPreviewImage(b.paymentScreenshotUrl!)}>
+            <img src={b.paymentScreenshotUrl} alt="Payment" className="w-full h-48 md:h-full object-cover" />
+          </div>
+          
+          {/* Details */}
+          <div className="p-6 flex-1 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-primary text-sm font-bold">{b.bookingId}</span>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                  b.status === "paid" ? "bg-green-100 text-green-700" :
+                  b.status === "rejected" ? "bg-red-100 text-red-700" :
+                  "bg-amber-100 text-amber-700"
+                }`}>
+                  {b.status === "paid" ? "Auto-Approved" : b.status === "rejected" ? "Rejected" : "Pending Review"}
+                </span>
+              </div>
+              
+              <h3 className="font-bold text-lg mb-1">{b.primaryName}</h3>
+              <p className="text-sm text-gray-600 mb-4">{b.primaryEmail} • {b.primaryRegNo} • ₹{b.totalAmount}</p>
+
+              <div className="bg-primary/5 rounded-xl p-4 border border-primary/10 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-primary uppercase tracking-wide">OCR Analysis</span>
+                  {b.ocrConfidence && (
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                      b.ocrConfidence === "high" ? "bg-green-100 text-green-700" :
+                      b.ocrConfidence === "low" ? "bg-amber-100 text-amber-700" :
+                      "bg-gray-200 text-gray-700"
+                    }`}>
+                      {b.ocrConfidence} CONFIDENCE
+                    </span>
+                  )}
+                </div>
+                {b.ocrReasons && b.ocrReasons.length > 0 ? (
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    {b.ocrReasons.map((r, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-primary mt-0.5">•</span>
+                        <span>{r}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-500">No OCR reasons available.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Actions (Only if pending) */}
+            {b.status === "pending_review" && (
+              <div className="flex items-center gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => handleReview(b.bookingId, "approve")}
+                  disabled={processingId === b.bookingId}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  <ThumbsUp className="w-3.5 h-3.5" /> Approve
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleReview(b.bookingId, "reject")}
+                  disabled={processingId === b.bookingId}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  <ThumbsDown className="w-3.5 h-3.5" /> Reject
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {previewImage && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 cursor-pointer" onClick={() => setPreviewImage(null)}>
+          <img src={previewImage} alt="Payment screenshot full size" className="max-w-full max-h-full object-contain rounded-xl" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Admin Dashboard ──────────────────────────────────────────────────────
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
-  const [tab, setTab] = useState<"bookings" | "checkin" | "reviews">("bookings");
+  const [tab, setTab] = useState<"bookings" | "checkin" | "reviews" | "ocr">("bookings");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1216,6 +1401,16 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <ScanLine className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
             Check-In
           </button>
+          <button
+            type="button"
+            onClick={() => setTab("ocr")}
+            className={`flex-1 py-2.5 text-xs font-semibold text-center transition-all cursor-pointer ${
+              tab === "ocr" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-gray-500"
+            }`}
+          >
+            <ImageIcon className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
+            OCR Logs
+          </button>
         </div>
       </div>
 
@@ -1224,6 +1419,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <CheckInTab />
         ) : tab === "reviews" ? (
           <ReviewsTab />
+        ) : tab === "ocr" ? (
+          <OCRLogsTab />
         ) : (
           <>
             {/* Stats */}
@@ -1369,13 +1566,21 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                               {new Date(b.createdAt).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}
                             </td>
                             <td className="px-4 py-3">
-                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${b.status === "paid"
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                b.status === "paid"
                                   ? "bg-green-100 text-green-700"
+                                  : b.status === "rejected"
+                                  ? "bg-red-100 text-red-700"
                                   : "bg-amber-100 text-amber-700"
-                                }`}>
+                              }`}>
                                 {b.status === "paid" && <CheckCircle2 className="w-3 h-3" />}
                                 {b.status}
                               </span>
+                              {b.status === "rejected" && b.rejectionReason && (
+                                <div className="text-[10px] text-red-500 mt-1 max-w-[120px] leading-tight" title={b.rejectionReason}>
+                                  {b.rejectionReason}
+                                </div>
+                              )}
                             </td>
                             <td className="px-4 py-3 text-xs text-gray-400">
                               {b.attendeeCount > 1 ? (
