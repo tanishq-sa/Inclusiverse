@@ -35,7 +35,7 @@ interface FormErrors {
 }
 
 const CHRIST_EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.christuniversity\.in$/i;
-const REG_NO_REGEX = /^(\d{6}|\d{8})$/;
+const REG_NO_REGEX = /^(\d{5}|\d{8})$/;
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 import qr59 from "@/assets/gpay-qr-59.png";
@@ -57,7 +57,7 @@ const QR_IMAGES: Record<number, string> = {
 function validateAttendee(a: AttendeeForm): FormErrors {
   const errors: FormErrors = {};
   if (!a.name.trim()) errors.name = "Name is required";
-  if (!REG_NO_REGEX.test(a.regNo)) errors.regNo = "Registration number must be 6 or 8 digits";
+  if (!REG_NO_REGEX.test(a.regNo)) errors.regNo = "Registration number must be 5 or 8 digits";
   if (!CHRIST_EMAIL_REGEX.test(a.email)) errors.email = "Must be a valid @christuniversity.in email";
   return errors;
 }
@@ -144,7 +144,7 @@ function AttendeeCard({
             type="text"
             value={attendee.regNo}
             onChange={(e) => onChange("regNo", e.target.value.replace(/\D/g, "").slice(0, 8))}
-            placeholder="6 or 8 digits"
+            placeholder="5 or 8 digits"
             maxLength={8}
             className={`w-full rounded-xl border px-3.5 py-2.5 text-sm text-text-main placeholder:text-gray-400 outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary font-mono tracking-widest ${errors.regNo ? "border-red-400 bg-red-50" : "border-gray-200 bg-white"
               }`}
