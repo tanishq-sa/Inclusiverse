@@ -248,7 +248,7 @@ function SuccessScreen({
         </div>
         <div className="flex justify-between items-center border-t border-gray-100 pt-4">
           <span className="text-sm text-gray-500 font-medium">Event</span>
-          <span className="text-sm font-semibold text-text-main">Chhichhore · 1 Oct · 9PM</span>
+          <span className="text-sm font-semibold text-text-main">Chhichhore · 1 Oct · 7PM</span>
         </div>
         <div className="flex justify-between items-center border-t border-gray-100 pt-4">
           <span className="text-sm text-gray-500 font-medium">Venue</span>

@@ -80,7 +80,7 @@ export const PAGE_METADATA: Record<Page, { title: string; description: string }>
   tickets: {
     title: "Chhichhore Movie Screening Tickets — Inclusiverse",
     description:
-      "Book your tickets for the Chhichhore movie screening on 1st October 2025, 9PM–11PM at Actinity Hub. Organised by Inclusiverse, Christ University Lavasa.",
+      "Book your tickets for the Chhichhore movie screening on 1st October 2025, 7M–10PM at Actinity Hub. Organised by Inclusiverse, Christ University Lavasa.",
   },
   admin: {
     title: "Admin Panel — Inclusiverse",
