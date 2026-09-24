@@ -414,6 +414,11 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
     setGlobalError(null);
   };
 
+  // ── Upload progress + OCR checking state ──────────────────────────────────
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadPhase, setUploadPhase] = useState<"idle" | "uploading" | "verifying" | "done">("idle");
+  const [ocrCheckElapsed, setOcrCheckElapsed] = useState(0);
+
   // ── Submit payment screenshot ─────────────────────────────────────────────
   const handleSubmitPayment = async () => {
     if (!screenshot) {
@@ -423,33 +428,85 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
 
     setSubmitting(true);
     setGlobalError(null);
+    setUploadProgress(0);
+    setUploadPhase("uploading");
+    setOcrCheckElapsed(0);
 
-    try {
-      const formData = new FormData();
-      formData.append("primaryName", primary.name);
-      formData.append("primaryRegNo", primary.regNo);
-      formData.append("primaryEmail", primary.email);
-      formData.append("attendees", JSON.stringify(extras));
-      formData.append("totalAmount", String(total));
-      formData.append("screenshot", screenshot);
+    const formData = new FormData();
+    formData.append("primaryName", primary.name);
+    formData.append("primaryRegNo", primary.regNo);
+    formData.append("primaryEmail", primary.email);
+    formData.append("attendees", JSON.stringify(extras));
+    formData.append("totalAmount", String(total));
+    formData.append("screenshot", screenshot);
 
-      const res = await fetch(`${API_BASE}/api/bookings/upload-payment`, {
-        method: "POST",
-        body: formData,
+    // Use XMLHttpRequest to track upload progress
+    const xhr = new XMLHttpRequest();
+
+    const xhrPromise = new Promise<{ ok: boolean; data: Record<string, unknown> }>((resolve, reject) => {
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          setUploadProgress(pct);
+          if (pct >= 100) {
+            // Upload done, now server is running OCR — switch to verifying phase
+            setUploadPhase("verifying");
+            // Start a 4-second elapsed timer to show OCR checking progress
+            const ocrStart = Date.now();
+            const ocrTimer = setInterval(() => {
+              const elapsed = Math.round((Date.now() - ocrStart) / 1000);
+              setOcrCheckElapsed(elapsed);
+            }, 1000);
+            // Store timer so we can clear it later
+            (xhr as XMLHttpRequest & { _ocrTimer?: ReturnType<typeof setInterval> })._ocrTimer = ocrTimer;
+          }
+        }
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to submit booking");
+      xhr.addEventListener("load", () => {
+        // Clear the OCR timer
+        const timer = (xhr as XMLHttpRequest & { _ocrTimer?: ReturnType<typeof setInterval> })._ocrTimer;
+        if (timer) clearInterval(timer);
 
+        try {
+          const data = JSON.parse(xhr.responseText);
+          resolve({ ok: xhr.status >= 200 && xhr.status < 300, data });
+        } catch {
+          reject(new Error("Invalid server response"));
+        }
+      });
+
+      xhr.addEventListener("error", () => {
+        const timer = (xhr as XMLHttpRequest & { _ocrTimer?: ReturnType<typeof setInterval> })._ocrTimer;
+        if (timer) clearInterval(timer);
+        reject(new Error("Network error. Please try again."));
+      });
+
+      xhr.addEventListener("abort", () => {
+        const timer = (xhr as XMLHttpRequest & { _ocrTimer?: ReturnType<typeof setInterval> })._ocrTimer;
+        if (timer) clearInterval(timer);
+        reject(new Error("Upload cancelled."));
+      });
+
+      xhr.open("POST", `${API_BASE}/api/bookings/upload-payment`);
+      xhr.send(formData);
+    });
+
+    try {
+      const { ok, data } = await xhrPromise;
+      if (!ok) throw new Error((data.error as string) || "Failed to submit booking");
+
+      setUploadPhase("done");
       setSuccess({
-        bookingId: data.bookingId,
+        bookingId: data.bookingId as string,
         total,
         attendeeCount,
-        status: data.status,
+        status: data.status as string,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong";
       setGlobalError(message);
+      setUploadPhase("idle");
     } finally {
       setSubmitting(false);
     }
@@ -650,25 +707,73 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
                   </m.div>
                 )}
 
-                {/* Submit */}
-                <button
-                  type="button"
-                  onClick={handleSubmitPayment}
-                  disabled={submitting || !screenshot}
-                  className="w-full bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-colors shadow-md shadow-primary/25 flex items-center justify-center gap-2 cursor-pointer text-base"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Submitting…
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      Submit Payment Proof
-                    </>
-                  )}
-                </button>
+                {/* Submit / Progress */}
+                {submitting ? (
+                  <m.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-3"
+                  >
+                    {uploadPhase === "uploading" ? (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <Loader2 className="w-5 h-5 animate-spin text-primary flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-gray-700">
+                              Uploading screenshot… {uploadProgress}%
+                            </p>
+                          </div>
+                        </div>
+                        {/* Progress bar */}
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                          <m.div
+                            className="bg-primary h-2.5 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${uploadProgress}%` }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                          />
+                        </div>
+                      </>
+                    ) : uploadPhase === "verifying" ? (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <Loader2 className="w-5 h-5 animate-spin text-amber-500 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-gray-700">
+                              Verifying payment…
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Checking for ₹{total} • {ocrCheckElapsed}s elapsed
+                            </p>
+                          </div>
+                        </div>
+                        {/* Verification progress indicator — pulsing bar */}
+                        <div className="w-full bg-amber-100 rounded-full h-2.5 overflow-hidden">
+                          <m.div
+                            className="bg-amber-400 h-2.5 rounded-full"
+                            animate={{ width: ["20%", "70%", "40%", "90%", "60%"] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary flex-shrink-0" />
+                        <p className="text-sm font-semibold text-gray-700">Processing…</p>
+                      </div>
+                    )}
+                  </m.div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubmitPayment}
+                    disabled={!screenshot}
+                    className="w-full bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-colors shadow-md shadow-primary/25 flex items-center justify-center gap-2 cursor-pointer text-base"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Submit Payment Proof
+                  </button>
+                )}
 
                 <p className="text-center text-xs text-gray-400 leading-relaxed">
                   Your payment will be verified automatically or reviewed by our team.

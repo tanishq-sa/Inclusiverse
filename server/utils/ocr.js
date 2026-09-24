@@ -17,7 +17,7 @@ async function extractTextFromImage(imageBuffer, filename) {
   form.append("isOverlayRequired", "false");
   form.append("detectOrientation", "true");
   form.append("scale", "true");
-  form.append("OCREngine", "2"); // Engine 2 is better for screenshots
+  form.append("OCREngine", "3"); // Engine 3 for better text extraction
 
   const response = await axios.post("https://api.ocr.space/parse/image", form, {
     headers: form.getHeaders(),
@@ -62,11 +62,17 @@ function analyzePaymentText(text, expectedAmount) {
   const hasFailKeyword = failKeywords.some((kw) => normalizedText.includes(kw));
   if (hasFailKeyword) reasons.push("Found failure keyword");
 
-  // Look for the exact expected amount as a standalone number (e.g., matching "59" or "59.00" but not "759")
-  // We use a negative lookbehind (?<!:) to prevent matching minutes in a timestamp (like "12:59")
-  const exactAmountRegex = new RegExp(`(?<!:)\\b${expectedAmount}(?:\\.00?)?\\b`);
-  const hasAmount = exactAmountRegex.test(normalizedText);
+  // Look for the rupee symbol (₹) followed by the exact expected amount
+  // This ensures we match the actual payment amount and not timestamps or unrelated numbers
+  const rupeeAmountRegex = new RegExp(`₹\\s*${expectedAmount}(?:\\.00?)?\\b`);
+  const hasAmount = rupeeAmountRegex.test(normalizedText);
   if (hasAmount) reasons.push(`Found exact amount ₹${expectedAmount}`);
+
+  // Also check the original (non-lowercased) text for the rupee symbol in case normalizing removed it
+  const originalText = text.replace(/[,\s]+/g, " ");
+  const hasAmountOriginal = rupeeAmountRegex.test(originalText);
+  const amountFound = hasAmount || hasAmountOriginal;
+  if (!hasAmount && hasAmountOriginal) reasons.push(`Found exact amount ₹${expectedAmount} (original text)`);
 
   // Check for the payee name
   const payeeKeywords = ["shreeja", "mukherjee"];
@@ -78,11 +84,11 @@ function analyzePaymentText(text, expectedAmount) {
     return { isValid: false, confidence: "high", reasons };
   }
 
-  if (hasSuccessKeyword && hasAmount && hasPayee) {
+  if (hasSuccessKeyword && amountFound && hasPayee) {
     return { isValid: true, confidence: "high", reasons };
   }
 
-  if (hasSuccessKeyword || hasAmount || hasPayee) {
+  if (hasSuccessKeyword || amountFound || hasPayee) {
     return { isValid: false, confidence: "low", reasons: [...reasons, "Partial match — needs manual review"] };
   }
 
