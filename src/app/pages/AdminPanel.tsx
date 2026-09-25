@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Lock,
+  Shield,
   Search,
   Download,
   RefreshCw,
@@ -27,6 +28,9 @@ import {
   ThumbsDown,
   Mail,
   Pencil,
+  LayoutDashboard,
+  Activity,
+  TrendingUp,
 } from "lucide-react";
 import { m, AnimatePresence } from "motion/react";
 import { Html5Qrcode } from "html5-qrcode";
@@ -93,58 +97,105 @@ function PasscodeGate({ onUnlock }: { onUnlock: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center px-4">
-      <m.div
-        initial={{ opacity: 0, y: 24, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="bg-white rounded-3xl border border-gray-200 shadow-lg p-10 w-full max-w-sm text-center"
-      >
-        <div className={`w-16 h-16 rounded-2xl ${error ? "bg-red-100" : "bg-primary/10"} flex items-center justify-center mx-auto mb-6 transition-colors duration-300`}>
-          <Lock className={`w-8 h-8 ${error ? "text-red-500" : "text-primary"} transition-colors`} />
-        </div>
-        <h1 className="text-2xl font-display font-bold text-text-main mb-1">Admin Panel</h1>
-        <p className="text-sm text-gray-500 mb-8">Chhichhore · Inclusiverse</p>
+    <div className="flex-grow flex items-center justify-center px-4 py-16 sm:py-24 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fef2f2 0%, #fff7ed 25%, #f7f7f7 50%, #eff6ff 75%, #fef2f2 100%)' }}>
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full bg-primary/3 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full border border-primary/5" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-primary/5" />
+        {/* Dot grid pattern */}
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle, rgba(198,40,40,0.04) 1px, transparent 1px)',
+          backgroundSize: '32px 32px'
+        }} />
+      </div>
 
-        <div className="relative mb-4">
-          <input
-            type={show ? "text" : "password"}
-            value={value}
-            onChange={(e) => { setValue(e.target.value); setError(false); }}
-            onKeyDown={(e) => e.key === "Enter" && submit()}
-            placeholder="Enter passcode"
-            className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all focus:ring-2 font-mono tracking-widest text-center ${error
-                ? "border-red-400 bg-red-50 focus:ring-red-200"
-                : "border-gray-200 focus:border-primary focus:ring-primary/20"
-              }`}
-            autoFocus
-          />
+      <m.div
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-full max-w-md"
+      >
+        {/* Main card */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/60 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1),0_0_0_1px_rgba(198,40,40,0.05)] p-8 sm:p-10 text-center">
+          {/* Animated icon */}
+          <div className="relative mx-auto mb-8 w-20 h-20">
+            <m.div
+              animate={error ? { scale: [1, 1.1, 1] } : { scale: [1, 1.05, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className={`absolute inset-0 rounded-2xl ${error ? 'bg-red-100/80' : 'bg-gradient-to-br from-primary/15 to-primary/5'} transition-colors duration-300`}
+            />
+            <div className={`absolute inset-0 rounded-2xl flex items-center justify-center`}>
+              <Shield className={`w-10 h-10 ${error ? 'text-red-500' : 'text-primary'} transition-colors duration-300`} />
+            </div>
+            {/* Pulse ring */}
+            {!error && (
+              <m.div
+                animate={{ scale: [1, 1.3], opacity: [0.3, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                className="absolute inset-0 rounded-2xl border-2 border-primary/20"
+              />
+            )}
+          </div>
+
+          {/* Heading */}
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-text-main mb-1.5">Admin Panel</h1>
+          <p className="text-sm text-gray-400 mb-1">Chhichhore · Inclusiverse</p>
+          <div className="flex items-center justify-center gap-1.5 mb-8">
+            <span className="w-8 h-px bg-gray-200" />
+            <Lock className="w-3 h-3 text-gray-300" />
+            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Secured Access</span>
+            <Lock className="w-3 h-3 text-gray-300" />
+            <span className="w-8 h-px bg-gray-200" />
+          </div>
+
+          {/* Input */}
+          <div className="relative mb-4">
+            <input
+              type={show ? "text" : "password"}
+              value={value}
+              onChange={(e) => { setValue(e.target.value); setError(false); }}
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+              placeholder="Enter passcode"
+              className={`w-full rounded-xl border-2 px-5 py-3.5 text-sm outline-none transition-all focus:ring-3 font-mono tracking-widest text-center bg-white/70 backdrop-blur-sm ${error
+                  ? "border-red-300 bg-red-50/50 focus:ring-red-100 focus:border-red-400"
+                  : "border-gray-200/80 focus:border-primary focus:ring-primary/10"
+                }`}
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={() => setShow((s) => !s)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
+            >
+              {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <m.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center justify-center gap-1.5 text-xs text-red-500 mb-4 bg-red-50 rounded-lg py-2 border border-red-100"
+            >
+              <AlertCircle className="w-3.5 h-3.5" /> Incorrect passcode. Please try again.
+            </m.div>
+          )}
+
+          {/* Submit button */}
           <button
             type="button"
-            onClick={() => setShow((s) => !s)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+            onClick={submit}
+            className="w-full bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 cursor-pointer flex items-center justify-center gap-2 group"
           >
-            {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <Lock className="w-4 h-4 transition-transform group-hover:scale-110" />
+            Unlock Dashboard
           </button>
         </div>
 
-        {error && (
-          <m.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-xs text-red-500 mb-4 flex items-center justify-center gap-1"
-          >
-            <AlertCircle className="w-3 h-3" /> Incorrect passcode
-          </m.p>
-        )}
 
-        <button
-          type="button"
-          onClick={submit}
-          className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-3 rounded-xl transition-colors shadow-sm cursor-pointer"
-        >
-          Unlock
-        </button>
       </m.div>
     </div>
   );
@@ -152,18 +203,220 @@ function PasscodeGate({ onUnlock }: { onUnlock: () => void }) {
 
 // ─── Stat Card ─────────────────────────────────────────────────────────────────
 function StatCard({ icon: Icon, label, value, sub, color }: { icon: React.ElementType; label: string; value: string | number; sub?: string; color?: string }) {
-  const bg = color === "green" ? "bg-green-100" : color === "amber" ? "bg-amber-100" : "bg-primary/10";
+  const bg = color === "green" ? "bg-green-50" : color === "amber" ? "bg-amber-50" : "bg-primary/5";
+  const iconBg = color === "green" ? "bg-green-100" : color === "amber" ? "bg-amber-100" : "bg-primary/10";
   const text = color === "green" ? "text-green-600" : color === "amber" ? "text-amber-600" : "text-primary";
+  const borderAccent = color === "green" ? "border-green-100" : color === "amber" ? "border-amber-100" : "border-primary/10";
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-      <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center`}>
-          <Icon className={`w-4 h-4 ${text}`} />
+    <m.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className={`bg-white rounded-2xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow relative overflow-hidden`}
+    >
+      <div className={`absolute top-0 right-0 w-24 h-24 ${bg} rounded-bl-[80px] -mr-2 -mt-2`} />
+      <div className="relative">
+        <div className="flex items-center gap-3 mb-3">
+          <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shadow-sm`}>
+            <Icon className={`w-4.5 h-4.5 ${text}`} />
+          </div>
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{label}</span>
         </div>
-        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{label}</span>
+        <p className="text-3xl font-display font-bold text-text-main">{value}</p>
+        {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
       </div>
-      <p className="text-2xl font-display font-bold text-text-main">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    </m.div>
+  );
+}
+
+// ─── Shimmer Skeleton Primitives ───────────────────────────────────────────────
+function Shimmer({ className = "" }: { className?: string }) {
+  return (
+    <div className={`relative overflow-hidden rounded-lg bg-gray-100 ${className}`}>
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+    </div>
+  );
+}
+
+function StatCardSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-gray-50 rounded-bl-[80px] -mr-2 -mt-2" />
+      <div className="relative">
+        <div className="flex items-center gap-3 mb-3">
+          <Shimmer className="w-10 h-10 rounded-xl" />
+          <Shimmer className="h-3 w-20 rounded-md" />
+        </div>
+        <Shimmer className="h-8 w-24 rounded-lg mb-1" />
+        <Shimmer className="h-3 w-32 rounded-md" />
+      </div>
+    </div>
+  );
+}
+
+function TableRowSkeleton() {
+  return (
+    <tr className="border-b border-gray-50">
+      <td className="px-4 py-3"><Shimmer className="h-4 w-20 rounded-md" /></td>
+      <td className="px-4 py-3"><Shimmer className="h-4 w-28 rounded-md" /></td>
+      <td className="px-4 py-3"><Shimmer className="h-4 w-16 rounded-md" /></td>
+      <td className="px-4 py-3"><Shimmer className="h-4 w-32 rounded-md" /></td>
+      <td className="px-4 py-3 text-center"><Shimmer className="h-7 w-7 rounded-full mx-auto" /></td>
+      <td className="px-4 py-3"><Shimmer className="h-4 w-14 rounded-md" /></td>
+      <td className="px-4 py-3"><Shimmer className="h-4 w-24 rounded-md" /></td>
+      <td className="px-4 py-3"><Shimmer className="h-5 w-16 rounded-full" /></td>
+      <td className="px-4 py-3"><Shimmer className="h-4 w-12 rounded-md" /></td>
+    </tr>
+  );
+}
+
+function BookingsLoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCardSkeleton />
+        <StatCardSkeleton />
+        <StatCardSkeleton />
+      </div>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <Shimmer className="h-10 w-full sm:w-80 rounded-xl" />
+          <div className="flex gap-2.5">
+            <Shimmer className="h-9 w-24 rounded-xl" />
+            <Shimmer className="h-9 w-28 rounded-xl" />
+            <Shimmer className="h-9 w-24 rounded-xl" />
+          </div>
+        </div>
+      </div>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-surface/80 border-b border-gray-100">
+              {["Booking ID", "Name", "Reg No.", "Email", "People", "Total", "Date", "Status", "Attendees"].map((h) => (
+                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wide">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 6 }).map((_, i) => <TableRowSkeleton key={i} />)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function CheckInLoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCardSkeleton />
+        <StatCardSkeleton />
+        <StatCardSkeleton />
+      </div>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+        <div className="flex items-center justify-between mb-2">
+          <Shimmer className="h-4 w-32 rounded-md" />
+          <Shimmer className="h-4 w-10 rounded-md" />
+        </div>
+        <Shimmer className="h-3 w-full rounded-full" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Shimmer className="w-9 h-9 rounded-xl" />
+            <Shimmer className="h-5 w-24 rounded-md" />
+          </div>
+          <Shimmer className="h-48 w-full rounded-xl" />
+        </div>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Shimmer className="w-9 h-9 rounded-xl" />
+            <Shimmer className="h-5 w-28 rounded-md" />
+          </div>
+          <Shimmer className="h-10 w-full rounded-xl mb-4" />
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-gray-100">
+                <div className="flex items-center gap-3">
+                  <Shimmer className="w-8 h-8 rounded-full" />
+                  <div>
+                    <Shimmer className="h-4 w-28 rounded-md mb-1" />
+                    <Shimmer className="h-3 w-36 rounded-md" />
+                  </div>
+                </div>
+                <Shimmer className="h-7 w-18 rounded-xl" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReviewsLoadingSkeleton() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 2 }).map((_, i) => (
+        <div key={i} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 bg-amber-50/30 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <Shimmer className="h-4 w-24 rounded-md" />
+                  <Shimmer className="h-5 w-24 rounded-full" />
+                </div>
+                <Shimmer className="h-4 w-56 rounded-md mb-1" />
+                <Shimmer className="h-3 w-44 rounded-md" />
+              </div>
+              <div className="flex gap-2">
+                <Shimmer className="h-9 w-24 rounded-xl" />
+                <Shimmer className="h-9 w-24 rounded-xl" />
+              </div>
+            </div>
+          </div>
+          <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Shimmer className="h-48 w-full rounded-xl" />
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, j) => (
+                <div key={j} className="flex items-center justify-between bg-surface rounded-xl px-3 py-2.5">
+                  <div>
+                    <Shimmer className="h-4 w-28 rounded-md mb-1" />
+                    <Shimmer className="h-3 w-40 rounded-md" />
+                  </div>
+                  <Shimmer className="h-4 w-4 rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function OCRLoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col md:flex-row">
+          <Shimmer className="w-full md:w-64 h-48 md:h-auto rounded-none" />
+          <div className="p-6 flex-1">
+            <div className="flex items-center justify-between mb-3">
+              <Shimmer className="h-4 w-24 rounded-md" />
+              <Shimmer className="h-5 w-24 rounded-full" />
+            </div>
+            <Shimmer className="h-6 w-40 rounded-md mb-2" />
+            <Shimmer className="h-4 w-56 rounded-md mb-4" />
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+              <Shimmer className="h-3 w-20 rounded-md" />
+              <Shimmer className="h-4 w-full rounded-md" />
+              <Shimmer className="h-4 w-3/4 rounded-md" />
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -514,8 +767,19 @@ function CheckInTab() {
           </div>
           <div className="max-h-[400px] overflow-y-auto space-y-2">
             {loading ? (
-              <div className="flex items-center justify-center py-10">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <div className="space-y-2 py-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <Shimmer className="w-8 h-8 rounded-full" />
+                      <div>
+                        <Shimmer className="h-4 w-28 rounded-md mb-1" />
+                        <Shimmer className="h-3 w-36 rounded-md" />
+                      </div>
+                    </div>
+                    <Shimmer className="h-7 w-18 rounded-xl" />
+                  </div>
+                ))}
               </div>
             ) : filtered.length === 0 ? (
               <div className="text-center py-10 text-gray-400">
@@ -597,8 +861,30 @@ function CheckInTab() {
           </button>
         </div>
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <div className="overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-surface/80 border-b border-gray-100">
+                  {["Status", "Name", "Reg No", "Email", "Booking", "Checked In At", "Method", "Action"].map((h) => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wide">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="border-b border-gray-50">
+                    <td className="px-4 py-3"><Shimmer className="h-5 w-14 rounded-full" /></td>
+                    <td className="px-4 py-3"><Shimmer className="h-4 w-28 rounded-md" /></td>
+                    <td className="px-4 py-3"><Shimmer className="h-4 w-16 rounded-md" /></td>
+                    <td className="px-4 py-3"><Shimmer className="h-4 w-32 rounded-md" /></td>
+                    <td className="px-4 py-3"><Shimmer className="h-4 w-20 rounded-md" /></td>
+                    <td className="px-4 py-3"><Shimmer className="h-4 w-24 rounded-md" /></td>
+                    <td className="px-4 py-3"><Shimmer className="h-5 w-16 rounded-full" /></td>
+                    <td className="px-4 py-3"><Shimmer className="h-7 w-20 rounded-lg" /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
           <>
@@ -819,15 +1105,13 @@ function ReviewsTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-display font-bold text-text-main flex items-center gap-2">
-          <ClipboardList className="w-5 h-5 text-primary" />
-          Pending Reviews
+        <div className="flex items-center gap-2">
           {pendingBookings.length > 0 && (
             <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
-              {pendingBookings.length}
+              {pendingBookings.length} pending
             </span>
           )}
-        </h2>
+        </div>
         <button
           type="button"
           onClick={fetchPending}
@@ -840,9 +1124,7 @@ function ReviewsTab() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
+        <ReviewsLoadingSkeleton />
       ) : pendingBookings.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center">
           <CheckCircle2 className="w-12 h-12 text-green-300 mx-auto mb-3" />
@@ -1060,7 +1342,7 @@ function OCRLogsTab() {
   };
 
   if (loading) {
-    return <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+    return <OCRLoadingSkeleton />;
   }
 
   if (logs.length === 0) {
@@ -1303,77 +1585,52 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       sortAsc ? <ChevronUp className="w-3 h-3 inline ml-1" /> : <ChevronDown className="w-3 h-3 inline ml-1" />
     ) : null;
 
+  // Tab definitions for DRY rendering
+  const tabs = [
+    { key: "bookings" as const, label: "Bookings", icon: Ticket },
+    { key: "reviews" as const, label: "Reviews", icon: ClipboardList },
+    { key: "checkin" as const, label: "Check-In", icon: ScanLine },
+    { key: "ocr" as const, label: "OCR Logs", icon: ImageIcon },
+  ];
+
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="flex-grow flex flex-col bg-surface">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200/80 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Lock className="w-4 h-4 text-primary" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
+              <LayoutDashboard className="w-4.5 h-4.5 text-primary" />
             </div>
             <div>
-              <h1 className="text-base font-display font-bold text-text-main leading-none">Admin Panel</h1>
-              <p className="text-xs text-gray-400">Chhichhore · Inclusiverse</p>
+              <h1 className="text-base font-display font-bold text-text-main leading-none">Admin Dashboard</h1>
+              <p className="text-[11px] text-gray-400 mt-0.5">Chhichhore · Inclusiverse</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {/* Tab Switcher */}
-            <div className="hidden sm:flex items-center bg-surface rounded-xl border border-gray-200 p-0.5">
-              <button
-                type="button"
-                onClick={() => setTab("bookings")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  tab === "bookings"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <Ticket className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
-                Bookings
-              </button>
-              <button
-                type="button"
-                onClick={() => setTab("reviews")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  tab === "reviews"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <ClipboardList className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
-                Reviews
-              </button>
-              <button
-                type="button"
-                onClick={() => setTab("checkin")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  tab === "checkin"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <ScanLine className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
-                Check-In
-              </button>
-              <button
-                type="button"
-                onClick={() => setTab("ocr")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  tab === "ocr"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <ImageIcon className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
-                OCR Logs
-              </button>
+            <div className="hidden sm:flex items-center bg-surface/80 rounded-xl border border-gray-200 p-0.5">
+              {tabs.map(({ key, label, icon: TabIcon }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setTab(key)}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    tab === key
+                      ? "bg-white text-primary shadow-sm border border-gray-100"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  <TabIcon className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
+                  {label}
+                </button>
+              ))}
             </div>
             <button
               type="button"
               onClick={() => tab === "bookings" ? fetchBookings() : undefined}
               disabled={loading && tab === "bookings"}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface border border-gray-200 text-sm font-medium text-gray-600 hover:text-primary hover:border-primary/40 transition-colors cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-600 hover:text-primary hover:border-primary/40 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading && tab === "bookings" ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">Refresh</span>
@@ -1381,7 +1638,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <button
               type="button"
               onClick={onLogout}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-500 hover:text-red-500 hover:border-red-200 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-500 hover:text-red-500 hover:bg-red-50 hover:border-red-200 transition-all cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
@@ -1390,50 +1647,40 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         </div>
         {/* Mobile Tab Switcher */}
         <div className="sm:hidden flex border-t border-gray-100">
-          <button
-            type="button"
-            onClick={() => setTab("bookings")}
-            className={`flex-1 py-2.5 text-xs font-semibold text-center transition-all cursor-pointer ${
-              tab === "bookings" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-gray-500"
-            }`}
-          >
-            <Ticket className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
-            Bookings
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("reviews")}
-            className={`flex-1 py-2.5 text-xs font-semibold text-center transition-all cursor-pointer ${
-              tab === "reviews" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-gray-500"
-            }`}
-          >
-            <ClipboardList className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
-            Reviews
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("checkin")}
-            className={`flex-1 py-2.5 text-xs font-semibold text-center transition-all cursor-pointer ${
-              tab === "checkin" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-gray-500"
-            }`}
-          >
-            <ScanLine className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
-            Check-In
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("ocr")}
-            className={`flex-1 py-2.5 text-xs font-semibold text-center transition-all cursor-pointer ${
-              tab === "ocr" ? "text-primary border-b-2 border-primary bg-primary/5" : "text-gray-500"
-            }`}
-          >
-            <ImageIcon className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
-            OCR Logs
-          </button>
+          {tabs.map(({ key, label, icon: TabIcon }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTab(key)}
+              className={`flex-1 py-2.5 text-xs font-semibold text-center transition-all cursor-pointer ${
+                tab === key ? "text-primary border-b-2 border-primary bg-primary/5" : "text-gray-500"
+              }`}
+            >
+              <TabIcon className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 w-full">
+        {/* Page title area */}
+        <m.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center gap-3 mb-2"
+        >
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-primary" />
+            <h2 className="text-lg font-display font-bold text-text-main capitalize">
+              {tab === "bookings" ? "Bookings Overview" : tab === "reviews" ? "Payment Reviews" : tab === "checkin" ? "Event Check-In" : "OCR Verification Logs"}
+            </h2>
+          </div>
+          <span className="h-px flex-1 bg-gray-200" />
+          <span className="text-[11px] text-gray-400 font-medium">{new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+        </m.div>
+
         {tab === "checkin" ? (
           <CheckInTab />
         ) : tab === "reviews" ? (
@@ -1446,97 +1693,115 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <StatCard icon={Ticket} label="Paid Bookings" value={validBookings.length} sub={`${bookings.length} total across all statuses`} />
               <StatCard icon={Users} label="Paid Attendees" value={totalAttendees} />
-              <StatCard icon={IndianRupee} label="Total Revenue" value={`₹${totalRevenue.toLocaleString("en-IN")}`} />
+              <StatCard icon={IndianRupee} label="Total Revenue" value={`₹${totalRevenue.toLocaleString("en-IN")}`} color="green" />
             </div>
 
             {/* Controls: Search + Download */}
-            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-              {/* Search */}
-              <div className="relative w-full sm:w-80">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Search by name, email, reg no, booking ID…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all"
-                />
-              </div>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                {/* Search */}
+                <div className="relative w-full sm:w-80">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, reg no, booking ID…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-surface/50 transition-all"
+                  />
+                </div>
 
-              {/* Toggles & Download buttons */}
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-xl border border-gray-200 shadow-sm">
-                  <span className="text-sm font-medium text-gray-700">Ticket Sales</span>
+                {/* Toggles & Download buttons */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex items-center gap-2 bg-surface px-3.5 py-2 rounded-xl border border-gray-200">
+                    <span className="text-xs font-medium text-gray-600">Ticket Sales</span>
+                    <button
+                      type="button"
+                      onClick={toggleTickets}
+                      disabled={settingsLoading}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
+                        settings.ticketsEnabled ? "bg-green-500" : "bg-gray-300"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                          settings.ticketsEnabled ? "translate-x-4.5" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    onClick={toggleTickets}
-                    disabled={settingsLoading}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
-                      settings.ticketsEnabled ? "bg-green-500" : "bg-gray-300"
-                    }`}
+                    onClick={handleResendFailedEmails}
+                    disabled={resending}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-orange-50 border border-orange-200 text-xs font-medium text-orange-700 hover:bg-orange-100 transition-colors cursor-pointer disabled:opacity-50"
                   >
-                    <span
-                      className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                        settings.ticketsEnabled ? "translate-x-4.5" : "translate-x-1"
-                      }`}
-                    />
+                    {resending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                    Resend Emails
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => downloadCSV("emails")}
+                    disabled={!!downloading}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-gray-200 hover:border-primary/40 text-xs font-medium text-gray-700 hover:text-primary transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {downloading === "emails" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                    Emails CSV
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => downloadCSV("full")}
+                    disabled={!!downloading}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white text-xs font-medium transition-all shadow-sm shadow-primary/20 cursor-pointer disabled:opacity-50"
+                  >
+                    {downloading === "full" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                    Full Report
                   </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleResendFailedEmails}
-                  disabled={resending}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-50 border border-orange-200 text-sm font-medium text-orange-700 hover:bg-orange-100 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
-                >
-                  {resending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-                  Resend Failed Emails
-                </button>
-                <button
-                  type="button"
-                  onClick={() => downloadCSV("emails")}
-                  disabled={!!downloading}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 hover:border-primary/40 text-sm font-medium text-gray-700 hover:text-primary transition-colors shadow-sm cursor-pointer disabled:opacity-50"
-                >
-                  {downloading === "emails" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-                  Emails CSV
-                </button>
-                <button
-                  type="button"
-                  onClick={() => downloadCSV("full")}
-                  disabled={!!downloading}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-sm font-medium transition-colors shadow-sm shadow-primary/20 cursor-pointer disabled:opacity-50"
-                >
-                  {downloading === "full" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-                  Full Report
-                </button>
               </div>
             </div>
 
             {/* Error */}
             {error && (
-              <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+              <m.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4"
+              >
                 <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
                 <p className="text-sm text-red-700">{error}</p>
                 <button type="button" onClick={fetchBookings} className="ml-auto text-xs text-red-600 underline cursor-pointer">Retry</button>
-              </div>
+              </m.div>
             )}
 
             {/* Table */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               {loading ? (
-                <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <div className="overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-surface/80 border-b border-gray-100">
+                        {["Booking ID", "Name", "Reg No.", "Email", "People", "Total", "Date", "Status", "Attendees"].map((h) => (
+                          <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wide">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.from({ length: 6 }).map((_, i) => <TableRowSkeleton key={i} />)}
+                    </tbody>
+                  </table>
                 </div>
               ) : filtered.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                   <Ticket className="w-12 h-12 mb-3 opacity-30" />
                   <p className="font-medium">{search ? "No results found" : "No bookings yet"}</p>
+                  {search && <p className="text-xs mt-1">Try a different search term</p>}
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-surface border-b border-gray-100">
+                      <tr className="bg-surface/80 border-b border-gray-100">
                         {[
                           { label: "Booking ID", field: "bookingId" as keyof Booking },
                           { label: "Name", field: "primaryName" as keyof Booking },
@@ -1565,7 +1830,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                       {filtered.map((b, idx) => (
                         <React.Fragment key={b._id}>
                           <tr
-                            className={`border-b border-gray-50 hover:bg-primary/5 transition-colors cursor-pointer ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+                            className={`border-b border-gray-50 hover:bg-primary/5 transition-colors cursor-pointer ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                               } ${expandedId === b._id ? "bg-primary/5" : ""}`}
                             onClick={() => setExpandedId(expandedId === b._id ? null : b._id)}
                           >
@@ -1576,7 +1841,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                             <td className="px-4 py-3 font-mono text-gray-500 text-xs">{b.primaryRegNo}</td>
                             <td className="px-4 py-3 text-gray-500 text-xs max-w-[180px] truncate">{b.primaryEmail}</td>
                             <td className="px-4 py-3 text-center">
-                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold">
                                 {b.attendeeCount}
                               </span>
                             </td>
@@ -1585,7 +1850,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                               {new Date(b.createdAt).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}
                             </td>
                             <td className="px-4 py-3">
-                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
                                 b.status === "paid"
                                   ? "bg-green-100 text-green-700"
                                   : b.status === "rejected"

@@ -278,6 +278,88 @@ function SuccessScreen({
   );
 }
 
+// ─── Shimmer Skeleton Primitives ───────────────────────────────────────────────
+function Shimmer({ className = "" }: { className?: string }) {
+  return (
+    <div className={`relative overflow-hidden rounded-lg bg-gray-100 ${className}`}>
+      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+    </div>
+  );
+}
+
+function MovieTicketSkeleton() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start py-10">
+      {/* ── Left: Form ── */}
+      <div className="lg:col-span-2 space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shimmer className="w-5 h-5 rounded-full" />
+            <Shimmer className="h-6 w-40 rounded-md" />
+          </div>
+          <Shimmer className="h-4 w-24 rounded-md" />
+        </div>
+
+        {/* Attendee Card Skeleton */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 bg-surface border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <Shimmer className="w-7 h-7 rounded-full" />
+              <Shimmer className="h-4 w-48 rounded-md" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-5">
+            <div>
+              <Shimmer className="h-3 w-20 rounded-md mb-2" />
+              <Shimmer className="h-10 w-full rounded-xl" />
+            </div>
+            <div>
+              <Shimmer className="h-3 w-28 rounded-md mb-2" />
+              <Shimmer className="h-10 w-full rounded-xl" />
+            </div>
+            <div>
+              <Shimmer className="h-3 w-24 rounded-md mb-2" />
+              <Shimmer className="h-10 w-full rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Right: Price Card ── */}
+      <div className="lg:col-span-1">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 bg-gray-100 border-b border-gray-200">
+            <div className="flex items-center gap-2">
+              <Shimmer className="w-4 h-4 rounded-full" />
+              <Shimmer className="h-5 w-32 rounded-md" />
+            </div>
+          </div>
+          <div className="px-5 py-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Shimmer className="w-4 h-4 rounded-full" />
+                <Shimmer className="h-4 w-24 rounded-md" />
+              </div>
+              <Shimmer className="h-4 w-10 rounded-md" />
+            </div>
+          </div>
+          <div className="px-5 py-4 border-t border-gray-100 bg-surface">
+            <div className="flex items-center justify-between">
+              <Shimmer className="h-6 w-12 rounded-md" />
+              <Shimmer className="h-8 w-16 rounded-md" />
+            </div>
+          </div>
+          <div className="px-5 py-4">
+            <Shimmer className="h-12 w-full rounded-xl mb-3" />
+            <Shimmer className="h-3 w-32 rounded-md mx-auto" />
+            <Shimmer className="h-3 w-24 rounded-md mx-auto mt-1" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
   const emptyAttendee = (): AttendeeForm => ({ name: "", regNo: "", email: "" });
@@ -580,9 +662,7 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
             </button>
           </div>
         ) : loadingSettings ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
+          <MovieTicketSkeleton />
         ) : step === "payment" ? (
           /* ── Payment Step: QR + Upload ── */
           <div className="max-w-2xl mx-auto space-y-6">
