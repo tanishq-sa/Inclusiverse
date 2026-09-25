@@ -11,6 +11,14 @@
   --font-display: "Poppins", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-dyslexic: "Lexend", sans-serif;
+
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @layer base {
