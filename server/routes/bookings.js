@@ -294,6 +294,10 @@ router.patch("/edit-email", requireAdmin, async (req, res) => {
       // Also update the matching attendee in the attendees array
       if (ticket.attendeeName === booking.primaryName && ticket.attendeeRegNo === booking.primaryRegNo) {
         booking.primaryEmail = newEmail;
+        booking.emailStatus = "pending";
+        booking.emailBounceReason = undefined;
+        booking.emailSent = false;
+        booking.emailStatusUpdatedAt = new Date();
       } else {
         const att = booking.attendees.find((a) => a.regNo === ticket.attendeeRegNo);
         if (att) att.email = newEmail;
@@ -301,6 +305,10 @@ router.patch("/edit-email", requireAdmin, async (req, res) => {
     } else {
       // Update primary email
       booking.primaryEmail = newEmail;
+      booking.emailStatus = "pending";
+      booking.emailBounceReason = undefined;
+      booking.emailSent = false;
+      booking.emailStatusUpdatedAt = new Date();
       // Also update in tickets if matching
       const primaryTicket = booking.tickets.find((t) => t.attendeeRegNo === booking.primaryRegNo);
       if (primaryTicket) primaryTicket.attendeeEmail = newEmail;
@@ -422,7 +430,7 @@ router.get("/", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 router.get("/email-status", requireAdmin, async (req, res) => {
   try {
-    const bookings = await Booking.find({}, {
+    const bookings = await Booking.find({ status: "paid" }, {
       bookingId: 1, primaryName: 1, primaryEmail: 1, emailStatus: 1, emailSent: 1, emailBounceReason: 1, emailStatusUpdatedAt: 1, status: 1
     }).sort({ createdAt: -1 });
     res.json({ success: true, count: bookings.length, bookings });

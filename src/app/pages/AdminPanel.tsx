@@ -1452,6 +1452,7 @@ function EmailTrackerTab() {
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [editingEmail, setEditingEmail] = useState<{ bookingId: string; current: string } | null>(null);
   const [newEmail, setNewEmail] = useState("");
+  const [search, setSearch] = useState("");
 
   const fetchEmails = async () => {
     setLoading(true);
@@ -1517,11 +1518,22 @@ function EmailTrackerTab() {
     }
   };
 
+  const filteredEmails = useMemo(() => {
+    const q = search.toLowerCase();
+    if (!q) return emails;
+    return emails.filter((e) =>
+      e.primaryName.toLowerCase().includes(q) ||
+      e.primaryEmail.toLowerCase().includes(q) ||
+      e.bookingId.toLowerCase().includes(q) ||
+      (e.emailBounceReason && e.emailBounceReason.toLowerCase().includes(q))
+    );
+  }, [emails, search]);
+
   const stats = {
-    total: emails.length,
-    sent: emails.filter(e => e.emailStatus === "sent").length,
-    failed: emails.filter(e => e.emailStatus === "failed" || e.emailStatus === "bounced").length,
-    pending: emails.filter(e => e.emailStatus === "pending" || (!e.emailStatus && !e.emailSent)).length,
+    total: filteredEmails.length,
+    sent: filteredEmails.filter(e => e.emailStatus === "sent").length,
+    failed: filteredEmails.filter(e => e.emailStatus === "failed" || e.emailStatus === "bounced").length,
+    pending: filteredEmails.filter(e => e.emailStatus === "pending" || (!e.emailStatus && !e.emailSent)).length,
   };
 
   if (loading) {
@@ -1530,11 +1542,18 @@ function EmailTrackerTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="font-bold text-lg text-text-main flex items-center gap-2">
-          <Mail className="w-5 h-5 text-primary" /> Email Delivery Tracker
-        </h3>
-        <button onClick={fetchEmails} className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer">
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search by name, email, booking ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all"
+          />
+        </div>
+        <button onClick={fetchEmails} className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer shadow-sm">
           <RefreshCw className="w-4 h-4" /> Refresh
         </button>
       </div>
@@ -1560,12 +1579,14 @@ function EmailTrackerTab() {
               </tr>
             </thead>
             <tbody>
-              {emails.length === 0 ? (
+              {filteredEmails.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-gray-500">No emails found</td>
+                  <td colSpan={6} className="text-center py-8 text-gray-500">
+                    {search ? "No emails found matching your search" : "No emails found"}
+                  </td>
                 </tr>
               ) : (
-                emails.map((e, idx) => (
+                filteredEmails.map((e, idx) => (
                   <tr key={e._id} className={`border-b border-gray-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
                     <td className="px-4 py-3 font-mono font-bold text-primary">{e.bookingId}</td>
                     <td className="px-4 py-3">
