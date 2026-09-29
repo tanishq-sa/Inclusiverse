@@ -426,6 +426,46 @@ function OCRLoadingSkeleton() {
   );
 }
 
+function EmailTrackerLoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <Shimmer className="h-10 w-full sm:w-80 rounded-xl" />
+        <Shimmer className="h-10 w-28 rounded-xl" />
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCardSkeleton />
+        <StatCardSkeleton />
+        <StatCardSkeleton />
+        <StatCardSkeleton />
+      </div>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-surface/80 border-b border-gray-100">
+              {["Booking ID", "Recipient", "Status", "Details", "Last Updated", "Actions"].map((h) => (
+                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wide">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <tr key={i} className="border-b border-gray-50">
+                <td className="px-4 py-3"><Shimmer className="h-4 w-24 rounded-md" /></td>
+                <td className="px-4 py-3"><Shimmer className="h-4 w-32 rounded-md mb-1" /><Shimmer className="h-3 w-40 rounded-md" /></td>
+                <td className="px-4 py-3"><Shimmer className="h-5 w-20 rounded-full" /></td>
+                <td className="px-4 py-3"><Shimmer className="h-4 w-28 rounded-md" /></td>
+                <td className="px-4 py-3"><Shimmer className="h-4 w-32 rounded-md" /></td>
+                <td className="px-4 py-3"><Shimmer className="h-8 w-20 rounded-lg" /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ─── QR Scanner Component ──────────────────────────────────────────────────────
 function QrScanner({ onScan, enabled }: { onScan: (data: string) => void; enabled: boolean }) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -1537,7 +1577,7 @@ function EmailTrackerTab() {
   };
 
   if (loading) {
-    return <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+    return <EmailTrackerLoadingSkeleton />;
   }
 
   return (
