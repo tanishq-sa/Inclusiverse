@@ -1495,6 +1495,8 @@ function EmailTrackerTab() {
   const [newEmail, setNewEmail] = useState("");
   const [search, setSearch] = useState("");
   const [sendingReminders, setSendingReminders] = useState(false);
+  const [showReminderPrompt, setShowReminderPrompt] = useState(false);
+  const [reminderPasscode, setReminderPasscode] = useState("");
 
   const fetchEmails = async () => {
     setLoading(true);
@@ -1561,11 +1563,12 @@ function EmailTrackerTab() {
   };
 
   const handleSendReminders = async () => {
-    const pass = window.prompt("Enter admin passcode to send reminder emails to ALL confirmed guests:");
-    if (pass !== ADMIN_PASSCODE) {
-      if (pass !== null) alert("Incorrect passcode.");
+    if (reminderPasscode !== ADMIN_PASSCODE) {
+      alert("Incorrect passcode.");
       return;
     }
+    setShowReminderPrompt(false);
+    setReminderPasscode("");
     setSendingReminders(true);
     try {
       const res = await fetch(`${API_BASE}/api/bookings/send-reminders`, {
@@ -1617,7 +1620,7 @@ function EmailTrackerTab() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleSendReminders} disabled={sendingReminders} className="flex items-center gap-2 bg-primary px-4 py-2 rounded-xl border border-transparent text-sm font-medium text-white hover:bg-primary-hover transition-colors cursor-pointer shadow-sm disabled:opacity-50">
+          <button onClick={() => setShowReminderPrompt(true)} disabled={sendingReminders} className="flex items-center gap-2 bg-primary px-4 py-2 rounded-xl border border-transparent text-sm font-medium text-white hover:bg-primary-hover transition-colors cursor-pointer shadow-sm disabled:opacity-50">
             {sendingReminders ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
             Send Reminders
           </button>
@@ -1736,6 +1739,45 @@ function EmailTrackerTab() {
               <button
                 type="button"
                 onClick={() => setEditingEmail(null)}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl transition-colors cursor-pointer text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Send Reminders Modal */}
+      {showReminderPrompt && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowReminderPrompt(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-display font-bold text-text-main text-lg mb-2 flex items-center gap-2">
+              <Bell className="w-5 h-5 text-primary" />
+              Send Reminder Emails
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">Are you sure you want to send reminder emails to ALL confirmed guests? Please enter the admin passcode to confirm.</p>
+            <input
+              type="password"
+              value={reminderPasscode}
+              onChange={(e) => setReminderPasscode(e.target.value)}
+              placeholder="Admin Passcode"
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary mb-4"
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleSendReminders}
+                className="flex-1 bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 rounded-xl transition-colors cursor-pointer text-sm"
+              >
+                Confirm & Send
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowReminderPrompt(false);
+                  setReminderPasscode("");
+                }}
                 className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl transition-colors cursor-pointer text-sm"
               >
                 Cancel
