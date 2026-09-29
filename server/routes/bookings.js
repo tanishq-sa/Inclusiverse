@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const multer = require("multer");
 const Booking = require("../models/Booking");
 const { sendConfirmation } = require("../mail/sendConfirmation");
+const { sendReminder } = require("../mail/sendReminder");
 const { uploadToR2 } = require("../utils/r2Upload");
 const { extractTextFromImage, analyzePaymentText } = require("../utils/ocr");
 
@@ -756,6 +757,35 @@ router.post("/resend-failed-emails", requireAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error("[POST /api/bookings/resend-failed-emails]", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/bookings/send-reminders  — send reminder to all paid & sent guests
+// ─────────────────────────────────────────────────────────────────────────────
+router.post("/send-reminders", requireAdmin, async (req, res) => {
+  try {
+    const bookings = await Booking.find({ status: "paid", emailStatus: "sent" });
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const booking of bookings) {
+      try {
+        await sendReminder(booking);
+        successCount++;
+      } catch (err) {
+        console.error(`[Mail] Failed to send reminder for ${booking.bookingId}:`, err.message);
+        failCount++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Reminders sent successfully to ${successCount} guests. (${failCount} failed)`,
+    });
+  } catch (err) {
+    console.error("[POST /api/bookings/send-reminders]", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

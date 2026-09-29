@@ -33,6 +33,7 @@ import {
   TrendingUp,
   Send,
   XCircle,
+  Bell,
 } from "lucide-react";
 import { m, AnimatePresence } from "motion/react";
 import { Html5Qrcode } from "html5-qrcode";
@@ -1493,6 +1494,7 @@ function EmailTrackerTab() {
   const [editingEmail, setEditingEmail] = useState<{ bookingId: string; current: string } | null>(null);
   const [newEmail, setNewEmail] = useState("");
   const [search, setSearch] = useState("");
+  const [sendingReminders, setSendingReminders] = useState(false);
 
   const fetchEmails = async () => {
     setLoading(true);
@@ -1558,6 +1560,27 @@ function EmailTrackerTab() {
     }
   };
 
+  const handleSendReminders = async () => {
+    const pass = window.prompt("Enter admin passcode to send reminder emails to ALL confirmed guests:");
+    if (pass !== ADMIN_PASSCODE) {
+      if (pass !== null) alert("Incorrect passcode.");
+      return;
+    }
+    setSendingReminders(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/send-reminders`, {
+        method: "POST",
+        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+      });
+      const data = await res.json();
+      alert(data.message || (data.success ? "Reminders sent!" : "Failed to send reminders"));
+    } catch {
+      alert("Network error while trying to send reminders.");
+    } finally {
+      setSendingReminders(false);
+    }
+  };
+
   const filteredEmails = useMemo(() => {
     const q = search.toLowerCase();
     if (!q) return emails;
@@ -1593,9 +1616,15 @@ function EmailTrackerTab() {
             className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all"
           />
         </div>
-        <button onClick={fetchEmails} className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer shadow-sm">
-          <RefreshCw className="w-4 h-4" /> Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleSendReminders} disabled={sendingReminders} className="flex items-center gap-2 bg-primary px-4 py-2 rounded-xl border border-transparent text-sm font-medium text-white hover:bg-primary-hover transition-colors cursor-pointer shadow-sm disabled:opacity-50">
+            {sendingReminders ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
+            Send Reminders
+          </button>
+          <button onClick={fetchEmails} className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer shadow-sm">
+            <RefreshCw className="w-4 h-4" /> Refresh
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
