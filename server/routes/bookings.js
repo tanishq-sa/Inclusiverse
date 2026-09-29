@@ -21,6 +21,29 @@ const upload = multer({
   },
 });
 
+// ─── Simple In-Memory Cache ──────────────────────────────────────────────────
+const requestCache = new Map();
+const CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+
+function cacheMiddleware(req, res, next) {
+  const key = req.originalUrl || req.url;
+  const cachedResponse = requestCache.get(key);
+  if (cachedResponse && Date.now() - cachedResponse.timestamp < CACHE_DURATION_MS) {
+    return res.json(cachedResponse.data);
+  }
+  const originalJson = res.json.bind(res);
+  res.json = (body) => {
+    requestCache.set(key, { data: body, timestamp: Date.now() });
+    return originalJson(body);
+  };
+  next();
+}
+
+function clearCache(req, res, next) {
+  requestCache.clear();
+  next();
+}
+
 // ─── Helper: generate a booking ID ───────────────────────────────────────────
 function generateBookingId() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -61,7 +84,7 @@ function getExpectedAmount(attendeeCount) {
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings/upload-payment — new GPay flow
 // ─────────────────────────────────────────────────────────────────────────────
-router.post("/upload-payment", upload.single("screenshot"), async (req, res) => {
+router.post("/upload-payment", upload.single("screenshot"), clearCache, async (req, res) => {
   try {
     const { primaryName, primaryRegNo, primaryEmail, attendees, totalAmount } = req.body;
 
@@ -205,7 +228,7 @@ router.post("/upload-payment", upload.single("screenshot"), async (req, res) => 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings/review-payment — admin approve/reject (admin only)
 // ─────────────────────────────────────────────────────────────────────────────
-router.post("/review-payment", requireAdmin, async (req, res) => {
+router.post("/review-payment", requireAdmin, clearCache, async (req, res) => {
   try {
     const { bookingId, action, reason } = req.body;
 
@@ -271,7 +294,7 @@ router.post("/review-payment", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // PATCH /api/bookings/edit-email — admin edit attendee email (admin only)
 // ─────────────────────────────────────────────────────────────────────────────
-router.patch("/edit-email", requireAdmin, async (req, res) => {
+router.patch("/edit-email", requireAdmin, clearCache, async (req, res) => {
   try {
     const { bookingId, ticketId, newEmail } = req.body;
 
@@ -327,7 +350,7 @@ router.patch("/edit-email", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings  — legacy Razorpay booking (keep for existing bookings)
 // ─────────────────────────────────────────────────────────────────────────────
-router.post("/", async (req, res) => {
+router.post("/", clearCache, async (req, res) => {
   try {
     const {
       primaryName,
@@ -416,7 +439,7 @@ router.post("/", async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/bookings  — return all bookings (admin only)
 // ─────────────────────────────────────────────────────────────────────────────
-router.get("/", requireAdmin, async (req, res) => {
+router.get("/", requireAdmin, cacheMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find().sort({ createdAt: -1 });
     res.json({ success: true, count: bookings.length, bookings });
@@ -429,7 +452,7 @@ router.get("/", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/bookings/email-status — get all email tracking statuses (admin only)
 // ─────────────────────────────────────────────────────────────────────────────
-router.get("/email-status", requireAdmin, async (req, res) => {
+router.get("/email-status", requireAdmin, cacheMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find({ status: "paid" }, {
       bookingId: 1, primaryName: 1, primaryEmail: 1, emailStatus: 1, emailSent: 1, emailBounceReason: 1, emailStatusUpdatedAt: 1, status: 1
@@ -444,7 +467,7 @@ router.get("/email-status", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/bookings/pending-reviews — bookings needing manual review (admin)
 // ─────────────────────────────────────────────────────────────────────────────
-router.get("/pending-reviews", requireAdmin, async (req, res) => {
+router.get("/pending-reviews", requireAdmin, cacheMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find({ status: "pending_review" }).sort({ createdAt: -1 });
     res.json({ success: true, count: bookings.length, bookings });
@@ -457,7 +480,7 @@ router.get("/pending-reviews", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings/checkin  — scan QR code to check-in (admin only)
 // ─────────────────────────────────────────────────────────────────────────────
-router.post("/checkin", requireAdmin, async (req, res) => {
+router.post("/checkin", requireAdmin, clearCache, async (req, res) => {
   try {
     const { ticketId } = req.body;
     if (!ticketId) {
@@ -522,7 +545,7 @@ router.post("/checkin", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings/manual-checkin  — manual check-in by ticket ID (admin)
 // ─────────────────────────────────────────────────────────────────────────────
-router.post("/manual-checkin", requireAdmin, async (req, res) => {
+router.post("/manual-checkin", requireAdmin, clearCache, async (req, res) => {
   try {
     const { ticketId } = req.body;
     if (!ticketId) {
@@ -580,7 +603,7 @@ router.post("/manual-checkin", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/bookings/checkin-stats  — attendance stats (admin only)
 // ─────────────────────────────────────────────────────────────────────────────
-router.get("/checkin-stats", requireAdmin, async (req, res) => {
+router.get("/checkin-stats", requireAdmin, cacheMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find({ status: "paid" });
     let totalTickets = 0;
@@ -608,7 +631,7 @@ router.get("/checkin-stats", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/bookings/all-tickets  — all tickets with check-in status (admin)
 // ─────────────────────────────────────────────────────────────────────────────
-router.get("/all-tickets", requireAdmin, async (req, res) => {
+router.get("/all-tickets", requireAdmin, cacheMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find({ status: "paid" }).sort({ createdAt: -1 });
     const tickets = [];
@@ -677,7 +700,7 @@ router.get("/export", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings/resend-email  — send to a specific booking (admin only)
 // ─────────────────────────────────────────────────────────────────────────────
-router.post("/resend-email", requireAdmin, async (req, res) => {
+router.post("/resend-email", requireAdmin, clearCache, async (req, res) => {
   try {
     const { bookingId } = req.body;
     if (!bookingId) {
@@ -719,7 +742,7 @@ router.post("/resend-email", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings/resend-failed-emails  — send to bookings that failed (admin only)
 // ─────────────────────────────────────────────────────────────────────────────
-router.post("/resend-failed-emails", requireAdmin, async (req, res) => {
+router.post("/resend-failed-emails", requireAdmin, clearCache, async (req, res) => {
   try {
     const failedBookings = await Booking.find({ emailSent: { $ne: true }, status: "paid" });
 
@@ -764,7 +787,7 @@ router.post("/resend-failed-emails", requireAdmin, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings/send-reminders  — send reminder to all paid & sent guests
 // ─────────────────────────────────────────────────────────────────────────────
-router.post("/send-reminders", requireAdmin, async (req, res) => {
+router.post("/send-reminders", requireAdmin, clearCache, async (req, res) => {
   try {
     const bookings = await Booking.find({ status: "paid", emailStatus: "sent" });
     let successCount = 0;
