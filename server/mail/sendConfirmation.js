@@ -205,7 +205,7 @@ async function sendConfirmation(booking) {
                   <strong style="color: #E65100;">📌 Important:</strong> Each QR code grants entry for <strong>one person only</strong>.
                   Show the corresponding QR code at the venue. Once scanned, it is marked as used and cannot be reused.
                   Payment is non-refundable as per our
-                  <a href="#" style="color: #C62828;">No Refund Policy</a>.
+                  <a href="https://inclusiverse.in/?page=no-refund" style="color: #C62828;">No Refund Policy</a>.
                 </p>
               </div>
             </td>
