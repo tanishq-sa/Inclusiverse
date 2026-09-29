@@ -172,11 +172,18 @@ router.post("/upload-payment", upload.single("screenshot"), async (req, res) => 
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Email sending timed out after 7s")), 7000)
         );
-        await Promise.race([emailPromise, timeoutPromise]);
+        const info = await Promise.race([emailPromise, timeoutPromise]);
         booking.emailSent = true;
+        booking.emailStatus = "sent";
+        if (info && info.messageId) booking.emailMessageId = info.messageId;
+        booking.emailStatusUpdatedAt = new Date();
         await booking.save();
       } catch (err) {
         console.error("[Mail] Failed to send confirmation:", err.message);
+        booking.emailStatus = "failed";
+        booking.emailBounceReason = err.message;
+        booking.emailStatusUpdatedAt = new Date();
+        await booking.save();
       }
     }
 
@@ -223,11 +230,18 @@ router.post("/review-payment", requireAdmin, async (req, res) => {
 
       // Send confirmation email
       try {
-        await sendConfirmation(booking);
+        const info = await sendConfirmation(booking);
         booking.emailSent = true;
+        booking.emailStatus = "sent";
+        if (info && info.messageId) booking.emailMessageId = info.messageId;
+        booking.emailStatusUpdatedAt = new Date();
         await booking.save();
       } catch (err) {
         console.error("[Mail] Failed to send after approval:", err.message);
+        booking.emailStatus = "failed";
+        booking.emailBounceReason = err.message;
+        booking.emailStatusUpdatedAt = new Date();
+        await booking.save();
       }
 
       res.json({
@@ -365,11 +379,18 @@ router.post("/", async (req, res) => {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Email sending timed out after 7s")), 7000)
       );
-      await Promise.race([emailPromise, timeoutPromise]);
+      const info = await Promise.race([emailPromise, timeoutPromise]);
       booking.emailSent = true;
+      booking.emailStatus = "sent";
+      if (info && info.messageId) booking.emailMessageId = info.messageId;
+      booking.emailStatusUpdatedAt = new Date();
       await booking.save();
     } catch (err) {
       console.error("[Mail] Failed to send confirmation:", err.message);
+      booking.emailStatus = "failed";
+      booking.emailBounceReason = err.message;
+      booking.emailStatusUpdatedAt = new Date();
+      await booking.save();
     }
 
     res.status(201).json({
@@ -392,6 +413,21 @@ router.get("/", requireAdmin, async (req, res) => {
     res.json({ success: true, count: bookings.length, bookings });
   } catch (err) {
     console.error("[GET /api/bookings]", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/bookings/email-status — get all email tracking statuses (admin only)
+// ─────────────────────────────────────────────────────────────────────────────
+router.get("/email-status", requireAdmin, async (req, res) => {
+  try {
+    const bookings = await Booking.find({}, {
+      bookingId: 1, primaryName: 1, primaryEmail: 1, emailStatus: 1, emailSent: 1, emailBounceReason: 1, emailStatusUpdatedAt: 1, status: 1
+    }).sort({ createdAt: -1 });
+    res.json({ success: true, count: bookings.length, bookings });
+  } catch (err) {
+    console.error("[GET /api/bookings/email-status]", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -630,6 +666,48 @@ router.get("/export", requireAdmin, async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// POST /api/bookings/resend-email  — send to a specific booking (admin only)
+// ─────────────────────────────────────────────────────────────────────────────
+router.post("/resend-email", requireAdmin, async (req, res) => {
+  try {
+    const { bookingId } = req.body;
+    if (!bookingId) {
+      return res.status(400).json({ error: "bookingId is required" });
+    }
+
+    const booking = await Booking.findOne({ bookingId });
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    if (booking.status !== "paid") {
+      return res.status(400).json({ error: "Cannot send email for unpaid booking" });
+    }
+
+    try {
+      const info = await sendConfirmation(booking);
+      booking.emailSent = true;
+      booking.emailStatus = "sent";
+      if (info && info.messageId) booking.emailMessageId = info.messageId;
+      booking.emailBounceReason = undefined; // clear reason
+      booking.emailStatusUpdatedAt = new Date();
+      await booking.save();
+      return res.json({ success: true, message: "Email sent successfully" });
+    } catch (err) {
+      console.error(`[Mail] Failed to resend for ${booking.bookingId}:`, err.message);
+      booking.emailStatus = "failed";
+      booking.emailBounceReason = err.message;
+      booking.emailStatusUpdatedAt = new Date();
+      await booking.save();
+      return res.status(500).json({ error: "Failed to send email: " + err.message });
+    }
+  } catch (err) {
+    console.error("[POST /api/bookings/resend-email]", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings/resend-failed-emails  — send to bookings that failed (admin only)
 // ─────────────────────────────────────────────────────────────────────────────
 router.post("/resend-failed-emails", requireAdmin, async (req, res) => {
@@ -645,12 +723,19 @@ router.post("/resend-failed-emails", requireAdmin, async (req, res) => {
 
     for (const booking of failedBookings) {
       try {
-        await sendConfirmation(booking);
+        const info = await sendConfirmation(booking);
         booking.emailSent = true;
+        booking.emailStatus = "sent";
+        if (info && info.messageId) booking.emailMessageId = info.messageId;
+        booking.emailStatusUpdatedAt = new Date();
         await booking.save();
         successCount++;
       } catch (err) {
         console.error(`[Mail] Failed to resend for ${booking.bookingId}:`, err.message);
+        booking.emailStatus = "failed";
+        booking.emailBounceReason = err.message;
+        booking.emailStatusUpdatedAt = new Date();
+        await booking.save();
         failCount++;
       }
     }

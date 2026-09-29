@@ -232,13 +232,15 @@ async function sendConfirmation(booking) {
 </html>
   `;
 
-  await transporter.sendMail({
+  const info = await transporter.sendMail({
     from: `"Inclusiverse 🎬" <${process.env.GMAIL_USER}>`,
     to: booking.primaryEmail,
     subject: `🎬 Your Chhichhore Ticket is Confirmed! [${booking.bookingId}]`,
     html,
     attachments: qrAttachments,
   });
+
+  return info;
 }
 
 module.exports = { sendConfirmation };

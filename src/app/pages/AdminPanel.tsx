@@ -31,6 +31,8 @@ import {
   LayoutDashboard,
   Activity,
   TrendingUp,
+  Send,
+  XCircle,
 } from "lucide-react";
 import { m, AnimatePresence } from "motion/react";
 import { Html5Qrcode } from "html5-qrcode";
@@ -69,6 +71,9 @@ interface Booking {
   paymentScreenshotUrl?: string;
   status: string;
   emailSent?: boolean;
+  emailStatus?: string;
+  emailBounceReason?: string;
+  emailStatusUpdatedAt?: string;
   reviewedBy?: string;
   reviewedAt?: string;
   rejectionReason?: string;
@@ -1440,9 +1445,222 @@ function OCRLogsTab() {
   );
 }
 
+// ─── Email Tracker Tab ────────────────────────────────────────────────────────
+function EmailTrackerTab() {
+  const [emails, setEmails] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const [editingEmail, setEditingEmail] = useState<{ bookingId: string; current: string } | null>(null);
+  const [newEmail, setNewEmail] = useState("");
+
+  const fetchEmails = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/email-status`, {
+        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+      });
+      const data = await res.json();
+      setEmails(data.bookings || []);
+    } catch (err) {
+      console.error("Failed to fetch email status", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchEmails(); }, []);
+
+  const handleEditEmail = async () => {
+    if (!editingEmail || !newEmail.trim()) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/edit-email`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        body: JSON.stringify({
+          bookingId: editingEmail.bookingId,
+          newEmail: newEmail.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Email updated! You can now try resending.");
+        setEditingEmail(null);
+        setNewEmail("");
+        fetchEmails();
+      } else {
+        alert(data.error || "Failed to update email");
+      }
+    } catch {
+      alert("Network error");
+    }
+  };
+
+  const handleResend = async (bookingId: string) => {
+    setResendingId(bookingId);
+    try {
+      const res = await fetch(`${API_BASE}/api/bookings/resend-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        body: JSON.stringify({ bookingId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Email resent successfully!");
+        fetchEmails();
+      } else {
+        alert(data.error || "Failed to resend email");
+      }
+    } catch {
+      alert("Network error while trying to resend email.");
+    } finally {
+      setResendingId(null);
+    }
+  };
+
+  const stats = {
+    total: emails.length,
+    sent: emails.filter(e => e.emailStatus === "sent").length,
+    failed: emails.filter(e => e.emailStatus === "failed" || e.emailStatus === "bounced").length,
+    pending: emails.filter(e => e.emailStatus === "pending" || (!e.emailStatus && !e.emailSent)).length,
+  };
+
+  if (loading) {
+    return <div className="py-20 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="font-bold text-lg text-text-main flex items-center gap-2">
+          <Mail className="w-5 h-5 text-primary" /> Email Delivery Tracker
+        </h3>
+        <button onClick={fetchEmails} className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer">
+          <RefreshCw className="w-4 h-4" /> Refresh
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard icon={Mail} label="Total Emails" value={stats.total} />
+        <StatCard icon={CheckCircle2} label="Sent" value={stats.sent} color="green" />
+        <StatCard icon={XCircle} label="Failed/Bounced" value={stats.failed} color="amber" />
+        <StatCard icon={Loader2} label="Pending" value={stats.pending} />
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-surface/80 border-b border-gray-100">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Booking ID</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Recipient</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Details</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Last Updated</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {emails.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-8 text-gray-500">No emails found</td>
+                </tr>
+              ) : (
+                emails.map((e, idx) => (
+                  <tr key={e._id} className={`border-b border-gray-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
+                    <td className="px-4 py-3 font-mono font-bold text-primary">{e.bookingId}</td>
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-text-main">{e.primaryName}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">{e.primaryEmail}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingEmail({ bookingId: e.bookingId, current: e.primaryEmail });
+                            setNewEmail(e.primaryEmail);
+                          }}
+                          className="text-gray-400 hover:text-primary transition-colors cursor-pointer p-0.5"
+                          title="Edit email"
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {e.emailStatus === "sent" || (e.emailSent && !e.emailStatus) ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700"><CheckCircle2 className="w-3 h-3" /> Delivered</span>
+                      ) : e.emailStatus === "failed" || e.emailStatus === "bounced" ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700"><XCircle className="w-3 h-3" /> {e.emailStatus}</span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600"><Loader2 className="w-3 h-3 animate-spin" /> Pending</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 max-w-xs truncate text-xs text-red-600" title={e.emailBounceReason || ""}>
+                      {e.emailBounceReason || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-400">
+                      {e.emailStatusUpdatedAt ? new Date(e.emailStatusUpdatedAt).toLocaleString("en-IN") : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => handleResend(e.bookingId)}
+                        disabled={resendingId === e.bookingId}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors disabled:opacity-50 cursor-pointer"
+                      >
+                        {resendingId === e.bookingId ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                        Resend
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Edit Email Modal */}
+      {editingEmail && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setEditingEmail(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-display font-bold text-text-main text-lg mb-4 flex items-center gap-2">
+              <Mail className="w-5 h-5 text-primary" />
+              Edit Primary Email
+            </h3>
+            <p className="text-sm text-gray-500 mb-3">Current: <strong>{editingEmail.current}</strong></p>
+            <input
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              placeholder="New email address"
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary mb-4"
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleEditEmail}
+                className="flex-1 bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 rounded-xl transition-colors cursor-pointer text-sm"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditingEmail(null)}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl transition-colors cursor-pointer text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Admin Dashboard ──────────────────────────────────────────────────────
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
-  const [tab, setTab] = useState<"bookings" | "checkin" | "reviews" | "ocr">("bookings");
+  const [tab, setTab] = useState<"bookings" | "checkin" | "reviews" | "ocr" | "email">("bookings");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1591,6 +1809,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     { key: "reviews" as const, label: "Reviews", icon: ClipboardList },
     { key: "checkin" as const, label: "Check-In", icon: ScanLine },
     { key: "ocr" as const, label: "OCR Logs", icon: ImageIcon },
+    { key: "email" as const, label: "Email Tracking", icon: Send },
   ];
 
   return (
@@ -1674,7 +1893,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-primary" />
             <h2 className="text-lg font-display font-bold text-text-main capitalize">
-              {tab === "bookings" ? "Bookings Overview" : tab === "reviews" ? "Payment Reviews" : tab === "checkin" ? "Event Check-In" : "OCR Verification Logs"}
+              {tab === "bookings" ? "Bookings Overview" : tab === "reviews" ? "Payment Reviews" : tab === "checkin" ? "Event Check-In" : tab === "email" ? "Email Delivery Tracker" : "OCR Verification Logs"}
             </h2>
           </div>
           <span className="h-px flex-1 bg-gray-200" />
@@ -1687,6 +1906,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <ReviewsTab />
         ) : tab === "ocr" ? (
           <OCRLogsTab />
+        ) : tab === "email" ? (
+          <EmailTrackerTab />
         ) : (
           <>
             {/* Stats */}

@@ -32,6 +32,10 @@ const bookingSchema = new mongoose.Schema({
   paymentScreenshotUrl: { type: String }, // Cloudflare R2 URL for GPay screenshot
   status: { type: String, enum: ["pending", "pending_review", "paid", "rejected"], default: "pending" },
   emailSent: { type: Boolean, default: false },
+  emailStatus: { type: String, enum: ["pending", "sent", "bounced", "failed"], default: "pending" },
+  emailBounceReason: { type: String },
+  emailMessageId: { type: String },
+  emailStatusUpdatedAt: { type: Date },
   reviewedBy: { type: String }, // admin action: "auto-ocr" or "manual"
   reviewedAt: { type: Date },
   rejectionReason: { type: String },
