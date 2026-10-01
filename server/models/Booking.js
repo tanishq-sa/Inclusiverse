@@ -42,6 +42,7 @@ const bookingSchema = new mongoose.Schema({
   ocrReasons: [{ type: String }],
   ocrConfidence: { type: String },
   ocrIsValid: { type: Boolean },
+  reminderSentAt: { type: Date },
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);

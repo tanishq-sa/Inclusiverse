@@ -13,8 +13,11 @@ const transporter = nodemailer.createTransport({
   socketTimeout: 5000,
 });
 
-async function sendReminder(booking) {
-  const html = `
+/**
+ * Build the reminder HTML for a given attendee name.
+ */
+function buildReminderHtml(attendeeName, booking) {
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,11 +39,43 @@ async function sendReminder(booking) {
             </td>
           </tr>
 
+          <!-- Quick-Glance Info -->
+          <tr>
+            <td style="padding: 28px 40px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background: #fdf5f5; border-radius: 12px; border: 1px solid #fce4e4; overflow: hidden;">
+                <tr>
+                  <td style="padding: 18px 24px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding: 6px 0;">
+                          <span style="font-size: 12px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📅 Date & Time</span><br/>
+                          <span style="font-size: 15px; color: #1a1a1a; font-weight: 600; margin-top: 2px; display: block;">1st October 2025 &bull; 7:00 PM</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0;">
+                          <span style="font-size: 12px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📍 Venue</span><br/>
+                          <span style="font-size: 15px; color: #1a1a1a; font-weight: 600; margin-top: 2px; display: block;">Activity Hub</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0;">
+                          <span style="font-size: 12px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">🎟️ Booking ID</span><br/>
+                          <span style="font-size: 16px; color: #C62828; font-weight: 700; margin-top: 2px; display: block; font-family: monospace; letter-spacing: 1px;">${booking.bookingId}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
           <!-- Message Details -->
           <tr>
-            <td style="padding: 32px 40px 20px;">
+            <td style="padding: 24px 40px 20px;">
               <p style="margin: 0 0 20px; font-size: 15px; color: #444; line-height: 1.6;">
-                Hi <strong>${booking.primaryName}</strong>,<br/><br/>
+                Hi <strong>${attendeeName}</strong>,<br/><br/>
                 This is a friendly reminder that the <strong>Chhichhore movie screening</strong> is happening today!
               </p>
               
@@ -76,26 +111,61 @@ async function sendReminder(booking) {
 </body>
 </html>
   `;
+}
+
+/**
+ * Send reminder emails to ALL attendees of a booking (primary + extras).
+ * Returns { sent: string[], failed: string[] } with email addresses.
+ */
+async function sendReminder(booking) {
+  // Collect all attendees: primary + extras
+  const allAttendees = [
+    { name: booking.primaryName, email: booking.primaryEmail },
+    ...booking.attendees.map((a) => ({ name: a.name, email: a.email })),
+  ];
+
+  // Deduplicate by email (in case primary is also listed in attendees)
+  const seen = new Set();
+  const uniqueAttendees = allAttendees.filter((a) => {
+    const key = a.email.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  const sent = [];
+  const failed = [];
 
   // Thread as a reply to the original confirmation email if possible
   const originalSubject = `🎬 Your Chhichhore Ticket is Confirmed! [${booking.bookingId}]`;
 
-  const mailOptions = {
-    from: `"Inclusiverse 🎬" <${process.env.GMAIL_USER}>`,
-    to: booking.primaryEmail,
-    subject: booking.emailMessageId
-      ? `Re: ${originalSubject}`
-      : `Reminder: Your Chhichhore Ticket [${booking.bookingId}]`,
-    html,
-  };
+  for (const attendee of uniqueAttendees) {
+    try {
+      const html = buildReminderHtml(attendee.name, booking);
 
-  if (booking.emailMessageId) {
-    mailOptions.inReplyTo = booking.emailMessageId;
-    mailOptions.references = [booking.emailMessageId];
+      const mailOptions = {
+        from: `"Inclusiverse 🎬" <${process.env.GMAIL_USER}>`,
+        to: attendee.email,
+        subject: booking.emailMessageId
+          ? `Re: ${originalSubject}`
+          : `Reminder: Your Chhichhore Ticket [${booking.bookingId}]`,
+        html,
+      };
+
+      if (booking.emailMessageId) {
+        mailOptions.inReplyTo = booking.emailMessageId;
+        mailOptions.references = [booking.emailMessageId];
+      }
+
+      await transporter.sendMail(mailOptions);
+      sent.push(attendee.email);
+    } catch (err) {
+      console.error(`[Mail] Failed to send reminder to ${attendee.email} (${booking.bookingId}):`, err.message);
+      failed.push(attendee.email);
+    }
   }
 
-  const info = await transporter.sendMail(mailOptions);
-  return info;
+  return { sent, failed };
 }
 
 module.exports = { sendReminder };

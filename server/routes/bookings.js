@@ -789,23 +789,61 @@ router.post("/resend-failed-emails", requireAdmin, clearCache, async (req, res) 
 // ─────────────────────────────────────────────────────────────────────────────
 router.post("/send-reminders", requireAdmin, clearCache, async (req, res) => {
   try {
-    const bookings = await Booking.find({ status: "paid", emailStatus: "sent" });
-    let successCount = 0;
-    let failCount = 0;
+    const force = req.body.force === true; // allow re-sending if explicitly forced
+
+    // Find eligible bookings — skip ones already reminded (unless forced)
+    const query = { status: "paid", emailStatus: "sent" };
+    if (!force) {
+      query.reminderSentAt = { $exists: false };
+    }
+
+    const bookings = await Booking.find(query);
+
+    if (bookings.length === 0) {
+      return res.json({
+        success: true,
+        message: force
+          ? "No paid bookings found to remind."
+          : "All reminders already sent! Use { \"force\": true } to resend.",
+        totalSent: 0,
+        totalFailed: 0,
+      });
+    }
+
+    let totalSent = 0;
+    let totalFailed = 0;
+    let bookingsProcessed = 0;
 
     for (const booking of bookings) {
       try {
-        await sendReminder(booking);
-        successCount++;
+        const { sent, failed } = await sendReminder(booking);
+        totalSent += sent.length;
+        totalFailed += failed.length;
+
+        // Mark reminder as sent if at least one email succeeded
+        if (sent.length > 0) {
+          booking.reminderSentAt = new Date();
+          await booking.save();
+        }
+
+        bookingsProcessed++;
       } catch (err) {
         console.error(`[Mail] Failed to send reminder for ${booking.bookingId}:`, err.message);
-        failCount++;
+        totalFailed += booking.attendeeCount || 1;
+      }
+
+      // Rate limit: 500ms delay between bookings to avoid Gmail throttling
+      if (bookings.indexOf(booking) < bookings.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
     res.json({
       success: true,
-      message: `Reminders sent successfully to ${successCount} guests. (${failCount} failed)`,
+      message: `Reminders sent to ${totalSent} attendees across ${bookingsProcessed} bookings. (${totalFailed} failed)`,
+      totalSent,
+      totalFailed,
+      bookingsProcessed,
     });
   } catch (err) {
     console.error("[POST /api/bookings/send-reminders]", err);
