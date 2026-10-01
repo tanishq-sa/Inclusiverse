@@ -817,22 +817,32 @@ export function MovieTicket({ setPage }: { setPage: (p: Page) => void }) {
                     ) : uploadPhase === "verifying" ? (
                       <>
                         <div className="flex items-center gap-3">
-                          <Loader2 className="w-5 h-5 animate-spin text-amber-500 flex-shrink-0" />
+                          <div className="relative w-5 h-5 flex-shrink-0">
+                            <span className="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-40" />
+                            <span className="relative block w-5 h-5 rounded-full bg-amber-500" />
+                          </div>
                           <div className="flex-1">
                             <p className="text-sm font-semibold text-gray-700">
-                              Verifying payment…
+                              {ocrCheckElapsed < 3
+                                ? "Uploading to server…"
+                                : ocrCheckElapsed < 7
+                                ? "Reading payment screenshot…"
+                                : ocrCheckElapsed < 12
+                                ? "Verifying payment details…"
+                                : "Almost done, hang tight…"}
                             </p>
-                            <p className="text-xs text-gray-500 mt-0.5">
-                              Checking for ₹{total} • {ocrCheckElapsed}s elapsed
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              This usually takes 5–15 seconds
                             </p>
                           </div>
                         </div>
-                        {/* Verification progress indicator — pulsing bar */}
-                        <div className="w-full bg-amber-100 rounded-full h-2.5 overflow-hidden">
+                        {/* Smooth indeterminate progress bar */}
+                        <div className="w-full bg-amber-100 rounded-full h-2 overflow-hidden">
                           <m.div
-                            className="bg-amber-400 h-2.5 rounded-full"
-                            animate={{ width: ["20%", "70%", "40%", "90%", "60%"] }}
-                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                            className="bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300 h-2 rounded-full"
+                            style={{ width: "40%" }}
+                            animate={{ x: ["-100%", "250%"] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                           />
                         </div>
                       </>
