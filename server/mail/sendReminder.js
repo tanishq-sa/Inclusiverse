@@ -77,14 +77,18 @@ async function sendReminder(booking) {
 </html>
   `;
 
+  // Thread as a reply to the original confirmation email if possible
+  const originalSubject = `🎬 Your Chhichhore Ticket is Confirmed! [${booking.bookingId}]`;
+
   const mailOptions = {
     from: `"Inclusiverse 🎬" <${process.env.GMAIL_USER}>`,
     to: booking.primaryEmail,
-    subject: `Reminder: Your Chhichhore Ticket [${booking.bookingId}]`,
+    subject: booking.emailMessageId
+      ? `Re: ${originalSubject}`
+      : `Reminder: Your Chhichhore Ticket [${booking.bookingId}]`,
     html,
   };
 
-  // If we have the original message ID from the confirmation email, thread this as a reply!
   if (booking.emailMessageId) {
     mailOptions.inReplyTo = booking.emailMessageId;
     mailOptions.references = [booking.emailMessageId];
