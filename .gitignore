@@ -5,3 +5,4 @@ dist
 .env.*.local
 /temp_downloads
 /scripts
+server/scripts/mark-reminders-sent.cjs
