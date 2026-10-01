@@ -786,25 +786,21 @@ router.post("/resend-failed-emails", requireAdmin, clearCache, async (req, res) 
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/bookings/send-reminders  — send reminder to all paid & sent guests
+//   - Skips primary if reminderSentAt is already set (primary already got theirs)
+//   - { "force": true } to resend to everyone
+//   - { "extrasOnly": true } to only send to extra attendees
 // ─────────────────────────────────────────────────────────────────────────────
 router.post("/send-reminders", requireAdmin, clearCache, async (req, res) => {
   try {
-    const force = req.body.force === true; // allow re-sending if explicitly forced
+    const force = req.body.force === true;
+    const extrasOnlyOverride = req.body.extrasOnly === true;
 
-    // Find eligible bookings — skip ones already reminded (unless forced)
-    const query = { status: "paid", emailStatus: "sent" };
-    if (!force) {
-      query.reminderSentAt = { $exists: false };
-    }
-
-    const bookings = await Booking.find(query);
+    const bookings = await Booking.find({ status: "paid", emailStatus: "sent" });
 
     if (bookings.length === 0) {
       return res.json({
         success: true,
-        message: force
-          ? "No paid bookings found to remind."
-          : "All reminders already sent! Use { \"force\": true } to resend.",
+        message: "No paid bookings found to remind.",
         totalSent: 0,
         totalFailed: 0,
       });
@@ -812,15 +808,37 @@ router.post("/send-reminders", requireAdmin, clearCache, async (req, res) => {
 
     let totalSent = 0;
     let totalFailed = 0;
+    let skippedCount = 0;
     let bookingsProcessed = 0;
 
     for (const booking of bookings) {
+      // Determine send mode:
+      // - force: send to all regardless
+      // - extrasOnlyOverride: only extras
+      // - already reminded: only extras (primary already got theirs)
+      // - fresh: send to all
+      const alreadyReminded = !!booking.reminderSentAt;
+
+      if (alreadyReminded && !force && !extrasOnlyOverride) {
+        // Already fully reminded and no special flags — skip entirely
+        skippedCount++;
+        continue;
+      }
+
+      const sendExtrasOnly = extrasOnlyOverride || (alreadyReminded && !force);
+
+      // Skip if extrasOnly but no extra attendees
+      if (sendExtrasOnly && (!booking.attendees || booking.attendees.length === 0)) {
+        skippedCount++;
+        continue;
+      }
+
       try {
-        const { sent, failed } = await sendReminder(booking);
+        const { sent, failed } = await sendReminder(booking, { extrasOnly: sendExtrasOnly });
         totalSent += sent.length;
         totalFailed += failed.length;
 
-        // Mark reminder as sent if at least one email succeeded
+        // Mark reminder as sent
         if (sent.length > 0) {
           booking.reminderSentAt = new Date();
           await booking.save();
@@ -840,10 +858,11 @@ router.post("/send-reminders", requireAdmin, clearCache, async (req, res) => {
 
     res.json({
       success: true,
-      message: `Reminders sent to ${totalSent} attendees across ${bookingsProcessed} bookings. (${totalFailed} failed)`,
+      message: `Reminders sent to ${totalSent} attendees across ${bookingsProcessed} bookings. (${totalFailed} failed, ${skippedCount} skipped)`,
       totalSent,
       totalFailed,
       bookingsProcessed,
+      skippedCount,
     });
   } catch (err) {
     console.error("[POST /api/bookings/send-reminders]", err);

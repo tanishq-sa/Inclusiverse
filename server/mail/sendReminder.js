@@ -114,17 +114,21 @@ function buildReminderHtml(attendeeName, booking) {
 }
 
 /**
- * Send reminder emails to ALL attendees of a booking (primary + extras).
+ * Send reminder emails to attendees of a booking.
+ * @param {object} booking - The booking document
+ * @param {{ extrasOnly?: boolean }} options - If extrasOnly is true, skip the primary
  * Returns { sent: string[], failed: string[] } with email addresses.
  */
-async function sendReminder(booking) {
-  // Collect all attendees: primary + extras
-  const allAttendees = [
-    { name: booking.primaryName, email: booking.primaryEmail },
-    ...booking.attendees.map((a) => ({ name: a.name, email: a.email })),
-  ];
+async function sendReminder(booking, { extrasOnly = false } = {}) {
+  // Collect attendees based on mode
+  const allAttendees = extrasOnly
+    ? booking.attendees.map((a) => ({ name: a.name, email: a.email }))
+    : [
+        { name: booking.primaryName, email: booking.primaryEmail },
+        ...booking.attendees.map((a) => ({ name: a.name, email: a.email })),
+      ];
 
-  // Deduplicate by email (in case primary is also listed in attendees)
+  // Deduplicate by email
   const seen = new Set();
   const uniqueAttendees = allAttendees.filter((a) => {
     const key = a.email.toLowerCase();
