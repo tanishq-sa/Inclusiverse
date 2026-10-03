@@ -65,6 +65,20 @@ export default function App() {
   const [isDyslexic, setIsDyslexic] = useState(false);
   const [galleryFilter, setGalleryFilter] = useState(getInitialGalleryFilter);
   const [pageLoading, setPageLoading] = useState(false);
+  const [showGetTicketsButton, setShowGetTicketsButton] = useState(false);
+
+  // Fetch settings (e.g. showGetTicketsButton) on mount
+  useEffect(() => {
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+    fetch(`${API_BASE}/api/settings`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.settings?.showGetTicketsButton !== undefined) {
+          setShowGetTicketsButton(data.settings.showGetTicketsButton);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Sync with browser back/forward buttons
   useEffect(() => {
@@ -238,6 +252,7 @@ export default function App() {
           setPage={handleSetPage}
           isDyslexic={isDyslexic}
           toggleDyslexic={toggleDyslexic}
+          showGetTicketsButton={showGetTicketsButton}
         />
         <main className="flex-grow">
           <AnimatePresence mode="wait">

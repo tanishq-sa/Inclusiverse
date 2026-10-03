@@ -26,6 +26,9 @@ router.get("/", async (req, res) => {
     if (settings.ticketsEnabled === undefined) {
       settings.ticketsEnabled = true;
     }
+    if (settings.showGetTicketsButton === undefined) {
+      settings.showGetTicketsButton = false;
+    }
 
     res.json({ success: true, settings });
   } catch (err) {
