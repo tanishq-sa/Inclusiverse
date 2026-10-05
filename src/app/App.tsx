@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { LazyMotion, domAnimation, m, AnimatePresence } from "motion/react";
 import { Skeleton } from "boneyard-js/react";
 
@@ -6,21 +6,32 @@ import { Page } from "./types";
 import { ALL_PAGES, PAGE_METADATA } from "./data/metadata";
 import { Nav } from "./components/Nav";
 import { Footer } from "./components/Footer";
-import { TeamPage } from "./components/TeamPage";
 
 import { Home } from "./pages/Home";
-import { About } from "./pages/About";
-import { Timeline } from "./pages/Timeline";
-import { Gallery } from "./pages/Gallery";
-import { JoinUs } from "./pages/JoinUs";
-import { NotFound } from "./pages/NotFound";
-import { ContactUs } from "./pages/ContactUs";
-import { TermsOfService } from "./pages/legal/TermsOfService";
-import { PrivacyPolicy } from "./pages/legal/PrivacyPolicy";
-import { CancellationPolicy } from "./pages/legal/CancellationPolicy";
-import { NoRefundPolicy } from "./pages/legal/NoRefundPolicy";
-import { MovieTicket } from "./pages/MovieTicket";
-import { AdminPanel } from "./pages/AdminPanel";
+
+// Lazy-loaded pages for bundle code-splitting
+const About = lazy(() => import("./pages/About").then((m) => ({ default: m.About })));
+const TeamPage = lazy(() => import("./components/TeamPage").then((m) => ({ default: m.TeamPage })));
+const Timeline = lazy(() => import("./pages/Timeline").then((m) => ({ default: m.Timeline })));
+const Gallery = lazy(() => import("./pages/Gallery").then((m) => ({ default: m.Gallery })));
+const JoinUs = lazy(() => import("./pages/JoinUs").then((m) => ({ default: m.JoinUs })));
+const NotFound = lazy(() => import("./pages/NotFound").then((m) => ({ default: m.NotFound })));
+const ContactUs = lazy(() => import("./pages/ContactUs").then((m) => ({ default: m.ContactUs })));
+const TermsOfService = lazy(() => import("./pages/legal/TermsOfService").then((m) => ({ default: m.TermsOfService })));
+const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy").then((m) => ({ default: m.PrivacyPolicy })));
+const CancellationPolicy = lazy(() => import("./pages/legal/CancellationPolicy").then((m) => ({ default: m.CancellationPolicy })));
+const NoRefundPolicy = lazy(() => import("./pages/legal/NoRefundPolicy").then((m) => ({ default: m.NoRefundPolicy })));
+const MovieTicket = lazy(() => import("./pages/MovieTicket").then((m) => ({ default: m.MovieTicket })));
+const AdminPanel = lazy(() => import("./pages/AdminPanel").then((m) => ({ default: m.AdminPanel })));
+
+function PageFallback() {
+  return (
+    <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3">
+      <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+      <span className="text-xs text-gray-400 font-medium tracking-wide">Loading page...</span>
+    </div>
+  );
+}
 
 export type { Page };
 
@@ -263,7 +274,9 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             >
-              {content}
+              <Suspense fallback={<PageFallback />}>
+                {content}
+              </Suspense>
             </m.div>
           </AnimatePresence>
         </main>

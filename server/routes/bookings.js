@@ -103,12 +103,26 @@ router.post("/upload-payment", upload.single("screenshot"), clearCache, async (r
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    if (!/^(\d{6}|\d{8})$/.test(primaryRegNo)) {
-      return res.status(400).json({ error: "Registration number must be 6 or 8 digits" });
+    if (!/^\d{5,8}$/.test(primaryRegNo)) {
+      return res.status(400).json({ error: "Registration number must be 5 to 8 digits" });
     }
 
     if (!primaryEmail.toLowerCase().endsWith("christuniversity.in")) {
       return res.status(400).json({ error: "Email must be a Christ University email" });
+    }
+
+    // Validate extra attendees
+    for (let i = 0; i < extraAttendees.length; i++) {
+      const att = extraAttendees[i];
+      if (!att.name || !att.regNo || !att.email) {
+        return res.status(400).json({ error: `Attendee ${i + 2} has missing fields` });
+      }
+      if (!/^\d{5,8}$/.test(att.regNo)) {
+        return res.status(400).json({ error: `Attendee ${i + 2} registration number must be 5 to 8 digits` });
+      }
+      if (!att.email.toLowerCase().endsWith("christuniversity.in")) {
+        return res.status(400).json({ error: `Attendee ${i + 2} email must be a Christ University email` });
+      }
     }
 
     if (!req.file) {
@@ -366,8 +380,8 @@ router.post("/", clearCache, async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    if (!/^\d{8}$/.test(primaryRegNo)) {
-      return res.status(400).json({ error: "Registration number must be exactly 8 digits" });
+    if (!/^\d{5,8}$/.test(primaryRegNo)) {
+      return res.status(400).json({ error: "Registration number must be 5 to 8 digits" });
     }
 
     if (!primaryEmail.toLowerCase().endsWith("christuniversity.in")) {
@@ -375,6 +389,18 @@ router.post("/", clearCache, async (req, res) => {
     }
 
     const extraAttendees = Array.isArray(attendees) ? attendees : [];
+    for (let i = 0; i < extraAttendees.length; i++) {
+      const att = extraAttendees[i];
+      if (!att.name || !att.regNo || !att.email) {
+        return res.status(400).json({ error: `Attendee ${i + 2} has missing fields` });
+      }
+      if (!/^\d{5,8}$/.test(att.regNo)) {
+        return res.status(400).json({ error: `Attendee ${i + 2} registration number must be 5 to 8 digits` });
+      }
+      if (!att.email.toLowerCase().endsWith("christuniversity.in")) {
+        return res.status(400).json({ error: `Attendee ${i + 2} email must be a Christ University email` });
+      }
+    }
     const attendeeCount = 1 + extraAttendees.length;
 
     let bookingId;

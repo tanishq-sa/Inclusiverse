@@ -57,4 +57,23 @@ router.patch("/", requireAdmin, async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/settings/verify-passcode  — verify admin passcode securely
+// ─────────────────────────────────────────────────────────────────────────────
+router.post("/verify-passcode", (req, res) => {
+  const { passcode } = req.body;
+  const adminPasscode = process.env.ADMIN_PASSCODE;
+
+  if (!adminPasscode) {
+    console.error("[POST /api/settings/verify-passcode] ADMIN_PASSCODE is not configured");
+    return res.status(500).json({ success: false, error: "Server authentication misconfigured" });
+  }
+
+  if (!passcode || passcode !== adminPasscode) {
+    return res.status(401).json({ success: false, error: "Incorrect passcode" });
+  }
+
+  res.json({ success: true, message: "Authorized" });
+});
+
 module.exports = router;

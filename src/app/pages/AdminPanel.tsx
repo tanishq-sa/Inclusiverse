@@ -1,5 +1,5 @@
-
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback, createContext, useContext } from "react";
+import { playSuccessFeedback, playAlreadyCheckedInFeedback, playErrorFeedback } from "../utils/feedback";
 import {
   Lock,
   Shield,
@@ -84,21 +84,55 @@ interface Booking {
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
-const ADMIN_PASSCODE = import.meta.env.VITE_ADMIN_PASSCODE;
+
+interface AdminAuthContextType {
+  passcode: string;
+  onLogout: () => void;
+}
+
+const AdminAuthContext = createContext<AdminAuthContextType>({
+  passcode: "",
+  onLogout: () => {},
+});
+
+const useAdminAuth = () => useContext(AdminAuthContext);
 
 // ─── Passcode Gate ─────────────────────────────────────────────────────────────
-function PasscodeGate({ onUnlock }: { onUnlock: () => void }) {
+function PasscodeGate({ onUnlock }: { onUnlock: (passcode: string) => void }) {
   const [value, setValue] = useState("");
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [show, setShow] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submit = () => {
-    if (value === ADMIN_PASSCODE) {
-      onUnlock();
-    } else {
+  const submit = async () => {
+    const trimmed = value.trim();
+    if (!trimmed || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setError(false);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/settings/verify-passcode`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passcode: trimmed }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        onUnlock(trimmed);
+      } else {
+        setError(true);
+        setErrorMessage(data.error || "Incorrect passcode. Please try again.");
+        setValue("");
+        setTimeout(() => setError(false), 2500);
+      }
+    } catch {
       setError(true);
-      setValue("");
-      setTimeout(() => setError(false), 1500);
+      setErrorMessage("Network error. Please check your connection.");
+      setTimeout(() => setError(false), 2500);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -186,7 +220,7 @@ function PasscodeGate({ onUnlock }: { onUnlock: () => void }) {
               animate={{ opacity: 1, y: 0 }}
               className="flex items-center justify-center gap-1.5 text-xs text-red-500 mb-4 bg-red-50 rounded-lg py-2 border border-red-100"
             >
-              <AlertCircle className="w-3.5 h-3.5" /> Incorrect passcode. Please try again.
+              <AlertCircle className="w-3.5 h-3.5" /> {errorMessage || "Incorrect passcode. Please try again."}
             </m.div>
           )}
 
@@ -194,10 +228,20 @@ function PasscodeGate({ onUnlock }: { onUnlock: () => void }) {
           <button
             type="button"
             onClick={submit}
-            className="w-full bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 cursor-pointer flex items-center justify-center gap-2 group"
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 cursor-pointer flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            <Lock className="w-4 h-4 transition-transform group-hover:scale-110" />
-            Unlock Dashboard
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Verifying...
+              </>
+            ) : (
+              <>
+                <Lock className="w-4 h-4 transition-transform group-hover:scale-110" />
+                Unlock Dashboard
+              </>
+            )}
           </button>
         </div>
 
@@ -598,6 +642,7 @@ function CheckInToast({ result, onDismiss }: { result: CheckInResult; onDismiss:
 
 // ─── Check-In Tab ──────────────────────────────────────────────────────────────
 function CheckInTab() {
+  const { passcode, onLogout } = useAdminAuth();
   const [scannerEnabled, setScannerEnabled] = useState(false);
   const [manualSearch, setManualSearch] = useState("");
   const [tickets, setTickets] = useState<TicketInfo[]>([]);
@@ -610,9 +655,13 @@ function CheckInTab() {
     setLoading(true);
     try {
       const [ticketsRes, statsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/bookings/all-tickets`, { headers: { "x-admin-passcode": ADMIN_PASSCODE } }),
-        fetch(`${API_BASE}/api/bookings/checkin-stats`, { headers: { "x-admin-passcode": ADMIN_PASSCODE } }),
+        fetch(`${API_BASE}/api/bookings/all-tickets`, { headers: { "x-admin-passcode": passcode } }),
+        fetch(`${API_BASE}/api/bookings/checkin-stats`, { headers: { "x-admin-passcode": passcode } }),
       ]);
+      if (ticketsRes.status === 401 || statsRes.status === 401) {
+        onLogout();
+        return;
+      }
       const ticketsData = await ticketsRes.json();
       const statsData = await statsRes.json();
       setTickets(ticketsData.tickets || []);
@@ -654,12 +703,20 @@ function CheckInTab() {
       const endpoint = method === "qr" ? "checkin" : "manual-checkin";
       const res = await fetch(`${API_BASE}/api/bookings/${endpoint}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
         body: JSON.stringify({ ticketId }),
       });
+
+      if (res.status === 401) {
+        playErrorFeedback();
+        onLogout();
+        return;
+      }
+
       const data = await res.json();
 
       if (res.ok) {
+        playSuccessFeedback();
         setCheckInResult({
           type: "success",
           message: "Check-in successful",
@@ -668,6 +725,7 @@ function CheckInTab() {
           bookingId: data.bookingId,
         });
       } else if (res.status === 409) {
+        playAlreadyCheckedInFeedback();
         setCheckInResult({
           type: "already",
           message: data.error,
@@ -675,12 +733,14 @@ function CheckInTab() {
           checkedInAt: data.checkedInAt,
         });
       } else {
+        playErrorFeedback();
         setCheckInResult({
           type: "error",
           message: data.error || "Unknown error",
         });
       }
     } catch {
+      playErrorFeedback();
       setCheckInResult({
         type: "error",
         message: "Network error — please check your connection",
@@ -1073,6 +1133,7 @@ function CheckInTab() {
 
 // ─── Reviews Tab ────────────────────────────────────────────────────────────────
 function ReviewsTab() {
+  const { passcode, onLogout } = useAdminAuth();
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -1084,8 +1145,12 @@ function ReviewsTab() {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/bookings/pending-reviews`, {
-        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "x-admin-passcode": passcode },
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       setPendingBookings(data.bookings || []);
     } catch (err) {
@@ -1105,9 +1170,13 @@ function ReviewsTab() {
     try {
       const res = await fetch(`${API_BASE}/api/bookings/review-payment`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
         body: JSON.stringify({ bookingId, action, reason: reason || undefined }),
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       if (res.ok) {
         alert(data.message);
@@ -1127,13 +1196,17 @@ function ReviewsTab() {
     try {
       const res = await fetch(`${API_BASE}/api/bookings/edit-email`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
         body: JSON.stringify({
           bookingId: editingEmail.bookingId,
           ticketId: editingEmail.ticketId,
           newEmail: newEmail.trim(),
         }),
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       if (res.ok) {
         alert("Email updated!");
@@ -1339,6 +1412,7 @@ function ReviewsTab() {
 
 // ─── OCR Logs Tab ─────────────────────────────────────────────────────────────
 function OCRLogsTab() {
+  const { passcode, onLogout } = useAdminAuth();
   const [logs, setLogs] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -1348,8 +1422,12 @@ function OCRLogsTab() {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/bookings`, {
-        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "x-admin-passcode": passcode },
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       const gpayBookings = (data.bookings || []).filter((b: Booking) => b.paymentMethod === "gpay" && b.paymentScreenshotUrl);
       setLogs(gpayBookings);
@@ -1370,9 +1448,13 @@ function OCRLogsTab() {
     try {
       const res = await fetch(`${API_BASE}/api/bookings/review-payment`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
         body: JSON.stringify({ bookingId, action, reason: reason || undefined }),
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       if (res.ok) {
         alert(data.message);
@@ -1488,6 +1570,7 @@ function OCRLogsTab() {
 
 // ─── Email Tracker Tab ────────────────────────────────────────────────────────
 function EmailTrackerTab() {
+  const { passcode, onLogout } = useAdminAuth();
   const [emails, setEmails] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [resendingId, setResendingId] = useState<string | null>(null);
@@ -1502,8 +1585,12 @@ function EmailTrackerTab() {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/bookings/email-status`, {
-        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "x-admin-passcode": passcode },
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       setEmails(data.bookings || []);
     } catch (err) {
@@ -1520,12 +1607,16 @@ function EmailTrackerTab() {
     try {
       const res = await fetch(`${API_BASE}/api/bookings/edit-email`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
         body: JSON.stringify({
           bookingId: editingEmail.bookingId,
           newEmail: newEmail.trim(),
         }),
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       if (res.ok) {
         alert("Email updated! You can now try resending.");
@@ -1545,9 +1636,13 @@ function EmailTrackerTab() {
     try {
       const res = await fetch(`${API_BASE}/api/bookings/resend-email`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
         body: JSON.stringify({ bookingId }),
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       if (res.ok) {
         alert("Email resent successfully!");
@@ -1563,7 +1658,7 @@ function EmailTrackerTab() {
   };
 
   const handleSendReminders = async () => {
-    if (reminderPasscode !== ADMIN_PASSCODE) {
+    if (reminderPasscode !== passcode) {
       alert("Incorrect passcode.");
       return;
     }
@@ -1573,8 +1668,12 @@ function EmailTrackerTab() {
     try {
       const res = await fetch(`${API_BASE}/api/bookings/send-reminders`, {
         method: "POST",
-        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "x-admin-passcode": passcode },
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       alert(data.message || (data.success ? "Reminders sent!" : "Failed to send reminders"));
     } catch {
@@ -1792,6 +1891,7 @@ function EmailTrackerTab() {
 
 // ─── Main Admin Dashboard ──────────────────────────────────────────────────────
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
+  const { passcode } = useAdminAuth();
   const [tab, setTab] = useState<"bookings" | "checkin" | "reviews" | "ocr" | "email">("bookings");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1811,8 +1911,12 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     try {
       const res = await fetch(`${API_BASE}/api/bookings/resend-failed-emails`, {
         method: "POST",
-        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "x-admin-passcode": passcode },
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       const data = await res.json();
       alert(data.message);
       if (data.success) fetchBookings();
@@ -1828,8 +1932,12 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     setError(null);
     try {
       const res = await fetch(`${API_BASE}/api/bookings`, {
-        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "x-admin-passcode": passcode },
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       if (!res.ok) throw new Error("Failed to fetch bookings");
       const data = await res.json();
       setBookings(data.bookings || []);
@@ -1856,11 +1964,15 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     setSettingsLoading(true);
     try {
       const newVal = !settings.ticketsEnabled;
-      await fetch(`${API_BASE}/api/settings`, {
+      const res = await fetch(`${API_BASE}/api/settings`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
         body: JSON.stringify({ key: "ticketsEnabled", value: newVal }),
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       setSettings((prev: any) => ({ ...prev, ticketsEnabled: newVal }));
     } catch (err) {
       console.error(err);
@@ -1868,8 +1980,6 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       setSettingsLoading(false);
     }
   };
-
-
 
   useEffect(() => { fetchBookings(); fetchSettings(); }, []);
 
@@ -1914,8 +2024,12 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     setDownloading(type);
     try {
       const res = await fetch(`${API_BASE}/api/bookings/export?type=${type}`, {
-        headers: { "x-admin-passcode": ADMIN_PASSCODE },
+        headers: { "x-admin-passcode": passcode },
       });
+      if (res.status === 401) {
+        onLogout();
+        return;
+      }
       if (!res.ok) throw new Error("Export failed");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -2282,22 +2396,24 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
 // ─── Exported Page ─────────────────────────────────────────────────────────────
 export function AdminPanel() {
-  const [unlocked, setUnlocked] = useState(() => {
-    return sessionStorage.getItem("adminUnlocked") === "true";
+  const [passcode, setPasscode] = useState(() => {
+    return sessionStorage.getItem("adminPasscode") || "";
   });
 
-  const handleUnlock = () => {
-    sessionStorage.setItem("adminUnlocked", "true");
-    setUnlocked(true);
+  const handleUnlock = (code: string) => {
+    sessionStorage.setItem("adminPasscode", code);
+    setPasscode(code);
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("adminUnlocked");
-    setUnlocked(false);
+    sessionStorage.removeItem("adminPasscode");
+    setPasscode("");
   };
 
-  return unlocked ? (
-    <AdminDashboard onLogout={handleLogout} />
+  return passcode ? (
+    <AdminAuthContext.Provider value={{ passcode, onLogout: handleLogout }}>
+      <AdminDashboard onLogout={handleLogout} />
+    </AdminAuthContext.Provider>
   ) : (
     <PasscodeGate onUnlock={handleUnlock} />
   );
