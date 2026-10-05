@@ -1801,7 +1801,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [sortAsc, setSortAsc] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<"emails" | "full" | null>(null);
-  const [settings, setSettings] = useState<any>({ ticketsEnabled: true, showGetTicketsButton: false });
+  const [settings, setSettings] = useState<any>({ ticketsEnabled: true });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [resending, setResending] = useState(false);
 
@@ -1869,22 +1869,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     }
   };
 
-  const toggleGetTicketsButton = async () => {
-    setSettingsLoading(true);
-    try {
-      const newVal = !settings.showGetTicketsButton;
-      await fetch(`${API_BASE}/api/settings`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": ADMIN_PASSCODE },
-        body: JSON.stringify({ key: "showGetTicketsButton", value: newVal }),
-      });
-      setSettings((prev: any) => ({ ...prev, showGetTicketsButton: newVal }));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSettingsLoading(false);
-    }
-  };
+
 
   useEffect(() => { fetchBookings(); fetchSettings(); }, []);
 
@@ -2100,23 +2085,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                       />
                     </button>
                   </div>
-                  <div className="flex items-center gap-2 bg-surface px-3.5 py-2 rounded-xl border border-gray-200">
-                    <span className="text-xs font-medium text-gray-600">Get Tickets Button</span>
-                    <button
-                      type="button"
-                      onClick={toggleGetTicketsButton}
-                      disabled={settingsLoading}
-                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
-                        settings.showGetTicketsButton ? "bg-green-500" : "bg-gray-300"
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                          settings.showGetTicketsButton ? "translate-x-4.5" : "translate-x-1"
-                        }`}
-                      />
-                    </button>
-                  </div>
+
                   <button
                     type="button"
                     onClick={handleResendFailedEmails}

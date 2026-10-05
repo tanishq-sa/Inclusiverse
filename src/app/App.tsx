@@ -67,14 +67,14 @@ export default function App() {
   const [pageLoading, setPageLoading] = useState(false);
   const [showGetTicketsButton, setShowGetTicketsButton] = useState(false);
 
-  // Fetch settings (e.g. showGetTicketsButton) on mount
+  // Fetch settings — Get Tickets button visibility is tied to ticketsEnabled
   useEffect(() => {
     const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
     fetch(`${API_BASE}/api/settings`)
       .then((res) => res.json())
       .then((data) => {
-        if (data?.settings?.showGetTicketsButton !== undefined) {
-          setShowGetTicketsButton(data.settings.showGetTicketsButton);
+        if (data?.settings?.ticketsEnabled !== undefined) {
+          setShowGetTicketsButton(data.settings.ticketsEnabled);
         }
       })
       .catch(() => {});
