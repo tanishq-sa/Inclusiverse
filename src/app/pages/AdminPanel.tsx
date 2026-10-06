@@ -92,7 +92,7 @@ interface AdminAuthContextType {
 
 const AdminAuthContext = createContext<AdminAuthContextType>({
   passcode: "",
-  onLogout: () => {},
+  onLogout: () => { },
 });
 
 const useAdminAuth = () => useContext(AdminAuthContext);
@@ -199,8 +199,8 @@ function PasscodeGate({ onUnlock }: { onUnlock: (passcode: string) => void }) {
               onKeyDown={(e) => e.key === "Enter" && submit()}
               placeholder="Enter passcode"
               className={`w-full rounded-xl border-2 px-5 py-3.5 text-sm outline-none transition-all focus:ring-3 font-mono tracking-widest text-center bg-white/70 backdrop-blur-sm ${error
-                  ? "border-red-300 bg-red-50/50 focus:ring-red-100 focus:border-red-400"
-                  : "border-gray-200/80 focus:border-primary focus:ring-primary/10"
+                ? "border-red-300 bg-red-50/50 focus:ring-red-100 focus:border-red-400"
+                : "border-gray-200/80 focus:border-primary focus:ring-primary/10"
                 }`}
               autoFocus
             />
@@ -256,24 +256,23 @@ function StatCard({ icon: Icon, label, value, sub, color }: { icon: React.Elemen
   const bg = color === "green" ? "bg-green-50" : color === "amber" ? "bg-amber-50" : "bg-primary/5";
   const iconBg = color === "green" ? "bg-green-100" : color === "amber" ? "bg-amber-100" : "bg-primary/10";
   const text = color === "green" ? "text-green-600" : color === "amber" ? "text-amber-600" : "text-primary";
-  const borderAccent = color === "green" ? "border-green-100" : color === "amber" ? "border-amber-100" : "border-primary/10";
   return (
     <m.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={`bg-white rounded-2xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow relative overflow-hidden`}
+      className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5 hover:shadow-md transition-shadow relative overflow-hidden"
     >
       <div className={`absolute top-0 right-0 w-24 h-24 ${bg} rounded-bl-[80px] -mr-2 -mt-2`} />
       <div className="relative">
-        <div className="flex items-center gap-3 mb-3">
-          <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shadow-sm`}>
-            <Icon className={`w-4.5 h-4.5 ${text}`} />
+        <div className="flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
+          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${iconBg} flex items-center justify-center shadow-sm flex-shrink-0`}>
+            <Icon className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${text}`} />
           </div>
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{label}</span>
+          <span className="text-[11px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wide truncate">{label}</span>
         </div>
-        <p className="text-3xl font-display font-bold text-text-main">{value}</p>
-        {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+        <p className="text-2xl sm:text-3xl font-display font-bold text-text-main truncate">{value}</p>
+        {sub && <p className="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">{sub}</p>}
       </div>
     </m.div>
   );
@@ -329,9 +328,9 @@ function BookingsLoadingSkeleton() {
         <StatCardSkeleton />
       </div>
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
-        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-          <Shimmer className="h-10 w-full sm:w-80 rounded-xl" />
-          <div className="flex gap-2.5">
+        <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+          <Shimmer className="h-10 w-full lg:w-80 rounded-xl" />
+          <div className="flex flex-wrap gap-2.5">
             <Shimmer className="h-9 w-24 rounded-xl" />
             <Shimmer className="h-9 w-28 rounded-xl" />
             <Shimmer className="h-9 w-24 rounded-xl" />
@@ -339,18 +338,37 @@ function BookingsLoadingSkeleton() {
         </div>
       </div>
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-surface/80 border-b border-gray-100">
-              {["Booking ID", "Name", "Reg No.", "Email", "People", "Total", "Date", "Status", "Attendees"].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wide">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: 6 }).map((_, i) => <TableRowSkeleton key={i} />)}
-          </tbody>
-        </table>
+        {/* Desktop Skeleton */}
+        <div className="hidden lg:block overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-surface/80 border-b border-gray-100">
+                {["Booking ID", "Name", "Reg No.", "Email", "People", "Total", "Date", "Status", "Attendees"].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wide">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 6 }).map((_, i) => <TableRowSkeleton key={i} />)}
+            </tbody>
+          </table>
+        </div>
+        {/* Mobile & Tablet Skeleton */}
+        <div className="lg:hidden divide-y divide-gray-100">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="p-4 space-y-3">
+              <div className="flex justify-between items-center">
+                <Shimmer className="h-4 w-24 rounded" />
+                <Shimmer className="h-5 w-16 rounded-full" />
+              </div>
+              <Shimmer className="h-14 w-full rounded-xl" />
+              <div className="flex justify-between items-center">
+                <Shimmer className="h-4 w-20 rounded" />
+                <Shimmer className="h-4 w-16 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -525,7 +543,15 @@ function QrScanner({ onScan, enabled }: { onScan: (data: string) => void; enable
       scannerRef.current = scanner;
       await scanner.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1 },
+        {
+          fps: 10,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const edge = Math.max(180, Math.floor(minEdge * 0.72));
+            return { width: edge, height: edge };
+          },
+          aspectRatio: 1,
+        },
         (decodedText) => {
           // Prevent rapid duplicate scans
           if (decodedText !== lastScanRef.current) {
@@ -535,7 +561,7 @@ function QrScanner({ onScan, enabled }: { onScan: (data: string) => void; enable
             setTimeout(() => { lastScanRef.current = ""; }, 3000);
           }
         },
-        () => {} // ignore errors during scanning
+        () => { } // ignore errors during scanning
       );
       setIsScanning(true);
     } catch (err) {
@@ -568,11 +594,11 @@ function QrScanner({ onScan, enabled }: { onScan: (data: string) => void; enable
   }, [enabled]);
 
   return (
-    <div>
+    <div className="w-full flex flex-col items-center">
       <div
         id="qr-reader"
-        className="rounded-2xl overflow-hidden bg-gray-900"
-        style={{ width: "100%", maxWidth: 400, minHeight: enabled ? 300 : 0 }}
+        className="rounded-2xl overflow-hidden bg-gray-900 w-full"
+        style={{ maxWidth: 420, minHeight: enabled ? 260 : 0 }}
       />
       {error && (
         <div className="flex items-center gap-2 mt-3 text-red-600 text-sm bg-red-50 border border-red-200 rounded-xl p-3">
@@ -686,7 +712,7 @@ function CheckInTab() {
       t.checkedIn ? "Yes" : "No",
       t.checkedInAt ? `"${new Date(t.checkedInAt).toLocaleString("en-IN")}"` : ""
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," 
+    const csvContent = "data:text/csv;charset=utf-8,"
       + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -819,7 +845,7 @@ function CheckInTab() {
       {/* Scanner + Manual Search */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* QR Scanner */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -830,11 +856,10 @@ function CheckInTab() {
             <button
               type="button"
               onClick={() => setScannerEnabled((e) => !e)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${
-                scannerEnabled
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${scannerEnabled
                   ? "bg-red-100 text-red-600 hover:bg-red-200"
                   : "bg-primary text-white hover:bg-primary-hover shadow-sm"
-              }`}
+                }`}
             >
               {scannerEnabled ? (
                 <><CameraOff className="w-3.5 h-3.5" /> Stop</>
@@ -854,7 +879,7 @@ function CheckInTab() {
         </div>
 
         {/* Manual Search */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
               <Search className="w-4 h-4 text-primary" />
@@ -896,16 +921,14 @@ function CheckInTab() {
               filtered.map((t) => (
                 <div
                   key={t.ticketId}
-                  className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
-                    t.checkedIn
+                  className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${t.checkedIn
                       ? "bg-green-50/50 border-green-200"
                       : "bg-white border-gray-100 hover:border-primary/30"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      t.checkedIn ? "bg-green-100" : "bg-gray-100"
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${t.checkedIn ? "bg-green-100" : "bg-gray-100"
+                      }`}>
                       {t.checkedIn ? (
                         <CheckCircle2 className="w-4 h-4 text-green-600" />
                       ) : (
@@ -1013,9 +1036,8 @@ function CheckInTab() {
                   {filtered.map((t, idx) => (
                     <tr
                       key={t.ticketId}
-                      className={`border-b border-gray-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"} ${
-                        t.checkedIn ? "" : "hover:bg-primary/5"
-                      } transition-colors`}
+                      className={`border-b border-gray-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"} ${t.checkedIn ? "" : "hover:bg-primary/5"
+                        } transition-colors`}
                     >
                       <td className="px-4 py-3">
                         {t.checkedIn ? (
@@ -1041,9 +1063,8 @@ function CheckInTab() {
                       </td>
                       <td className="px-4 py-3 text-xs">
                         {t.checkedInBy ? (
-                          <span className={`px-2 py-0.5 rounded-full font-semibold ${
-                            t.checkedInBy === "qr" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
-                          }`}>
+                          <span className={`px-2 py-0.5 rounded-full font-semibold ${t.checkedInBy === "qr" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
+                            }`}>
                             {t.checkedInBy === "qr" ? "📱 QR" : "✋ Manual"}
                           </span>
                         ) : "—"}
@@ -1085,14 +1106,13 @@ function CheckInTab() {
                       )}
                     </div>
                     {t.checkedInBy && (
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        t.checkedInBy === "qr" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
-                      }`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${t.checkedInBy === "qr" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
+                        }`}>
                         {t.checkedInBy === "qr" ? "📱 QR" : "✋ Manual"}
                       </span>
                     )}
                   </div>
-                  
+
                   <div>
                     <p className="font-medium text-text-main text-sm">{t.attendeeName}</p>
                     <p className="text-xs text-gray-500 font-mono mt-0.5">{t.attendeeRegNo}</p>
@@ -1256,21 +1276,21 @@ function ReviewsTab() {
             <div key={b._id} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               {/* Header */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-5 py-4 bg-amber-50/50 border-b border-amber-100">
-                <div>
+                <div className="min-w-0 flex-1 mr-0 sm:mr-3">
                   <div className="flex items-center gap-3">
                     <span className="font-mono font-bold text-primary text-sm tracking-wider">{b.bookingId}</span>
                     <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full">
                       Pending Review
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">
-                    <strong>{b.primaryName}</strong> · {b.primaryRegNo} · {b.primaryEmail}
+                  <p className="text-sm text-gray-600 mt-1 break-words">
+                    <strong>{b.primaryName}</strong> · {b.primaryRegNo} · <span className="break-all">{b.primaryEmail}</span>
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">
                     {b.attendeeCount} {b.attendeeCount === 1 ? "attendee" : "attendees"} · ₹{b.totalAmount} · {new Date(b.createdAt).toLocaleString("en-IN")}
                   </p>
                 </div>
-                <div className="flex sm:items-center gap-2 mt-4 sm:mt-0 w-full sm:w-auto">
+                <div className="flex sm:items-center gap-2 mt-4 sm:mt-0 w-full sm:w-auto flex-shrink-0">
                   <button
                     type="button"
                     onClick={() => handleReview(b.bookingId, "approve")}
@@ -1293,7 +1313,7 @@ function ReviewsTab() {
               </div>
 
               {/* Content */}
-              <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Payment Screenshot */}
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Payment Screenshot</p>
@@ -1328,13 +1348,13 @@ function ReviewsTab() {
                       { name: b.primaryName, regNo: b.primaryRegNo, email: b.primaryEmail, isPrimary: true },
                       ...b.attendees.map((a) => ({ ...a, isPrimary: false })),
                     ].map((att, i) => (
-                      <div key={i} className="flex items-center justify-between bg-surface rounded-xl px-3 py-2.5">
-                        <div>
-                          <p className="text-sm font-medium text-text-main">
+                      <div key={i} className="flex items-center justify-between gap-2 bg-surface rounded-xl px-3 py-2.5">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-text-main truncate">
                             {att.name}
-                            {att.isPrimary && <span className="text-xs text-primary ml-1.5">(Primary)</span>}
+                            {att.isPrimary && <span className="text-xs text-primary ml-1.5 font-normal">(Primary)</span>}
                           </p>
-                          <p className="text-xs text-gray-400">{att.regNo} · {att.email}</p>
+                          <p className="text-xs text-gray-400 break-all">{att.regNo} · {att.email}</p>
                         </div>
                         <button
                           type="button"
@@ -1342,7 +1362,7 @@ function ReviewsTab() {
                             setEditingEmail({ bookingId: b.bookingId, current: att.email });
                             setNewEmail(att.email);
                           }}
-                          className="text-gray-400 hover:text-primary transition-colors cursor-pointer p-1"
+                          className="text-gray-400 hover:text-primary transition-colors cursor-pointer p-1.5 flex-shrink-0"
                           title="Edit email"
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -1488,33 +1508,33 @@ function OCRLogsTab() {
           <div className="w-full md:w-64 bg-gray-100 flex-shrink-0 cursor-pointer border-b md:border-b-0 md:border-r border-gray-200" onClick={() => setPreviewImage(b.paymentScreenshotUrl!)}>
             <img src={b.paymentScreenshotUrl} alt="Payment" className="w-full h-48 md:h-full object-cover" />
           </div>
-          
+
           {/* Details */}
-          <div className="p-6 flex-1 flex flex-col justify-between">
+          <div className="p-4 sm:p-6 flex-1 min-w-0 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-primary text-sm font-bold">{b.bookingId}</span>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                  b.status === "paid" ? "bg-green-100 text-green-700" :
-                  b.status === "rejected" ? "bg-red-100 text-red-700" :
-                  "bg-amber-100 text-amber-700"
-                }`}>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${b.status === "paid" ? "bg-green-100 text-green-700" :
+                    b.status === "rejected" ? "bg-red-100 text-red-700" :
+                      "bg-amber-100 text-amber-700"
+                  }`}>
                   {b.status === "paid" ? "Auto-Approved" : b.status === "rejected" ? "Rejected" : "Pending Review"}
                 </span>
               </div>
-              
-              <h3 className="font-bold text-lg mb-1">{b.primaryName}</h3>
-              <p className="text-sm text-gray-600 mb-4">{b.primaryEmail} • {b.primaryRegNo} • ₹{b.totalAmount}</p>
+
+              <h3 className="font-bold text-base sm:text-lg mb-1 truncate">{b.primaryName}</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mb-4 break-words">
+                <span className="break-all">{b.primaryEmail}</span> • <span className="font-mono">{b.primaryRegNo}</span> • ₹{b.totalAmount}
+              </p>
 
               <div className="bg-primary/5 rounded-xl p-4 border border-primary/10 mb-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold text-primary uppercase tracking-wide">OCR Analysis</span>
                   {b.ocrConfidence && (
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                      b.ocrConfidence === "high" ? "bg-green-100 text-green-700" :
-                      b.ocrConfidence === "low" ? "bg-amber-100 text-amber-700" :
-                      "bg-gray-200 text-gray-700"
-                    }`}>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${b.ocrConfidence === "high" ? "bg-green-100 text-green-700" :
+                        b.ocrConfidence === "low" ? "bg-amber-100 text-amber-700" :
+                          "bg-gray-200 text-gray-700"
+                      }`}>
                       {b.ocrConfidence} CONFIDENCE
                     </span>
                   )}
@@ -1707,7 +1727,7 @@ function EmailTrackerTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
@@ -1718,12 +1738,12 @@ function EmailTrackerTab() {
             className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition-all"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowReminderPrompt(true)} disabled={sendingReminders} className="flex items-center gap-2 bg-primary px-4 py-2 rounded-xl border border-transparent text-sm font-medium text-white hover:bg-primary-hover transition-colors cursor-pointer shadow-sm disabled:opacity-50">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <button onClick={() => setShowReminderPrompt(true)} disabled={sendingReminders} className="flex-1 sm:flex-none justify-center flex items-center gap-2 bg-primary px-4 py-2 rounded-xl border border-transparent text-sm font-medium text-white hover:bg-primary-hover transition-colors cursor-pointer shadow-sm disabled:opacity-50">
             {sendingReminders ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
             Send Reminders
           </button>
-          <button onClick={fetchEmails} className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer shadow-sm">
+          <button onClick={fetchEmails} className="flex-1 sm:flex-none justify-center flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:text-primary transition-colors cursor-pointer shadow-sm">
             <RefreshCw className="w-4 h-4" /> Refresh
           </button>
         </div>
@@ -1737,7 +1757,8 @@ function EmailTrackerTab() {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-surface/80 border-b border-gray-100">
@@ -1808,6 +1829,75 @@ function EmailTrackerTab() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile & Tablet Card View */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {filteredEmails.length === 0 ? (
+            <div className="text-center py-8 text-gray-400 text-sm">
+              {search ? "No emails found matching your search" : "No emails found"}
+            </div>
+          ) : (
+            filteredEmails.map((e) => (
+              <div key={e._id} className="p-4 space-y-2.5 bg-white">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono font-bold text-primary text-xs tracking-wider">{e.bookingId}</span>
+                  {e.emailStatus === "sent" || (e.emailSent && !e.emailStatus) ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-700">
+                      <CheckCircle2 className="w-3 h-3" /> Delivered
+                    </span>
+                  ) : e.emailStatus === "failed" || e.emailStatus === "bounced" ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-100 text-red-700">
+                      <XCircle className="w-3 h-3" /> {e.emailStatus}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Pending
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <p className="font-medium text-text-main text-sm">{e.primaryName}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-xs text-gray-500 truncate">{e.primaryEmail}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingEmail({ bookingId: e.bookingId, current: e.primaryEmail });
+                        setNewEmail(e.primaryEmail);
+                      }}
+                      className="text-gray-400 hover:text-primary transition-colors cursor-pointer p-0.5"
+                      title="Edit email"
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+
+                {e.emailBounceReason && (
+                  <p className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+                    {e.emailBounceReason}
+                  </p>
+                )}
+
+                <div className="flex items-center justify-between pt-1 text-xs">
+                  <span className="text-gray-400 text-[11px]">
+                    {e.emailStatusUpdatedAt ? new Date(e.emailStatusUpdatedAt).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" }) : "—"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleResend(e.bookingId)}
+                    disabled={resendingId === e.bookingId}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    {resendingId === e.bookingId ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                    Resend
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -2064,29 +2154,28 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     <div className="flex-grow flex flex-col bg-surface">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200/80 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10 flex-shrink-0">
               <LayoutDashboard className="w-4.5 h-4.5 text-primary" />
             </div>
-            <div>
-              <h1 className="text-base font-display font-bold text-text-main leading-none">Admin Dashboard</h1>
-              <p className="text-[11px] text-gray-400 mt-0.5">Chhichhore · Inclusiverse</p>
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-base font-display font-bold text-text-main leading-tight truncate">Admin Dashboard</h1>
+              <p className="text-[10px] sm:text-[11px] text-gray-400 truncate">Chhichhore · Inclusiverse</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {/* Tab Switcher */}
-            <div className="hidden sm:flex items-center bg-surface/80 rounded-xl border border-gray-200 p-0.5">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            {/* Desktop Tab Switcher (xl+) */}
+            <div className="hidden xl:flex items-center bg-surface/80 rounded-xl border border-gray-200 p-0.5">
               {tabs.map(({ key, label, icon: TabIcon }) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setTab(key)}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    tab === key
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${tab === key
                       ? "bg-white text-primary shadow-sm border border-gray-100"
                       : "text-gray-500 hover:text-gray-700"
-                  }`}
+                    }`}
                 >
                   <TabIcon className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
                   {label}
@@ -2097,7 +2186,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               type="button"
               onClick={() => tab === "bookings" ? fetchBookings() : undefined}
               disabled={loading && tab === "bookings"}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-600 hover:text-primary hover:border-primary/40 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs sm:text-sm font-medium text-gray-600 hover:text-primary hover:border-primary/40 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+              title="Refresh"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading && tab === "bookings" ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">Refresh</span>
@@ -2105,26 +2195,29 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <button
               type="button"
               onClick={onLogout}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-500 hover:text-red-500 hover:bg-red-50 hover:border-red-200 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl border border-gray-200 text-xs sm:text-sm font-medium text-gray-500 hover:text-red-500 hover:bg-red-50 hover:border-red-200 transition-all cursor-pointer"
+              title="Logout"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
-        {/* Mobile Tab Switcher */}
-        <div className="sm:hidden flex border-t border-gray-100">
+
+        {/* Mobile & Tablet Tab Switcher (Touch-scrollable pill strip for < xl) */}
+        <div className="xl:hidden flex items-center gap-1.5 overflow-x-auto scrollbar-none border-t border-gray-100 px-3 py-2 bg-white/95">
           {tabs.map(({ key, label, icon: TabIcon }) => (
             <button
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`flex-1 py-2.5 text-xs font-semibold text-center transition-all cursor-pointer ${
-                tab === key ? "text-primary border-b-2 border-primary bg-primary/5" : "text-gray-500"
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex-shrink-0 ${tab === key
+                  ? "bg-primary text-white shadow-sm"
+                  : "bg-surface text-gray-600 hover:text-text-main border border-gray-200/60"
+                }`}
             >
-              <TabIcon className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
-              {label}
+              <TabIcon className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{label}</span>
             </button>
           ))}
         </div>
@@ -2167,9 +2260,9 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
             {/* Controls: Search + Download */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
-              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+              <div className="flex flex-col lg:flex-row gap-3.5 items-stretch lg:items-center justify-between">
                 {/* Search */}
-                <div className="relative w-full sm:w-80">
+                <div className="relative w-full lg:w-80">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   <input
                     type="text"
@@ -2181,21 +2274,19 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                 </div>
 
                 {/* Toggles & Download buttons */}
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <div className="flex items-center gap-2 bg-surface px-3.5 py-2 rounded-xl border border-gray-200">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  <div className="flex items-center gap-2 bg-surface px-3 py-2 rounded-xl border border-gray-200">
                     <span className="text-xs font-medium text-gray-600">Ticket Sales</span>
                     <button
                       type="button"
                       onClick={toggleTickets}
                       disabled={settingsLoading}
-                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${
-                        settings.ticketsEnabled ? "bg-green-500" : "bg-gray-300"
-                      }`}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${settings.ticketsEnabled ? "bg-green-500" : "bg-gray-300"
+                        }`}
                     >
                       <span
-                        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                          settings.ticketsEnabled ? "translate-x-4.5" : "translate-x-1"
-                        }`}
+                        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${settings.ticketsEnabled ? "translate-x-4.5" : "translate-x-1"
+                          }`}
                       />
                     </button>
                   </div>
@@ -2207,7 +2298,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-orange-50 border border-orange-200 text-xs font-medium text-orange-700 hover:bg-orange-100 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {resending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-                    Resend Emails
+                    <span>Resend Emails</span>
                   </button>
                   <button
                     type="button"
@@ -2216,7 +2307,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-gray-200 hover:border-primary/40 text-xs font-medium text-gray-700 hover:text-primary transition-all cursor-pointer disabled:opacity-50"
                   >
                     {downloading === "emails" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-                    Emails CSV
+                    <span>Emails CSV</span>
                   </button>
                   <button
                     type="button"
@@ -2225,7 +2316,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary text-white text-xs font-medium transition-all shadow-sm shadow-primary/20 cursor-pointer disabled:opacity-50"
                   >
                     {downloading === "full" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-                    Full Report
+                    <span>Full Report</span>
                   </button>
                 </div>
               </div>
@@ -2244,22 +2335,39 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               </m.div>
             )}
 
-            {/* Table */}
+            {/* Table / Cards */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               {loading ? (
-                <div className="overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-surface/80 border-b border-gray-100">
-                        {["Booking ID", "Name", "Reg No.", "Email", "People", "Total", "Date", "Status", "Attendees"].map((h) => (
-                          <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wide">{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Array.from({ length: 6 }).map((_, i) => <TableRowSkeleton key={i} />)}
-                    </tbody>
-                  </table>
+                <div>
+                  <div className="hidden lg:block overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-surface/80 border-b border-gray-100">
+                          {["Booking ID", "Name", "Reg No.", "Email", "People", "Total", "Date", "Status", "Attendees"].map((h) => (
+                            <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wide">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Array.from({ length: 6 }).map((_, i) => <TableRowSkeleton key={i} />)}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="lg:hidden divide-y divide-gray-100">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <Shimmer className="h-4 w-24 rounded" />
+                          <Shimmer className="h-5 w-16 rounded-full" />
+                        </div>
+                        <Shimmer className="h-14 w-full rounded-xl" />
+                        <div className="flex justify-between items-center">
+                          <Shimmer className="h-4 w-20 rounded" />
+                          <Shimmer className="h-4 w-16 rounded" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : filtered.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
@@ -2268,119 +2376,222 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                   {search && <p className="text-xs mt-1">Try a different search term</p>}
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-surface/80 border-b border-gray-100">
-                        {[
-                          { label: "Booking ID", field: "bookingId" as keyof Booking },
-                          { label: "Name", field: "primaryName" as keyof Booking },
-                          { label: "Reg No.", field: "primaryRegNo" as keyof Booking },
-                          { label: "Email", field: "primaryEmail" as keyof Booking },
-                          { label: "People", field: "attendeeCount" as keyof Booking },
-                          { label: "Total", field: "totalAmount" as keyof Booking },
-                          { label: "Date", field: "createdAt" as keyof Booking },
-                          { label: "Status", field: "status" as keyof Booking },
-                        ].map(({ label, field }) => (
-                          <th
-                            key={field}
-                            onClick={() => toggleSort(field)}
-                            className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer hover:text-primary transition-colors whitespace-nowrap select-none"
-                          >
-                            {label}
-                            <SortIcon field={field} />
+                <>
+                  {/* Desktop Table View (lg+) */}
+                  <div className="hidden lg:block overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-surface/80 border-b border-gray-100">
+                          {[
+                            { label: "Booking ID", field: "bookingId" as keyof Booking },
+                            { label: "Name", field: "primaryName" as keyof Booking },
+                            { label: "Reg No.", field: "primaryRegNo" as keyof Booking },
+                            { label: "Email", field: "primaryEmail" as keyof Booking },
+                            { label: "People", field: "attendeeCount" as keyof Booking },
+                            { label: "Total", field: "totalAmount" as keyof Booking },
+                            { label: "Date", field: "createdAt" as keyof Booking },
+                            { label: "Status", field: "status" as keyof Booking },
+                          ].map(({ label, field }) => (
+                            <th
+                              key={field}
+                              onClick={() => toggleSort(field)}
+                              className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer hover:text-primary transition-colors whitespace-nowrap select-none"
+                            >
+                              {label}
+                              <SortIcon field={field} />
+                            </th>
+                          ))}
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Attendees
                           </th>
-                        ))}
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                          Attendees
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((b, idx) => (
-                        <React.Fragment key={b._id}>
-                          <tr
-                            className={`border-b border-gray-50 hover:bg-primary/5 transition-colors cursor-pointer ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
-                              } ${expandedId === b._id ? "bg-primary/5" : ""}`}
-                            onClick={() => setExpandedId(expandedId === b._id ? null : b._id)}
-                          >
-                            <td className="px-4 py-3">
-                              <span className="font-mono font-bold text-primary text-xs tracking-wider">{b.bookingId}</span>
-                            </td>
-                            <td className="px-4 py-3 font-medium text-text-main whitespace-nowrap">{b.primaryName}</td>
-                            <td className="px-4 py-3 font-mono text-gray-500 text-xs">{b.primaryRegNo}</td>
-                            <td className="px-4 py-3 text-gray-500 text-xs max-w-[180px] truncate">{b.primaryEmail}</td>
-                            <td className="px-4 py-3 text-center">
-                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold">
-                                {b.attendeeCount}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 font-semibold text-text-main whitespace-nowrap">₹{b.totalAmount}</td>
-                            <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
-                              {new Date(b.createdAt).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                                b.status === "paid"
-                                  ? "bg-green-100 text-green-700"
-                                  : b.status === "rejected"
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-amber-100 text-amber-700"
-                              }`}>
-                                {b.status === "paid" && <CheckCircle2 className="w-3 h-3" />}
-                                {b.status}
-                              </span>
-                              {b.status === "rejected" && b.rejectionReason && (
-                                <div className="text-[10px] text-red-500 mt-1 max-w-[120px] leading-tight" title={b.rejectionReason}>
-                                  {b.rejectionReason}
-                                </div>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-xs text-gray-400">
-                              {b.attendeeCount > 1 ? (
-                                <button type="button" className="text-primary hover:underline cursor-pointer text-xs">
-                                  {expandedId === b._id ? "Hide" : `+${b.attendeeCount - 1} more`}
-                                </button>
-                              ) : (
-                                <span className="text-gray-300">—</span>
-                              )}
-                            </td>
-                          </tr>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map((b, idx) => (
+                          <React.Fragment key={b._id}>
+                            <tr
+                              className={`border-b border-gray-50 hover:bg-primary/5 transition-colors cursor-pointer ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                                } ${expandedId === b._id ? "bg-primary/5" : ""}`}
+                              onClick={() => setExpandedId(expandedId === b._id ? null : b._id)}
+                            >
+                              <td className="px-4 py-3">
+                                <span className="font-mono font-bold text-primary text-xs tracking-wider">{b.bookingId}</span>
+                              </td>
+                              <td className="px-4 py-3 font-medium text-text-main whitespace-nowrap">{b.primaryName}</td>
+                              <td className="px-4 py-3 font-mono text-gray-500 text-xs">{b.primaryRegNo}</td>
+                              <td className="px-4 py-3 text-gray-500 text-xs max-w-[180px] truncate">{b.primaryEmail}</td>
+                              <td className="px-4 py-3 text-center">
+                                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                                  {b.attendeeCount}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 font-semibold text-text-main whitespace-nowrap">₹{b.totalAmount}</td>
+                              <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
+                                {new Date(b.createdAt).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${b.status === "paid"
+                                    ? "bg-green-100 text-green-700"
+                                    : b.status === "rejected"
+                                      ? "bg-red-100 text-red-700"
+                                      : "bg-amber-100 text-amber-700"
+                                  }`}>
+                                  {b.status === "paid" && <CheckCircle2 className="w-3 h-3" />}
+                                  {b.status}
+                                </span>
+                                {b.status === "rejected" && b.rejectionReason && (
+                                  <div className="text-[10px] text-red-500 mt-1 max-w-[120px] leading-tight" title={b.rejectionReason}>
+                                    {b.rejectionReason}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-xs text-gray-400">
+                                {b.attendeeCount > 1 ? (
+                                  <button type="button" className="text-primary hover:underline cursor-pointer text-xs">
+                                    {expandedId === b._id ? "Hide" : `+${b.attendeeCount - 1} more`}
+                                  </button>
+                                ) : (
+                                  <span className="text-gray-300">—</span>
+                                )}
+                              </td>
+                            </tr>
 
-                          {/* Expanded: Additional attendees */}
-                          <AnimatePresence>
-                            {expandedId === b._id && b.attendees.length > 0 && (
-                              <tr>
-                                <td colSpan={9} className="bg-primary/5 border-b border-primary/10 px-4 py-3">
-                                  <m.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                  >
-                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Additional Attendees</p>
-                                    <div className="space-y-1.5">
-                                      {b.attendees.map((a, i) => (
-                                        <div key={i} className="flex items-center gap-4 bg-white rounded-lg px-3 py-2 text-sm border border-gray-100">
-                                          <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center flex-shrink-0">
-                                            {i + 2}
-                                          </span>
-                                          <span className="font-medium text-text-main">{a.name}</span>
-                                          <span className="font-mono text-xs text-gray-400">{a.regNo}</span>
-                                          <span className="text-xs text-gray-400">{a.email}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </m.div>
-                                </td>
-                              </tr>
+                            {/* Expanded: Additional attendees in desktop table */}
+                            <AnimatePresence>
+                              {expandedId === b._id && b.attendees.length > 0 && (
+                                <tr>
+                                  <td colSpan={9} className="bg-primary/5 border-b border-primary/10 px-4 py-3">
+                                    <m.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: "auto" }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      transition={{ duration: 0.2 }}
+                                    >
+                                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Additional Attendees</p>
+                                      <div className="space-y-1.5">
+                                        {b.attendees.map((a, i) => (
+                                          <div key={i} className="flex items-center gap-4 bg-white rounded-lg px-3 py-2 text-sm border border-gray-100">
+                                            <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                              {i + 2}
+                                            </span>
+                                            <span className="font-medium text-text-main">{a.name}</span>
+                                            <span className="font-mono text-xs text-gray-400">{a.regNo}</span>
+                                            <span className="text-xs text-gray-400">{a.email}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </m.div>
+                                  </td>
+                                </tr>
+                              )}
+                            </AnimatePresence>
+                          </React.Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile & Tablet Card View (< lg) */}
+                  <div className="lg:hidden flex flex-col divide-y divide-gray-100">
+                    {filtered.map((b) => (
+                      <div key={b._id} className="p-4 sm:p-5 bg-white space-y-3 transition-colors hover:bg-gray-50/50">
+                        {/* Header: ID, Date, Status */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="font-mono font-bold text-primary text-xs sm:text-sm tracking-wider">{b.bookingId}</span>
+                            <p className="text-[11px] text-gray-400 mt-0.5">
+                              {new Date(b.createdAt).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                              b.status === "paid"
+                                ? "bg-green-100 text-green-700"
+                                : b.status === "rejected"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}>
+                              {b.status === "paid" && <CheckCircle2 className="w-3 h-3" />}
+                              <span className="capitalize">{b.status}</span>
+                            </span>
+                            {b.status === "rejected" && b.rejectionReason && (
+                              <span className="text-[10px] text-red-500 text-right max-w-[140px] leading-tight" title={b.rejectionReason}>
+                                {b.rejectionReason}
+                              </span>
                             )}
-                          </AnimatePresence>
-                        </React.Fragment>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                          </div>
+                        </div>
+
+                        {/* Primary Attendee details */}
+                        <div className="bg-surface/70 rounded-xl p-3 border border-gray-100 space-y-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold text-text-main text-sm truncate">{b.primaryName}</span>
+                            <span className="font-mono text-xs text-gray-600 bg-white px-2 py-0.5 rounded border border-gray-200/60 flex-shrink-0">
+                              {b.primaryRegNo}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 break-all">{b.primaryEmail}</p>
+                        </div>
+
+                        {/* People count & Total Amount row */}
+                        <div className="flex items-center justify-between pt-1">
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-semibold">
+                              <Users className="w-3 h-3" />
+                              {b.attendeeCount} {b.attendeeCount === 1 ? "Person" : "People"}
+                            </span>
+                            {b.attendeeCount > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => setExpandedId(expandedId === b._id ? null : b._id)}
+                                className="text-xs font-medium text-primary hover:underline cursor-pointer flex items-center gap-1"
+                              >
+                                {expandedId === b._id ? "Hide" : `+${b.attendeeCount - 1} more`}
+                                <ChevronDown className={`w-3 h-3 transition-transform ${expandedId === b._id ? "rotate-180" : ""}`} />
+                              </button>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs text-gray-400 mr-1">Total:</span>
+                            <span className="font-bold text-text-main text-sm sm:text-base">₹{b.totalAmount}</span>
+                          </div>
+                        </div>
+
+                        {/* Expanded: Additional Attendees on Mobile/Tablet */}
+                        <AnimatePresence>
+                          {expandedId === b._id && b.attendees.length > 0 && (
+                            <m.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="pt-2 border-t border-gray-100"
+                            >
+                              <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Additional Attendees</p>
+                              <div className="space-y-1.5">
+                                {b.attendees.map((a, i) => (
+                                  <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 bg-gray-50/70 rounded-lg p-2.5 text-xs border border-gray-100">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                                        {i + 2}
+                                      </span>
+                                      <span className="font-medium text-text-main truncate">{a.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-gray-500 pl-7 sm:pl-0">
+                                      <span className="font-mono text-[11px]">{a.regNo}</span>
+                                      <span>·</span>
+                                      <span className="truncate max-w-[160px] sm:max-w-none">{a.email}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </m.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
 
