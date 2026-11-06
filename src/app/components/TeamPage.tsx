@@ -117,7 +117,7 @@ export function TeamPage({ onNavigate }: { onNavigate?: (page: Page) => void }) 
               Meet the <span className="text-primary">Team</span>
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
-              Inclusiverse is a 100% student-led initiative at Christ University, Pune Lavasa Campus. Our entire team consists of passionate student leaders and advisors driven to make inclusion a reality, guided by our dedicated faculty mentors.
+              Inclusiverse is a 100% student-led initiative at Christ University, Pune Lavasa Campus. Our entire team consists of passionate student leaders and advisors driven to make inclusion a reality, guided by our dedicated faculty coordinator.
             </p>
           </m.div>
         </div>
@@ -126,18 +126,18 @@ export function TeamPage({ onNavigate }: { onNavigate?: (page: Page) => void }) 
       {/* Main Content Sections */}
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
-          {/* Faculty Coordinators Section */}
+          {/* Faculty Coordinator Section */}
           <div>
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-display font-bold text-text-main mb-3">
-                Faculty Coordinators
+                Faculty Coordinator{facultyMembers.length === 1 ? "" : "s"}
               </h2>
               <p className="text-gray-600 text-sm max-w-xl mx-auto leading-relaxed">
                 Providing institutional mentorship, guidance, and unwavering support to our student-led chapter.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-3xl mx-auto">
+            <div className={`grid grid-cols-1 gap-8 mx-auto ${facultyMembers.length === 1 ? "max-w-sm" : "sm:grid-cols-2 max-w-3xl"}`}>
               {facultyMembers.map((member, idx) => (
                 <MemberCard key={member.id} member={member} index={idx} />
               ))}
@@ -200,7 +200,7 @@ export function TeamPage({ onNavigate }: { onNavigate?: (page: Page) => void }) 
                 "Inclusiverse is not defined by the events we conduct. It is defined by the people we bring together."
               </p>
               <p className="text-gray-700 leading-relaxed mb-6">
-                From sports championships to creative expression drives, every milestone is conceptualized, organized, and executed by student volunteers under the mentorship of our faculty coordinators.
+                From sports championships to creative expression drives, every milestone is conceptualized, organized, and executed by student volunteers under the mentorship of our faculty coordinator.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-100">
                 <span className="text-sm text-gray-500 font-medium">

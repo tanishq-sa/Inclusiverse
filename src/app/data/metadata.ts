@@ -29,9 +29,9 @@ export const PAGE_METADATA: Record<Page, { title: string; description: string }>
       "Learn about Inclusiverse's mission, purpose, values, and community initiatives at Christ University, Pune Lavasa Campus.",
   },
   team: {
-    title: "Our Team — Inclusiverse | Student Leaders & Faculty Mentors",
+    title: "Our Team — Inclusiverse | Student Leaders & Faculty Coordinator",
     description:
-      "Meet the passionate student leaders, advisors, and faculty mentors behind Inclusiverse at Christ University, Pune Lavasa Campus.",
+      "Meet the passionate student leaders, advisors, and faculty coordinator behind Inclusiverse at Christ University, Pune Lavasa Campus.",
   },
   timeline: {
     title: "Timeline & Milestones — Inclusiverse | Our Journey",
@@ -71,7 +71,7 @@ export const PAGE_METADATA: Record<Page, { title: string; description: string }>
   contact: {
     title: "Contact Us — Inclusiverse",
     description:
-      "Reach out to the Inclusiverse student team and faculty coordinators at Christ University, Pune Lavasa Campus.",
+      "Reach out to the Inclusiverse student team and faculty coordinator at Christ University, Pune Lavasa Campus.",
   },
   "404": {
     title: "Page Not Found — Inclusiverse",
