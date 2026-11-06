@@ -129,7 +129,7 @@ export function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
                   className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-8 py-4 rounded-full font-medium text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center gap-2 shadow-sm cursor-pointer"
                 >
                   <Heart className="w-5 h-5 fill-red-500 text-red-500" />
-                  Donate
+                  Contribute
                 </m.button>
               </m.div>
             </m.div>
@@ -216,7 +216,7 @@ export function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
             className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto"
           >
             {[
-              { label: "Volunteers", value: "50+" },
+              { label: "Inclusiwarriors", value: "50+" },
               { label: "Events", value: `${dynamicEventsCount}+` },
               { label: "Smiles", value: "500+" },
             ].map((stat, i) => (
@@ -373,7 +373,7 @@ export function Home({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
               onClick={() => setPage("join")}
               className="bg-primary hover:bg-primary-hover text-white px-8 py-4 rounded-full font-medium text-lg transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 cursor-pointer"
             >
-              Become a Volunteer
+              Become an Inclusiwarrior
             </m.button>
           </div>
         </m.div>

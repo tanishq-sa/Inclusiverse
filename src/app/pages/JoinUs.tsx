@@ -58,7 +58,7 @@ export function JoinUs() {
           </div>
         </m.a>
 
-        {/* Card 2: External Volunteer */}
+        {/* Card 2: External Inclusiwarrior */}
         <m.a
           href={OUTSIDE_VOLUNTEER_FORM_URL}
           target="_blank"
@@ -76,7 +76,7 @@ export function JoinUs() {
               Community & Global
             </div>
             <h3 className="text-2xl sm:text-3xl font-display font-bold text-text-main mb-3 group-hover:text-primary transition-colors">
-              External Volunteer
+              External Inclusiwarrior
             </h3>
             <p className="text-gray-600 text-base leading-relaxed mb-8">
               Join our broader community from anywhere. Help with creative design, outreach, partner

@@ -27,18 +27,6 @@ export const TEAM_MEMBERS: TeamMember[] = [
     linkedin: "https://www.linkedin.com/in/avichal-sharma-eco01/",
     initials: "AS"
   },
-  {
-    id: "nishita-sharma",
-    name: "Nishita Sharma",
-    role: "Faculty Coordinator",
-    category: "Faculty Coordinators",
-    bio: "Supporting student initiatives to drive meaningful social impact, accessibility awareness, and institutional collaboration.",
-    image: "https://kp.christuniversity.in/KnowledgePro/images/EmployeePhotos/E6079.jpg", // Placeholder - user will upload image later
-    imagePosition: "center 15%",
-    email: "nishita.sharma@christuniversity.in",
-    linkedin: "https://www.linkedin.com/in/nishita-sharma-4a2901171/",
-    initials: "NS"
-  },
   // Core Leadership (Students)
   {
     id: "mayank-sharma",

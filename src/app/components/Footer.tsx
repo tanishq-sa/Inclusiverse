@@ -111,7 +111,7 @@ export function Footer({ setPage }: Readonly<{ setPage: (p: Page) => void }>) {
                 onClick={() => setPage("join")}
                 className="px-4 py-2 text-xs font-semibold bg-primary hover:bg-primary-hover text-white rounded-xl transition-colors shadow-sm cursor-pointer"
               >
-                Volunteer Now
+                Join as an Inclusiwarrior
               </button>
             </div>
           </div>

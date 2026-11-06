@@ -67,7 +67,7 @@ export function DonateModal({ onClose }: Readonly<{ onClose: () => void }>) {
           type="button"
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-gray-400 hover:text-text-main hover:bg-gray-100 rounded-full transition-colors z-10 cursor-pointer"
-          aria-label="Close donation modal"
+          aria-label="Close contribution modal"
         >
           <X className="w-5 h-5" />
         </button>
@@ -103,7 +103,7 @@ export function DonateModal({ onClose }: Readonly<{ onClose: () => void }>) {
           </h3>
           <p className="text-gray-500 text-sm">
             {step === "amount"
-              ? "Choose an amount to donate via UPI"
+              ? "Choose an amount to contribute via UPI"
               : `Scan to pay ₹${activeAmount.toLocaleString("en-IN")}`}
           </p>
         </div>
