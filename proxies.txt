@@ -1,0 +1,14 @@
+# Source: https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/http/data.txt
+# Passed Google Drive HTTPS test at creation time.
+http://176.111.37.5:39811
+http://103.227.187.241:6090
+http://103.237.102.191:11111
+http://41.209.57.199:80
+http://176.111.37.216:39811
+http://181.78.44.63:999
+http://130.110.103.245:3128
+http://52.140.40.92:80
+http://4.144.146.21:80
+http://160.187.174.249:80
+http://125.25.167.187:80
+http://34.105.252.3:3128

@@ -1,0 +1,298 @@
+Script started on Sat Nov 14 12:52:13 2026
+[1m[7m%[27m[1m[0m                                                                                                                                                  [0m[27m[24m[Jdazzelr@Tanishqs-MacBook-Air Inclisiverse Website Figma (Copy) % [K[?2004hccd 
+[Jdist/            guidelines/      node_modules/    public/          scripts/         server/          src/             temp_downloads/[A[0m[27m[24m[65Ccd[K[1Cdist[1m/[0mguid[0melines[1m/[0m[11Dnode_modul[0mes[1m/[0m[13Dpublic[1m/[0m     [0m script[0ms[1m/[0merver[1m/[0m[0m [0m      cripts[1m/[0m[0m [?2004l
+[J[1m[7m%[27m[1m[0m                                                                                                                                                  [0m[27m[24m[Jdazzelr@Tanishqs-MacBook-Air scripts % [K[?2004hpptp python3 download_gallery.py[1m [0m[0m [?2004l
+
+🎯 Event-Based Gallery Downloader
+========================================
+
+📌 Enter event name (e.g. 'Beyond Barriers'): Emerging InClusiWarriors
+
+📁 Event: Emerging InClusiWarriors
+📂 Folder: gallery/emerging-inclusiwarriors/
+
+📅 Enter year for timeline (leave blank to skip): 2025
+📅 Timeline year: 2025
+
+🔗 Enter Google Drive folder URL: https://drive.google.com/drive/folders/1kzxIpamN1o7BtmZby93sqFdK9Rmwfs8e?usp=sharing
+
+📦 Batch size — files before cooldown pause (default: 15): 
+⏸️  Batch delay — seconds to pause between batches (default: 30): 
+
+========================================
+🚀 Starting download for: Emerging InClusiWarriors
+   📦 Batch size: 15 files | ⏸️  Batch delay: 30s
+========================================
+
+📡 Fetching folder metadata from Google Drive...
+🚀 Found 26 images. Downloading sequentially with rate limiting...
+   ⏱️  1.5s between files, 30s pause every 15 files
+
+⬇️ [1/26] Downloaded: DSC07164.JPG
+⬇️ [2/26] Downloaded: DSC07168.JPG
+⬇️ [3/26] Downloaded: DSC07171.JPG
+⬇️ [4/26] Downloaded: DSC07173.JPG
+⬇️ [5/26] Downloaded: DSC07176.JPG
+⬇️ [6/26] Downloaded: DSC07178.JPG
+⬇️ [7/26] Downloaded: DSC07183.JPG
+⬇️ [8/26] Downloaded: DSC07184.JPG
+⬇️ [9/26] Downloaded: DSC07186.JPG
+⬇️ [10/26] Downloaded: DSC07189.JPG
+⬇️ [11/26] Downloaded: DSC07190.JPG
+⬇️ [12/26] Downloaded: DSC07191.JPG
+⬇️ [13/26] Downloaded: DSC07193.JPG
+⬇️ [14/26] Downloaded: DSC07197.JPG
+⬇️ [15/26] Downloaded: DSC07199.JPG
+
+🧊 Batch cooldown: 15 processed, pausing 30s to avoid rate limits...
+
+⬇️ [16/26] Downloaded: DSC07202.JPG
+⬇️ [17/26] Downloaded: DSC07204.JPG
+⬇️ [18/26] Downloaded: DSC07206.JPG
+⬇️ [19/26] Downloaded: DSC07207.JPG
+⬇️ [20/26] Downloaded: DSC07214.JPG
+⬇️ [21/26] Downloaded: DSC07220.JPG
+⬇️ [22/26] Downloaded: DSC07226.JPG
+⬇️ [23/26] Downloaded: DSC07231.JPG
+⬇️ [24/26] Downloaded: DSC07238.JPG
+⬇️ [25/26] Downloaded: DSC07241.JPG
+⬇️ [26/26] Downloaded: DSC07252.JPG
+
+📊 Download finished: 26 downloaded, 0 cached/skipped, 0 failed.
+
+⚡ Converting 26 images to WebP using 8 parallel workers...
+✅ [1/26] Converted: DSC07168.JPG -> DSC07168.webp
+✅ [2/26] Converted: DSC07183.JPG -> DSC07183.webp
+✅ [3/26] Converted: DSC07184.JPG -> DSC07184.webp
+✅ [4/26] Converted: DSC07190.JPG -> DSC07190.webp
+✅ [5/26] Converted: DSC07252.JPG -> DSC07252.webp
+✅ [6/26] Converted: DSC07220.JPG -> DSC07220.webp
+✅ [7/26] Converted: DSC07241.JPG -> DSC07241.webp
+✅ [8/26] Converted: DSC07197.JPG -> DSC07197.webp
+✅ [9/26] Converted: DSC07231.JPG -> DSC07231.webp
+✅ [10/26] Converted: DSC07178.JPG -> DSC07178.webp
+✅ [11/26] Converted: DSC07191.JPG -> DSC07191.webp
+✅ [12/26] Converted: DSC07193.JPG -> DSC07193.webp
+✅ [13/26] Converted: DSC07186.JPG -> DSC07186.webp
+✅ [14/26] Converted: DSC07202.JPG -> DSC07202.webp
+✅ [15/26] Converted: DSC07226.JPG -> DSC07226.webp
+✅ [16/26] Converted: DSC07214.JPG -> DSC07214.webp
+✅ [17/26] Converted: DSC07189.JPG -> DSC07189.webp
+✅ [18/26] Converted: DSC07176.JPG -> DSC07176.webp
+✅ [19/26] Converted: DSC07199.JPG -> DSC07199.webp
+✅ [20/26] Converted: DSC07238.JPG -> DSC07238.webp
+✅ [21/26] Converted: DSC07204.JPG -> DSC07204.webp
+✅ [22/26] Converted: DSC07173.JPG -> DSC07173.webp
+✅ [23/26] Converted: DSC07171.JPG -> DSC07171.webp
+✅ [24/26] Converted: DSC07207.JPG -> DSC07207.webp
+✅ [25/26] Converted: DSC07206.JPG -> DSC07206.webp
+✅ [26/26] Converted: DSC07164.JPG -> DSC07164.webp
+📋 Event 'Emerging InClusiWarriors' already exists in events.json
+
+🎉 All done! Total gallery photos in JSON: 253 (Added 26 new)
+📁 Photos saved to: public/gallery/emerging-inclusiwarriors/
+🏷️  Filter category: Emerging InClusiWarriors
+📅 Timeline year: 2025
+[1m[7m%[27m[1m[0m                                                                                                                                                  [0m[27m[24m[Jdazzelr@Tanishqs-MacBook-Air scripts % [K[?2004hpython3 download_gallery.py[27Dcd scripts                 [17D[10Dpython3 download_gallery.py[?2004l
+
+🎯 Event-Based Gallery Downloader
+========================================
+
+📌 Enter event name (e.g. 'Beyond Barriers'): State Unified Championship
+
+📁 Event: State Unified Championship
+📂 Folder: gallery/state-unified-championship/
+
+📅 Enter year for timeline (leave blank to skip): 2024
+📅 Timeline year: 2024
+
+🔗 Enter Google Drive folder URL: https://drive.google.com/drive/folders/1FAkVVNqUd9MSvYWy1KT3RVYlc4hp7ShH?usp=sharing
+
+📦 Batch size — files before cooldown pause (default: 15): 100
+⏸️  Batch delay — seconds to pause between batches (default: 30): 
+
+========================================
+🚀 Starting download for: State Unified Championship
+   📦 Batch size: 100 files | ⏸️  Batch delay: 30s
+========================================
+
+📡 Fetching folder metadata from Google Drive...
+🚀 Found 426 images. Downloading sequentially with rate limiting...
+   ⏱️  1.5s between files, 30s pause every 100 files
+
+⏩ [1/426] Already cached: IMG_20241109_102147326.jpg
+⏩ [2/426] Already cached: IMG_20241109_103738195.jpg
+⏩ [3/426] Already cached: IMG_20241109_103741845.jpg
+⏩ [4/426] Already cached: IMG_20241109_115311209.jpg
+⏩ [5/426] Already cached: IMG_20241109_115313873.jpg
+⏩ [6/426] Already cached: IMG_20241109_115322346.jpg
+⏩ [7/426] Already cached: IMG_20241109_115323990.jpg
+⏩ [8/426] Already cached: IMG_20241109_115455585.jpg
+⏩ [9/426] Already cached: IMG_20241109_115516507.jpg
+⏩ [10/426] Already cached: IMG_20241109_115536377.jpg
+⏩ [11/426] Already cached: IMG_20241109_120410971.jpg
+⏩ [12/426] Already cached: IMG_20241109_122225933.jpg
+⏩ [13/426] Already cached: IMG20241108192528.jpg
+⏩ [14/426] Already cached: IMG20241108231531.jpg
+⏩ [15/426] Already cached: IMG20241108231913.jpg
+⏩ [16/426] Already cached: IMG20241108231917.jpg
+⏩ [17/426] Already cached: IMG20241109094044.jpg
+⏩ [18/426] Already cached: IMG20241109094050.jpg
+⏩ [19/426] Already cached: IMG20241109095304.jpg
+⏩ [20/426] Already cached: IMG20241109095306.jpg
+⏩ [21/426] Already cached: IMG20241109095309.jpg
+⏩ [22/426] Already cached: IMG20241109110657.jpg
+⏩ [23/426] Already cached: IMG20241109110658.jpg
+⏩ [24/426] Already cached: IMG20241109110902.jpg
+⏩ [25/426] Already cached: IMG20241109110923.jpg
+⏩ [26/426] Already cached: IMG20241109110925.jpg
+⏩ [27/426] Already cached: IMG20241109110927.jpg
+⏩ [28/426] Already cached: IMG20241109111038.jpg
+⏩ [29/426] Already cached: IMG20241109111046.jpg
+⏩ [30/426] Already cached: IMG20241109111047.jpg
+⬇️ [31/426] Downloaded: IMG20241109111156.jpg
+⬇️ [32/426] Downloaded: IMG20241109111159.jpg
+⬇️ [33/426] Downloaded: IMG20241109111203.jpg
+⬇️ [34/426] Downloaded: IMG20241109111208.jpg
+⬇️ [35/426] Downloaded: IMG20241109112908.jpg
+⬇️ [36/426] Downloaded: IMG20241109112909.jpg
+⬇️ [37/426] Downloaded: IMG20241109113447.jpg
+⬇️ [38/426] Downloaded: IMG20241109113449.jpg
+⬇️ [39/426] Downloaded: IMG20241109113450.jpg
+⬇️ [40/426] Downloaded: IMG20241109113630.jpg
+⬇️ [41/426] Downloaded: IMG20241109113635.jpg
+⬇️ [42/426] Downloaded: IMG20241109114237.jpg
+⬇️ [43/426] Downloaded: IMG20241109121928.jpg
+⬇️ [44/426] Downloaded: IMG20241109122008.jpg
+⬇️ [45/426] Downloaded: IMG20241109122202.jpg
+⬇️ [46/426] Downloaded: IMG20241109122742.jpg
+⏩ [47/426] Already cached: IMG20241109122744.jpg
+⏩ [48/426] Already cached: IMG20241109122745.jpg
+⏩ [49/426] Already cached: IMG20241109131646.jpg
+⏩ [50/426] Already cached: IMG20241109131701.jpg
+⏩ [51/426] Already cached: IMG20241109131702.jpg
+⏩ [52/426] Already cached: PXL_20241109_073141755.jpg
+⏩ [53/426] Already cached: 20241110_134712.jpg
+⏩ [54/426] Already cached: 20241110_134717.jpg
+⏩ [55/426] Already cached: DSC02016.JPG
+⏩ [56/426] Already cached: DSC02017.JPG
+⏩ [57/426] Already cached: DSC02018.JPG
+⏩ [58/426] Already cached: DSC02019.JPG
+⏩ [59/426] Already cached: DSC02020.JPG
+⏩ [60/426] Already cached: DSC02021.JPG
+⏩ [61/426] Already cached: DSC02022.JPG
+⏩ [62/426] Already cached: DSC02023.JPG
+⏩ [63/426] Already cached: DSC02024.JPG
+⏩ [64/426] Already cached: DSC02025.JPG
+⏩ [65/426] Already cached: DSC02026.JPG
+⏩ [66/426] Already cached: DSC02027.JPG
+⏩ [67/426] Already cached: DSC02028.JPG
+⏩ [68/426] Already cached: DSC02029.JPG
+⏩ [69/426] Already cached: DSC02030.JPG
+⏩ [70/426] Already cached: DSC02031.JPG
+⏩ [71/426] Already cached: DSC02032.JPG
+⬇️ [72/426] Downloaded: DSC02033.JPG
+⬇️ [73/426] Downloaded: DSC02034.JPG
+⬇️ [74/426] Downloaded: DSC02035.JPG
+⬇️ [75/426] Downloaded: DSC02036.JPG
+⬇️ [76/426] Downloaded: DSC02037.JPG
+⬇️ [77/426] Downloaded: DSC02038.JPG
+⬇️ [78/426] Downloaded: DSC02039.JPG
+⬇️ [79/426] Downloaded: DSC02040.JPG
+⬇️ [80/426] Downloaded: DSC02041.JPG
+⬇️ [81/426] Downloaded: DSC02042.JPG
+⬇️ [82/426] Downloaded: DSC02043.JPG
+⬇️ [83/426] Downloaded: DSC02044.JPG
+⬇️ [84/426] Downloaded: DSC02045.JPG
+⬇️ [85/426] Downloaded: DSC02046.JPG
+⬇️ [86/426] Downloaded: DSC02047.JPG
+⬇️ [87/426] Downloaded: DSC02048.JPG
+⬇️ [88/426] Downloaded: DSC02049.JPG
+⬇️ [89/426] Downloaded: DSC02050.JPG
+⬇️ [90/426] Downloaded: DSC02051.JPG
+⬇️ [91/426] Downloaded: DSC02052.JPG
+⬇️ [92/426] Downloaded: DSC02053.JPG
+⬇️ [93/426] Downloaded: DSC02054.JPG
+⬇️ [94/426] Downloaded: DSC02055.JPG
+⬇️ [95/426] Downloaded: DSC02056.JPG
+⬇️ [96/426] Downloaded: DSC02057.JPG
+⏳ [97/426] Retry 1/4 for DSC02058.JPG (waiting 3s)...
+⏳ [97/426] Retry 2/4 for DSC02058.JPG (waiting 8s)...
+⏳ [97/426] Retry 3/4 for DSC02058.JPG (waiting 19s)...
+⏳ [97/426] Retry 4/4 for DSC02058.JPG (waiting 47s)...
+⚠️ [97/426] Failed DSC02058.JPG after 5 attempts
+⏳ [98/426] Retry 1/4 for DSC02059.JPG (waiting 3s)...
+⏳ [98/426] Retry 2/4 for DSC02059.JPG (waiting 8s)...
+⏳ [98/426] Retry 3/4 for DSC02059.JPG (waiting 19s)...
+⏳ [98/426] Retry 4/4 for DSC02059.JPG (waiting 47s)...
+⚠️ [98/426] Failed DSC02059.JPG after 5 attempts
+⏳ [99/426] Retry 1/4 for DSC02060.JPG (waiting 3s)...
+^CTraceback (most recent call last):
+  File [35m"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/gdown/download.py"[0m, line [35m313[0m, in [35mdownload[0m
+    url = get_url_from_gdrive_confirmation(res.text)
+  File [35m"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/gdown/download.py"[0m, line [35m70[0m, in [35mget_url_from_gdrive_confirmation[0m
+    raise FileURLRetrievalError(
+    ...<4 lines>...
+    )
+[1;35mgdown.exceptions.FileURLRetrievalError[0m: [35mCannot retrieve the public link of the file. You may need to change the permission to 'Anyone with the link', or have had many accesses. Check FAQ in https://github.com/wkentaro/gdown?tab=readme-ov-file#faq.[0m
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File [35m"/Users/dazzelr/Downloads/Inclisiverse Website Figma (Copy)/scripts/download_gallery.py"[0m, line [35m56[0m, in [35mdownload_single_file[0m
+    [31mgdown.download[0m[1;31m([0m
+    [31m~~~~~~~~~~~~~~[0m[1;31m^[0m
+        [1;31murl="https://drive.google.com/uc?id=" + f.id,[0m
+        [1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+    ...<2 lines>...
+        [1;31muse_cookies=False[0m
+        [1;31m^^^^^^^^^^^^^^^^^[0m
+    [1;31m)[0m
+    [1;31m^[0m
+  File [35m"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/gdown/download.py"[0m, line [35m324[0m, in [35mdownload[0m
+    raise FileURLRetrievalError(message)
+[1;35mgdown.exceptions.FileURLRetrievalError[0m: [35mFailed to retrieve file url:
+
+	Cannot retrieve the public link of the file. You may need to change
+	the permission to 'Anyone with the link', or have had many accesses.
+	Check FAQ in https://github.com/wkentaro/gdown?tab=readme-ov-file#faq.
+
+You may still be able to access the file from the browser:
+
+	https://drive.google.com/uc?id=1-drlEa133ZRlOY3-NgV5jZHt3pemcx-6
+
+but Gdown can't. Please check connections and permissions.[0m
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File [35m"/Users/dazzelr/Downloads/Inclisiverse Website Figma (Copy)/scripts/download_gallery.py"[0m, line [35m350[0m, in [35m<module>[0m
+    [31mmain[0m[1;31m()[0m
+    [31m~~~~[0m[1;31m^^[0m
+  File [35m"/Users/dazzelr/Downloads/Inclisiverse Website Figma (Copy)/scripts/download_gallery.py"[0m, line [35m302[0m, in [35mmain[0m
+    [31mdownload_folder_sequential[0m[1;31m([0m
+    [31m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m[1;31m^[0m
+        [1;31mdrive_url,[0m
+        [1;31m^^^^^^^^^^[0m
+    ...<2 lines>...
+        [1;31mbatch_delay=batch_delay[0m
+        [1;31m^^^^^^^^^^^^^^^^^^^^^^^[0m
+    [1;31m)[0m
+    [1;31m^[0m
+  File [35m"/Users/dazzelr/Downloads/Inclisiverse Website Figma (Copy)/scripts/download_gallery.py"[0m, line [35m124[0m, in [35mdownload_folder_sequential[0m
+    [31mdownload_single_file[0m[1;31m(f, stats, lock, total_count, i)[0m
+    [31m~~~~~~~~~~~~~~~~~~~~[0m[1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  File [35m"/Users/dazzelr/Downloads/Inclisiverse Website Figma (Copy)/scripts/download_gallery.py"[0m, line [35m77[0m, in [35mdownload_single_file[0m
+    [31mtime.sleep[0m[1;31m(backoff)[0m
+    [31m~~~~~~~~~~[0m[1;31m^^^^^^^^^[0m
+[1;35mKeyboardInterrupt[0m
+
+[1m[7m%[27m[1m[0m                                                                                                                                                  [0m[27m[24m[Jdazzelr@Tanishqs-MacBook-Air scripts % [K[?2004h[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                  [0m[27m[24m[Jdazzelr@Tanishqs-MacBook-Air scripts % [K[?2004h[7mpython3 scripts/download_gallery.py --event "State Unified Championship" --convert-only[27m[87D[27mp[27my[27mt[27mh[27mo[27mn[27m3[27m [27ms[27mc[27mr[27mi[27mp[27mt[27ms[27m/[27md[27mo[27mw[27mn[27ml[27mo[27ma[27md[27m_[27mg[27ma[27ml[27ml[27me[27mr[27my[27m.[27mp[27my[27m [27m-[27m-[27me[27mv[27me[27mn[27mt[27m [27m"[27mS[27mt[27ma[27mt[27me[27m [27mU[27mn[27mi[27mf[27mi[27me[27md[27m [27mC[27mh[27ma[27mm[27mp[27mi[27mo[27mn[27ms[27mh[27mi[27mp[27m"[27m [27m-[27m-[27mc[27mo[27mn[27mv[27me[27mr[27mt[27m-[27mo[27mn[27ml[27my[?2004l
+/Library/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/dazzelr/Downloads/Inclisiverse Website Figma (Copy)/scripts/scripts/download_gallery.py': [Errno 2] No such file or directory
+[1m[7m%[27m[1m[0m                                                                                                                                                  [0m[27m[24m[Jdazzelr@Tanishqs-MacBook-Air scripts % [K[?2004hccd [?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                  [0m[27m[24m[Jdazzelr@Tanishqs-MacBook-Air ~ % [K[?2004h[7mpython3 scripts/download_gallery.py --event "State Unified Championship" --convert-only[27m[87D[27mp[27my[27mt[27mh[27mo[27mn[27m3[27m [27ms[27mc[27mr[27mi[27mp[27mt[27ms[27m/[27md[27mo[27mw[27mn[27ml[27mo[27ma[27md[27m_[27mg[27ma[27ml[27ml[27me[27mr[27my[27m.[27mp[27my[27m [27m-[27m-[27me[27mv[27me[27mn[27mt[27m [27m"[27mS[27mt[27ma[27mt[27me[27m [27mU[27mn[27mi[27mf[27mi[27me[27md[27m [27mC[27mh[27ma[27mm[27mp[27mi[27mo[27mn[27ms[27mh[27mi[27mp[27m"[27m [27m-[27m-[27mc[27mo[27mn[27mv[27me[27mr[27mt[27m-[27mo[27mn[27ml[27my[?2004l
+/Library/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/dazzelr/scripts/download_gallery.py': [Errno 2] No such file or directory
+[1m[7m%[27m[1m[0m                                                                                                                                                  [0m[27m[24m[Jdazzelr@Tanishqs-MacBook-Air ~ % [K[?2004hpython3 scripts/download_gallery.py --event "State Unified Championship" --convert-only[?2004l
+/Library/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/dazzelr/scripts/download_gallery.py': [Errno 2] No such file or directory
+[1m[7m%[27m[1m[0m                                                                                                                                                  [0m[27m[24m[Jdazzelr@Tanishqs-MacBook-Air ~ % [K[?2004hpython3 scripts/download_gallery.py --event "State Unified Championship" --convert-only
