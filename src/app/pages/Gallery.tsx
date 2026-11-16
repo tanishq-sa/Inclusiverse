@@ -49,18 +49,23 @@ function GalleryCard({
       onClick={onClick}
       className="w-full break-inside-avoid rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 group relative block text-left bg-gray-100 mb-5 cursor-pointer"
     >
-      <div className="relative w-full overflow-hidden bg-gray-100">
+      <div
+        className="relative w-full overflow-hidden bg-gray-100"
+        style={{ aspectRatio: `${photo.width ?? 4} / ${photo.height ?? 3}` }}
+      >
         <img
           src={photo.src}
           alt={photo.alt}
+          width={photo.width}
+          height={photo.height}
           loading={index < 6 ? "eager" : "lazy"}
           onLoad={() => setIsLoaded(true)}
-          className={`w-full object-cover group-hover:scale-105 transition-transform duration-500 ${
-            isLoaded ? "opacity-100" : "opacity-0 min-h-[220px]"
+          className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-[transform,opacity] duration-500 ${
+            isLoaded ? "opacity-100" : "opacity-0"
           }`}
         />
         {!isLoaded && (
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse min-h-[220px]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse" />
         )}
       </div>
 
@@ -103,7 +108,11 @@ export function Gallery({
     setVisibleCount(INITIAL_GALLERY_COUNT);
   }, [activeFilter]);
 
-  const visiblePhotos = filteredPhotos.slice(0, visibleCount);
+  const visibleBatches = Array.from(
+    { length: Math.ceil(Math.min(visibleCount, filteredPhotos.length) / GALLERY_BATCH_SIZE) },
+    (_, batchIndex) =>
+      filteredPhotos.slice(batchIndex * GALLERY_BATCH_SIZE, (batchIndex + 1) * GALLERY_BATCH_SIZE)
+  );
   const hasMore = visibleCount < filteredPhotos.length;
 
   const handleCloseLightbox = () => setLightboxIndex(null);
@@ -241,22 +250,26 @@ export function Gallery({
             </m.div>
           ) : (
             <>
-              <m.div
-                key={activeFilter}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className="columns-1 sm:columns-2 lg:columns-3 gap-5"
-              >
-                {visiblePhotos.map((photo, i) => (
-                  <GalleryCard
-                    key={photo.src}
-                    photo={photo}
-                    index={i}
-                    onClick={() => setLightboxIndex(i)}
-                  />
+              <div key={activeFilter}>
+                {visibleBatches.map((batch, batchIndex) => (
+                  <div
+                    key={batchIndex}
+                    className="columns-1 sm:columns-2 lg:columns-3 gap-5"
+                  >
+                    {batch.map((photo, index) => {
+                      const photoIndex = batchIndex * GALLERY_BATCH_SIZE + index;
+                      return (
+                        <GalleryCard
+                          key={`${photo.src}-${photoIndex}`}
+                          photo={photo}
+                          index={photoIndex}
+                          onClick={() => setLightboxIndex(photoIndex)}
+                        />
+                      );
+                    })}
+                  </div>
                 ))}
-              </m.div>
+              </div>
 
               {/* Bottom Infinite Scroll Sentinel & Load More trigger */}
               {hasMore && (

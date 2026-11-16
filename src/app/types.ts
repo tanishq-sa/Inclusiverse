@@ -20,6 +20,8 @@ export interface GalleryPhoto {
   caption: string;
   cat: string;
   event?: string;
+  width?: number;
+  height?: number;
 }
 
 export interface GalleryEvent {
