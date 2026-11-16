@@ -11,6 +11,13 @@ const GALLERY_EVENTS = GALLERY_EVENTS_RAW as GalleryEvent[];
 const INITIAL_GALLERY_COUNT = 12;
 const GALLERY_BATCH_SIZE = 12;
 
+function getGalleryColumnCount() {
+  if (typeof window === "undefined") return 1;
+  if (window.matchMedia("(min-width: 1024px)").matches) return 3;
+  if (window.matchMedia("(min-width: 640px)").matches) return 2;
+  return 1;
+}
+
 const ALL_GALLERY_FILTERS: { name: string; slug: string }[] = (() => {
   const eventFilters = GALLERY_EVENTS.map((e: { name: string; slug: string }) => ({
     name: e.name,
@@ -89,7 +96,20 @@ export function Gallery({
 }>) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(INITIAL_GALLERY_COUNT);
+  const [columnCount, setColumnCount] = useState(getGalleryColumnCount);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const small = window.matchMedia("(min-width: 640px)");
+    const large = window.matchMedia("(min-width: 1024px)");
+    const updateColumns = () => setColumnCount(getGalleryColumnCount());
+    small.addEventListener("change", updateColumns);
+    large.addEventListener("change", updateColumns);
+    return () => {
+      small.removeEventListener("change", updateColumns);
+      large.removeEventListener("change", updateColumns);
+    };
+  }, []);
 
   const allFilters = ALL_GALLERY_FILTERS;
 
@@ -108,11 +128,16 @@ export function Gallery({
     setVisibleCount(INITIAL_GALLERY_COUNT);
   }, [activeFilter]);
 
-  const visibleBatches = Array.from(
-    { length: Math.ceil(Math.min(visibleCount, filteredPhotos.length) / GALLERY_BATCH_SIZE) },
-    (_, batchIndex) =>
-      filteredPhotos.slice(batchIndex * GALLERY_BATCH_SIZE, (batchIndex + 1) * GALLERY_BATCH_SIZE)
+  const columns: { photo: GalleryPhoto; index: number }[][] = Array.from(
+    { length: columnCount },
+    () => []
   );
+  const columnHeights = Array(columnCount).fill(0) as number[];
+  filteredPhotos.slice(0, visibleCount).forEach((photo, index) => {
+    const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
+    columns[shortestColumn].push({ photo, index });
+    columnHeights[shortestColumn] += (photo.height ?? 3) / (photo.width ?? 4) + 0.05;
+  });
   const hasMore = visibleCount < filteredPhotos.length;
 
   const handleCloseLightbox = () => setLightboxIndex(null);
@@ -251,24 +276,20 @@ export function Gallery({
           ) : (
             <>
               <div key={activeFilter}>
-                {visibleBatches.map((batch, batchIndex) => (
-                  <div
-                    key={batchIndex}
-                    className="columns-1 sm:columns-2 lg:columns-3 gap-5"
-                  >
-                    {batch.map((photo, index) => {
-                      const photoIndex = batchIndex * GALLERY_BATCH_SIZE + index;
-                      return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
+                  {columns.map((column, columnIndex) => (
+                    <div key={columnIndex} className="min-w-0">
+                      {column.map(({ photo, index }) => (
                         <GalleryCard
-                          key={`${photo.src}-${photoIndex}`}
+                          key={`${photo.src}-${index}`}
                           photo={photo}
-                          index={photoIndex}
-                          onClick={() => setLightboxIndex(photoIndex)}
+                          index={index}
+                          onClick={() => setLightboxIndex(index)}
                         />
-                      );
-                    })}
-                  </div>
-                ))}
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Bottom Infinite Scroll Sentinel & Load More trigger */}
